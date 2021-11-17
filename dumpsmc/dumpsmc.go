@@ -199,12 +199,6 @@ func vmx() {
 	smcKey0 := bytes.Index(contents, keyKey)
 	smcKey1 := bytes.LastIndex(contents, keyKey)
 
-	//TODO: Remove this when unlocker is re-written
-	// Find '$Adr' key in V0 table and used to patch OSK0 & OSK1 key functions
-	//var adrKey = []byte{0x72, 0x64, 0x41, 0x24, 0x04, 0x32, 0x33, 0x69, 0x75}
-	//smcAdr := bytes.Index(contents, adrKey)
-	//println(fmt.Sprintf("0x%08x", smcAdr))
-
 	// Print vSMC0 tables and keys
 	vmxhdr0 := gethdr(contents, smcHeaderV0Offset)
 	printhdr("0", smcHeaderV0Offset, vmxhdr0)
