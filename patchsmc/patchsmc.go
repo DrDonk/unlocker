@@ -35,7 +35,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"github.com/canhlinh/go-binary-pack"
-	"io/ioutil"
+	"github.com/edsrzf/mmap-go"
 	"os"
 )
 
@@ -140,7 +140,7 @@ func getkey(contents []byte, offset int) smcKey {
 	return vmxKey
 }
 
-func dumpkeys(contents []byte, offset int, count int) {
+func patchkeys(contents []byte, offset int, count int) {
 	println(fmt.Sprintf("Table Offset : 0x%08x", offset))
 	println("Offset     Name Len Type Flag FuncPtr    Data")
 	println("-------    ---- --- ---- ---- -------    ----")
@@ -152,11 +152,19 @@ func dumpkeys(contents []byte, offset int, count int) {
 		// Unpack binary key data
 		ptrCurrent := offset + (i * RowLength)
 		vmxKey = getkey(contents, ptrCurrent)
-		printkey(ptrCurrent, vmxKey)
+		switch vmxKey.key {
+		case "KPPW":
+			printkey(ptrCurrent, vmxKey)
+		case "OSK0":
+			printkey(ptrCurrent, vmxKey)
+		case "OSK1":
+			printkey(ptrCurrent, vmxKey)
+		}
 	}
 }
 
-func vmx() {
+//goland:noinspection GoUnhandledErrorResult
+func vSMC() {
 
 	//Get and check file passed as parameter
 	var filename string
@@ -166,16 +174,24 @@ func vmx() {
 		filename = os.Args[1]
 	}
 
-	contents, err := ioutil.ReadFile(filename)
+	//	Open the file
+	f, err := os.OpenFile(filename, os.O_RDWR, 0644)
 	if err != nil {
 		println(fmt.Sprintf("Cannot find file %s", filename))
 		println(err)
-		return
 	}
+	defer f.Close()
+
+	// Memory map file
+	contents, err := mmap.Map(f, mmap.RDWR, 0)
+	if err != nil {
+		println("error mapping: %s", err)
+	}
+	defer contents.Unmap()
 
 	//Print titles
-	println("dumpsmc")
-	println("-------")
+	println("patchsmc")
+	println("--------")
 	println(fmt.Sprintf("File: %s", filename))
 	println()
 
@@ -190,26 +206,25 @@ func vmx() {
 	smcKey0 := bytes.Index(contents, keyKey)
 	smcKey1 := bytes.LastIndex(contents, keyKey)
 
-	//TODO: Remove this when unlocker is re-written
 	// Find '$Adr' key in V0 table and used to patch OSK0 & OSK1 key functions
-	//var adrKey = []byte{0x72, 0x64, 0x41, 0x24, 0x04, 0x32, 0x33, 0x69, 0x75}
-	//smcAdr := bytes.Index(contents, adrKey)
-	//println(fmt.Sprintf("0x%08x", smcAdr))
+	var adrKey = []byte{0x72, 0x64, 0x41, 0x24, 0x04, 0x32, 0x33, 0x69, 0x75}
+	smcAdr := bytes.Index(contents, adrKey)
+	println(fmt.Sprintf("0x%08x", smcAdr))
 
 	// Print vSMC0 tables and keys
 	vmxhdr0 := gethdr(contents, smcHeaderV0Offset)
 	printhdr("0", smcHeaderV0Offset, vmxhdr0)
-	dumpkeys(contents, smcKey0, int(vmxhdr0.cntPrivate))
+	patchkeys(contents, smcKey0, int(vmxhdr0.cntPrivate))
 
 	println("\n")
 
 	// Print vSMC1 tables and keys
 	vmxhdr1 := gethdr(contents, smcHeaderV1Offset)
 	printhdr("1", smcHeaderV1Offset, vmxhdr1)
-	dumpkeys(contents, smcKey1, int(vmxhdr1.cntPrivate))
+	patchkeys(contents, smcKey1, int(vmxhdr1.cntPrivate))
 
 }
 
 func main() {
-	vmx()
+	vSMC()
 }

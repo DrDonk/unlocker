@@ -35,7 +35,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"github.com/canhlinh/go-binary-pack"
-	"io/ioutil"
+	"github.com/edsrzf/mmap-go"
 	"os"
 )
 
@@ -156,6 +156,7 @@ func dumpkeys(contents []byte, offset int, count int) {
 	}
 }
 
+//goland:noinspection GoUnhandledErrorResult
 func vmx() {
 
 	//Get and check file passed as parameter
@@ -166,12 +167,20 @@ func vmx() {
 		filename = os.Args[1]
 	}
 
-	contents, err := ioutil.ReadFile(filename)
+	//	Open the file
+	f, err := os.OpenFile(filename, os.O_RDWR, 0644)
 	if err != nil {
 		println(fmt.Sprintf("Cannot find file %s", filename))
 		println(err)
-		return
 	}
+	defer f.Close()
+
+	// Memory map file
+	contents, err := mmap.Map(f, mmap.RDWR, 0)
+	if err != nil {
+		println("error mapping: %s", err)
+	}
+	defer contents.Unmap()
 
 	//Print titles
 	println("dumpsmc")
