@@ -1,0 +1,6 @@
+github.com/canhlinh/go-binary-pack v0.0.0-20181203110405-72348cf47f32 h1:2frz5u51940fkPXzOlKhY/zL4FBtXerEdNEs2AEicMA=
+github.com/canhlinh/go-binary-pack v0.0.0-20181203110405-72348cf47f32/go.mod h1:5oL/IK/HhX2kkOQK0V5dpmpFQET3dRgjS+4hfSjs+Pw=
+github.com/edsrzf/mmap-go v1.0.0 h1:CEBF7HpRnUCSJgGUb5h1Gm7e3VkmVDrR8lvWVLtrOFw=
+github.com/edsrzf/mmap-go v1.0.0/go.mod h1:YO35OhQPt3KJa3ryjFM5Bs14WD66h8eGKpfaBNrHW5M=
+golang.org/x/sys v0.0.0-20211116061358-0a5406a5449c h1:DHcbWVXeY+0Y8HHKR+rbLwnoh2F4tNCY7rTiHJ30RmA=
+golang.org/x/sys v0.0.0-20211116061358-0a5406a5449c/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
