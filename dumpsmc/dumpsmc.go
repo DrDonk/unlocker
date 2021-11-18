@@ -62,12 +62,23 @@ type smcKey struct {
 	data     string
 }
 
-func reverse(s string) (result string) {
+func FourCCToString(s string) (result string) {
 	for _, v := range s {
 		if v != 0 {
 			result = string(v) + result
 		} else {
 			result = " " + result
+		}
+	}
+	return
+}
+
+func StringToFourCC(s string) (result string) {
+	for _, v := range s {
+		if v != 32 {
+			result = string(v) + result
+		} else {
+			result = "\x00" + result
 		}
 	}
 	return
@@ -83,6 +94,10 @@ func printhdr(version string, offset int, vmxHdr smcHdr) {
 }
 
 func printkey(offset int, vmxKey smcKey) {
+	//Convert binary string to hexdump
+	data := hex.EncodeToString([]byte(vmxKey.data)[0:vmxKey.length])
+
+	//Print the key
 	println(fmt.Sprintf("0x%08x %04s %02d  %-04s 0x%02x 0x%08x %s",
 		offset,
 		vmxKey.key,
@@ -90,11 +105,11 @@ func printkey(offset int, vmxKey smcKey) {
 		vmxKey.dataType,
 		vmxKey.flag,
 		vmxKey.ptrFunc,
-		vmxKey.data))
+		data))
 	return
 }
 
-func gethdr(contents []byte, offset int) smcHdr {
+func gethdr(contents mmap.MMap, offset int) smcHdr {
 	// Setup struct pack string
 	var hdrPack = []string{"Q", "I", "I"}
 
@@ -115,7 +130,7 @@ func gethdr(contents []byte, offset int) smcHdr {
 	return vmxHdr
 }
 
-func getkey(contents []byte, offset int) smcKey {
+func getkey(contents mmap.MMap, offset int) smcKey {
 	// Setup struct pack string
 	var keyPack = []string{"4s", "B", "4s", "B", "B", "B", "B", "B", "B", "B", "Q", "48s"}
 
@@ -130,17 +145,16 @@ func getkey(contents []byte, offset int) smcKey {
 
 	// Return the smcKey as a struct
 	var vmxKey smcKey
-	vmxKey.key = reverse(keyRow[0].(string))
+	vmxKey.key = FourCCToString(keyRow[0].(string))
 	vmxKey.length = byte(keyRow[1].(int))
-	vmxKey.dataType = reverse(keyRow[2].(string))
+	vmxKey.dataType = FourCCToString(keyRow[2].(string))
 	vmxKey.flag = byte(keyRow[3].(int))
 	vmxKey.ptrFunc = uintptr(keyRow[10].(int))
-	vmxKey.data = hex.EncodeToString([]byte(keyRow[11].(string))[0:vmxKey.length])
-
+	vmxKey.data = keyRow[11].(string)
 	return vmxKey
 }
 
-func dumpkeys(contents []byte, offset int, count int) {
+func dumpkeys(contents mmap.MMap, offset int, count int) {
 	println(fmt.Sprintf("Table Offset : 0x%08x", offset))
 	println("Offset     Name Len Type Flag FuncPtr    Data")
 	println("-------    ---- --- ---- ---- -------    ----")
@@ -157,7 +171,7 @@ func dumpkeys(contents []byte, offset int, count int) {
 }
 
 //goland:noinspection GoUnhandledErrorResult
-func vmx() {
+func vSMC() {
 
 	//Get and check file passed as parameter
 	var filename string
@@ -183,8 +197,9 @@ func vmx() {
 	defer contents.Unmap()
 
 	//Print titles
-	println("dumpsmc")
+	println("DumpSMC")
 	println("-------")
+	println("© 2014-2021 David Parsons\n")
 	println(fmt.Sprintf("File: %s", filename))
 	println()
 
@@ -214,5 +229,5 @@ func vmx() {
 }
 
 func main() {
-	vmx()
+	vSMC()
 }
