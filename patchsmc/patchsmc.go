@@ -44,10 +44,10 @@ const KeyLength = 24
 const DataLength = 48
 const RowLength = KeyLength + DataLength
 
-const kppwData = "5370656369616c6973526576656c696f"
-const kpstData = "01"
-const osk0Data = "6f757268617264776f726b62797468657365776f72647367756172646564706c"
-const osk1Data = "65617365646f6e74737465616c2863294170706c65436f6d7075746572496e63"
+const kpstData = "\x01"
+const kppwData = "\x53\x70\x65\x63\x69\x61\x6c\x69\x73\x52\x65\x76\x65\x6c\x69\x6f\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
+const osk0Data = "\x6f\x75\x72\x68\x61\x72\x64\x77\x6f\x72\x6b\x62\x79\x74\x68\x65\x73\x65\x77\x6f\x72\x64\x73\x67\x75\x61\x72\x64\x65\x64\x70\x6c"
+const osk1Data = "\x65\x61\x73\x65\x64\x6f\x6e\x74\x73\x74\x65\x61\x6c\x28\x63\x29\x41\x70\x70\x6c\x65\x43\x6f\x6d\x70\x75\x74\x65\x72\x49\x6e\x63"
 
 //goland:noinspection GoUnusedType
 type smcHdr struct {
@@ -67,12 +67,23 @@ type smcKey struct {
 	data     string
 }
 
-func reverse(s string) (result string) {
+func FourCCToString(s string) (result string) {
 	for _, v := range s {
 		if v != 0 {
 			result = string(v) + result
 		} else {
 			result = " " + result
+		}
+	}
+	return
+}
+
+func StringToFourCC(s string) (result string) {
+	for _, v := range s {
+		if v != 32 {
+			result = string(v) + result
+		} else {
+			result = "\x00" + result
 		}
 	}
 	return
@@ -88,6 +99,10 @@ func printhdr(version string, offset int, vmxHdr smcHdr) {
 }
 
 func printkey(offset int, vmxKey smcKey) {
+	//Convert binary string to hexdump
+	data := hex.EncodeToString([]byte(vmxKey.data)[0:vmxKey.length])
+
+	//Print the key
 	println(fmt.Sprintf("0x%08x %04s %02d  %-04s 0x%02x 0x%08x %s",
 		offset,
 		vmxKey.key,
@@ -95,11 +110,11 @@ func printkey(offset int, vmxKey smcKey) {
 		vmxKey.dataType,
 		vmxKey.flag,
 		vmxKey.ptrFunc,
-		vmxKey.data))
+		data))
 	return
 }
 
-func gethdr(contents []byte, offset int) smcHdr {
+func gethdr(contents mmap.MMap, offset int) smcHdr {
 	// Setup struct pack string
 	var hdrPack = []string{"Q", "I", "I"}
 
@@ -120,7 +135,7 @@ func gethdr(contents []byte, offset int) smcHdr {
 	return vmxHdr
 }
 
-func getkey(contents []byte, offset int) smcKey {
+func getkey(contents mmap.MMap, offset int) smcKey {
 	// Setup struct pack string
 	var keyPack = []string{"4s", "B", "4s", "B", "B", "B", "B", "B", "B", "B", "Q", "48s"}
 
@@ -135,44 +150,59 @@ func getkey(contents []byte, offset int) smcKey {
 
 	// Return the smcKey as a struct
 	var vmxKey smcKey
-	vmxKey.key = reverse(keyRow[0].(string))
+	vmxKey.key = FourCCToString(keyRow[0].(string))
 	vmxKey.length = byte(keyRow[1].(int))
-	vmxKey.dataType = reverse(keyRow[2].(string))
+	vmxKey.dataType = FourCCToString(keyRow[2].(string))
 	vmxKey.flag = byte(keyRow[3].(int))
 	vmxKey.ptrFunc = uintptr(keyRow[10].(int))
-	vmxKey.data = hex.EncodeToString([]byte(keyRow[11].(string))[0:vmxKey.length])
-
+	vmxKey.data = keyRow[11].(string)
 	return vmxKey
 }
 
-//func putkey(contents []byte, offset int, vmxKey smcKey) {
-//	// Setup struct pack string
-//	var keyPack = []string{"4s", "B", "4s", "B", "B", "B", "B", "B", "B", "B", "Q", "48s"}
-//
-//	// Create BinaryPack object
-//	bp := new(binarypack.BinaryPack)
-//
-//	// Unpack binary key data
-//	keyRow, err := bp.Pack(keyPack, abc)
-//
-//	.UnPack(keyPack, contents[offset:offset+RowLength])
-//	if err != nil {
-//		println(err)
-//	}
+func putkey(contents mmap.MMap, offset int, vmxKey smcKey) {
+	// Setup struct pack string
+	var keyPack = []string{"4s", "B", "4s", "B", "B", "B", "B", "B", "B", "B", "Q", "48s"}
 
-//// Return the smcKey as a struct
-//var vmxKey smcKey
-//vmxKey.key = reverse(keyRow[0].(string))
-//vmxKey.length = byte(keyRow[1].(int))
-//vmxKey.dataType = reverse(keyRow[2].(string))
-//vmxKey.flag = byte(keyRow[3].(int))
-//vmxKey.ptrFunc = uintptr(keyRow[10].(int))
-//vmxKey.data = hex.EncodeToString([]byte(keyRow[11].(string))[0:vmxKey.length])
+	// Create BinaryPack object
+	bp := new(binarypack.BinaryPack)
 
-//	return
-//}
+	//keyData, _ := hex.DecodeString(vmxKey.data)
+	keyRow := []interface{}{
+		StringToFourCC(vmxKey.key),
+		int(vmxKey.length),
+		StringToFourCC(vmxKey.dataType),
+		int(vmxKey.flag),
+		0, // Padding
+		0, // Padding
+		0, // Padding
+		0, // Padding
+		0, // Padding
+		0, // Padding
+		int(vmxKey.ptrFunc),
+		vmxKey.data,
+	}
 
-func patchkeys(contents []byte, offset int, count int, funcAddr uintptr) {
+	// Pack binary key data
+	keyPacked, err := bp.Pack(keyPack, keyRow)
+	if err != nil {
+		panic(err)
+	}
+
+	// Iterate key bytes and copy to mmap file
+	// Cannot find a copy method which works with MMap objects
+	for i := 0; i < RowLength; i++ {
+		contents[offset+i] = keyPacked[i]
+	}
+
+	//Flush to disk
+	err = contents.Flush()
+	if err != nil {
+		panic(err)
+	}
+	return
+}
+
+func patchkeys(contents mmap.MMap, offset int, count int, funcAddr uintptr) {
 	println(fmt.Sprintf("Table Offset : 0x%08x", offset))
 	println("Offset     Name Len Type Flag FuncPtr    Data")
 	println("-------    ---- --- ---- ---- -------    ----")
@@ -186,25 +216,34 @@ func patchkeys(contents []byte, offset int, count int, funcAddr uintptr) {
 		vmxKey = getkey(contents, ptrCurrent)
 		switch vmxKey.key {
 		case "KPPW":
-			//data, _ := hex.DecodeString(kppwData)
+			println("Patching KPPW:")
 			printkey(ptrCurrent, vmxKey)
 			vmxKey.data = kppwData
+			putkey(contents, ptrCurrent, vmxKey)
+			vmxKey = getkey(contents, ptrCurrent)
 			printkey(ptrCurrent, vmxKey)
 		case "KPST":
+			println("Patching KPST:")
 			printkey(ptrCurrent, vmxKey)
 			vmxKey.data = kpstData
+			putkey(contents, ptrCurrent, vmxKey)
+			vmxKey = getkey(contents, ptrCurrent)
 			printkey(ptrCurrent, vmxKey)
 		case "OSK0":
-			//data, _ := hex.DecodeString(osk0Data)
+			println("Patching OSK0:")
 			printkey(ptrCurrent, vmxKey)
 			vmxKey.ptrFunc = funcAddr
 			vmxKey.data = osk0Data
+			putkey(contents, ptrCurrent, vmxKey)
+			vmxKey = getkey(contents, ptrCurrent)
 			printkey(ptrCurrent, vmxKey)
 		case "OSK1":
-			//data, _ := hex.DecodeString(osk1Data)
+			println("Patching OSK1:")
 			printkey(ptrCurrent, vmxKey)
 			vmxKey.ptrFunc = funcAddr
 			vmxKey.data = osk1Data
+			putkey(contents, ptrCurrent, vmxKey)
+			vmxKey = getkey(contents, ptrCurrent)
 			printkey(ptrCurrent, vmxKey)
 		}
 	}
@@ -237,8 +276,9 @@ func vSMC() {
 	defer contents.Unmap()
 
 	//Print titles
-	println("patchsmc")
+	println("PatchSMC")
 	println("--------")
+	println("© 2014-2021 David Parsons & Sam Bingner\n")
 	println(fmt.Sprintf("File: %s", filename))
 	println()
 
@@ -259,17 +299,19 @@ func vSMC() {
 	vmxAdr := getkey(contents, smcAdr)
 	println(fmt.Sprintf("0x%08x", vmxAdr.ptrFunc))
 
-	// Print vSMC0 tables and keys
+	// Patch vSMC0 tables and keys
 	vmxhdr0 := gethdr(contents, smcHeaderV0Offset)
 	printhdr("0", smcHeaderV0Offset, vmxhdr0)
 	patchkeys(contents, smcKey0, int(vmxhdr0.cntPrivate), vmxAdr.ptrFunc)
 
 	println("\n")
 
-	// Print vSMC1 tables and keys
+	// Patch vSMC1 tables and keys
 	vmxhdr1 := gethdr(contents, smcHeaderV1Offset)
 	printhdr("1", smcHeaderV1Offset, vmxhdr1)
 	patchkeys(contents, smcKey1, int(vmxhdr1.cntPrivate), vmxAdr.ptrFunc)
+
+	contents.Flush()
 
 }
 
