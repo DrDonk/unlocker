@@ -32,11 +32,13 @@ package main
 
 import (
 	"bytes"
+	"encoding/binary"
 	"encoding/hex"
 	"fmt"
 	"github.com/canhlinh/go-binary-pack"
 	"github.com/edsrzf/mmap-go"
 	"os"
+	"unsafe"
 )
 
 const HdrLength = 16
@@ -48,6 +50,8 @@ const kpstData = "\x01"
 const kppwData = "\x53\x70\x65\x63\x69\x61\x6c\x69\x73\x52\x65\x76\x65\x6c\x69\x6f\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
 const osk0Data = "\x6f\x75\x72\x68\x61\x72\x64\x77\x6f\x72\x6b\x62\x79\x74\x68\x65\x73\x65\x77\x6f\x72\x64\x73\x67\x75\x61\x72\x64\x65\x64\x70\x6c"
 const osk1Data = "\x65\x61\x73\x65\x64\x6f\x6e\x74\x73\x74\x65\x61\x6c\x28\x63\x29\x41\x70\x70\x6c\x65\x43\x6f\x6d\x70\x75\x74\x65\x72\x49\x6e\x63"
+
+const elfMagic = "7f454c46"
 
 //goland:noinspection GoUnusedType
 type smcHdr struct {
@@ -87,6 +91,48 @@ func StringToFourCC(s string) (result string) {
 		}
 	}
 	return
+}
+
+func PtrToBytes(ptr uintptr) []byte {
+	size := unsafe.Sizeof(ptr)
+	bytePtr := make([]byte, size)
+	switch size {
+	case 4:
+		binary.LittleEndian.PutUint32(bytePtr, uint32(ptr))
+	case 8:
+		binary.LittleEndian.PutUint64(bytePtr, uint64(ptr))
+	default:
+		panic(fmt.Sprintf("unknown uintptr size: %v", size))
+	}
+	return bytePtr
+}
+
+func PatchELF(contents mmap.MMap, AppleSMCHandleOSK uintptr, AppleSMCHandleDefault uintptr) {
+	// Process ELF RELA records
+	progType := hex.EncodeToString(contents[0:4])
+	if progType == elfMagic {
+		println(fmt.Sprintf("\nModifying ELF RELA records from 0x%08x -> 0x%08x", AppleSMCHandleOSK, AppleSMCHandleDefault))
+		defPtr := PtrToBytes(AppleSMCHandleDefault)
+		oskPtr := PtrToBytes(AppleSMCHandleOSK)
+		var relaPtr int
+		for {
+			relaPtr = bytes.Index(contents, oskPtr)
+			if relaPtr != -1 {
+				println(fmt.Sprintf("Relocation modified at: 0x%08x", relaPtr))
+				for i := 0; i < 4; i++ {
+					contents[relaPtr+i] = defPtr[i]
+
+					//Flush to disk
+					err := contents.Flush()
+					if err != nil {
+						panic(err)
+					}
+				}
+			} else {
+				break
+			}
+		}
+	}
 }
 
 func printhdr(version string, offset int, vmxHdr smcHdr) {
@@ -202,25 +248,23 @@ func putkey(contents mmap.MMap, offset int, vmxKey smcKey) {
 	return
 }
 
-func patchkeys(contents mmap.MMap, offset int, count int) {
-	println(fmt.Sprintf("Table Offset : 0x%08x", offset))
-	println("Offset     Name Len Type Flag FuncPtr    Data")
-	println("-------    ---- --- ---- ---- -------    ----")
-
+func patchkeys(contents mmap.MMap, offset int, count int) (uintptr, uintptr) {
 	// Loop for each count and print key
 	// Last key should be OSK1
 	var vmxKey smcKey
-	var funcAddr uintptr
+	var AppleSMCHandleDefault uintptr
+	var AppleSMCHandleOSK uintptr
+
+	println(fmt.Sprintf("Table Offset : 0x%08x", offset))
 	for i := 0; i < count; i++ {
 		// Unpack binary key data
 		ptrCurrent := offset + (i * RowLength)
 		vmxKey = getkey(contents, ptrCurrent)
 		switch vmxKey.key {
-		case "$Adr":
-			println("Getting $Adr:")
+		case "+LKS":
+			println("Getting +LKS:")
 			printkey(ptrCurrent, vmxKey)
-			funcAddr = vmxKey.ptrFunc
-
+			AppleSMCHandleDefault = vmxKey.ptrFunc
 		case "KPPW":
 			println("Patching KPPW:")
 			printkey(ptrCurrent, vmxKey)
@@ -238,7 +282,8 @@ func patchkeys(contents mmap.MMap, offset int, count int) {
 		case "OSK0":
 			println("Patching OSK0:")
 			printkey(ptrCurrent, vmxKey)
-			vmxKey.ptrFunc = funcAddr
+			AppleSMCHandleOSK = vmxKey.ptrFunc
+			vmxKey.ptrFunc = AppleSMCHandleDefault
 			vmxKey.data = osk0Data
 			putkey(contents, ptrCurrent, vmxKey)
 			vmxKey = getkey(contents, ptrCurrent)
@@ -246,13 +291,14 @@ func patchkeys(contents mmap.MMap, offset int, count int) {
 		case "OSK1":
 			println("Patching OSK1:")
 			printkey(ptrCurrent, vmxKey)
-			vmxKey.ptrFunc = funcAddr
+			vmxKey.ptrFunc = AppleSMCHandleDefault
 			vmxKey.data = osk1Data
 			putkey(contents, ptrCurrent, vmxKey)
 			vmxKey = getkey(contents, ptrCurrent)
 			printkey(ptrCurrent, vmxKey)
 		}
 	}
+	return AppleSMCHandleOSK, AppleSMCHandleDefault
 }
 
 //goland:noinspection GoUnhandledErrorResult
@@ -309,8 +355,8 @@ func vSMC() {
 	// Patch vSMC1 tables and keys
 	vmxhdr1 := gethdr(contents, smcHeaderV1Offset)
 	printhdr("1", smcHeaderV1Offset, vmxhdr1)
-	patchkeys(contents, smcKey1, int(vmxhdr1.cntPrivate))
-
+	AppleSMCHandleOSK, AppleSMCHandleDefault := patchkeys(contents, smcKey1, int(vmxhdr1.cntPrivate))
+	PatchELF(contents, AppleSMCHandleOSK, AppleSMCHandleDefault)
 	contents.Flush()
 
 }
