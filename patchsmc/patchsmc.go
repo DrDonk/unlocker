@@ -202,7 +202,7 @@ func putkey(contents mmap.MMap, offset int, vmxKey smcKey) {
 	return
 }
 
-func patchkeys(contents mmap.MMap, offset int, count int, funcAddr uintptr) {
+func patchkeys(contents mmap.MMap, offset int, count int) {
 	println(fmt.Sprintf("Table Offset : 0x%08x", offset))
 	println("Offset     Name Len Type Flag FuncPtr    Data")
 	println("-------    ---- --- ---- ---- -------    ----")
@@ -210,11 +210,17 @@ func patchkeys(contents mmap.MMap, offset int, count int, funcAddr uintptr) {
 	// Loop for each count and print key
 	// Last key should be OSK1
 	var vmxKey smcKey
+	var funcAddr uintptr
 	for i := 0; i < count; i++ {
 		// Unpack binary key data
 		ptrCurrent := offset + (i * RowLength)
 		vmxKey = getkey(contents, ptrCurrent)
 		switch vmxKey.key {
+		case "$Adr":
+			println("Getting $Adr:")
+			printkey(ptrCurrent, vmxKey)
+			funcAddr = vmxKey.ptrFunc
+
 		case "KPPW":
 			println("Patching KPPW:")
 			printkey(ptrCurrent, vmxKey)
@@ -293,23 +299,17 @@ func vSMC() {
 	smcKey0 := bytes.Index(contents, keyKey)
 	smcKey1 := bytes.LastIndex(contents, keyKey)
 
-	// Find '$Adr' key in V0 table and used to patch OSK0 & OSK1 key functions
-	var adrKey = []byte{0x72, 0x64, 0x41, 0x24, 0x04, 0x32, 0x33, 0x69, 0x75}
-	smcAdr := bytes.Index(contents, adrKey)
-	vmxAdr := getkey(contents, smcAdr)
-	println(fmt.Sprintf("0x%08x", vmxAdr.ptrFunc))
-
 	// Patch vSMC0 tables and keys
 	vmxhdr0 := gethdr(contents, smcHeaderV0Offset)
 	printhdr("0", smcHeaderV0Offset, vmxhdr0)
-	patchkeys(contents, smcKey0, int(vmxhdr0.cntPrivate), vmxAdr.ptrFunc)
+	patchkeys(contents, smcKey0, int(vmxhdr0.cntPrivate))
 
 	println("\n")
 
 	// Patch vSMC1 tables and keys
 	vmxhdr1 := gethdr(contents, smcHeaderV1Offset)
 	printhdr("1", smcHeaderV1Offset, vmxhdr1)
-	patchkeys(contents, smcKey1, int(vmxhdr1.cntPrivate), vmxAdr.ptrFunc)
+	patchkeys(contents, smcKey1, int(vmxhdr1.cntPrivate))
 
 	contents.Flush()
 
