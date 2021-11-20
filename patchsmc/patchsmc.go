@@ -107,6 +107,7 @@ func PtrToBytes(ptr uintptr) []byte {
 	return bytePtr
 }
 
+//goland:noinspection Annotator
 func PatchELF(contents mmap.MMap, AppleSMCHandleOSK uintptr, AppleSMCHandleDefault uintptr) {
 	// Process ELF RELA records
 	progType := hex.EncodeToString(contents[0:4])
@@ -205,6 +206,7 @@ func getkey(contents mmap.MMap, offset int) smcKey {
 	return vmxKey
 }
 
+//goland:noinspection Annotator
 func putkey(contents mmap.MMap, offset int, vmxKey smcKey) {
 	// Setup struct pack string
 	var keyPack = []string{"4s", "B", "4s", "B", "B", "B", "B", "B", "B", "B", "Q", "48s"}
@@ -301,7 +303,7 @@ func patchkeys(contents mmap.MMap, offset int, count int) (uintptr, uintptr) {
 	return AppleSMCHandleOSK, AppleSMCHandleDefault
 }
 
-//goland:noinspection GoUnhandledErrorResult
+//goland:noinspection GoUnhandledErrorResult,Annotator,Annotator
 func vSMC() {
 
 	//Get and check file passed as parameter

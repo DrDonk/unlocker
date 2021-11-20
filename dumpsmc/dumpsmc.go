@@ -73,6 +73,7 @@ func FourCCToString(s string) (result string) {
 	return
 }
 
+//goland:noinspection GoUnusedExportedFunction
 func StringToFourCC(s string) (result string) {
 	for _, v := range s {
 		if v != 32 {
@@ -194,6 +195,7 @@ func vSMC() {
 	if err != nil {
 		println("error mapping: %s", err)
 	}
+	//goland:noinspection Annotator
 	defer contents.Unmap()
 
 	//Print titles
