@@ -6,15 +6,15 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
+	"github.com/edsrzf/mmap-go"
 	"os"
 )
 
-const APPLESMC = "applesmc"
-const VMKERNEL = "vmkernel"
-
 //goland:noinspection GoUnhandledErrorResult
 func vmkctl() {
+
+	var APPLESMC = []byte("applesmc")
+	var VMKERNEL = []byte("vmkernel")
 
 	//Get and check file passed as parameter
 	var filename string
@@ -25,11 +25,19 @@ func vmkctl() {
 	}
 
 	//	Open the file
-	contents, err := ioutil.ReadFile(filename)
+	f, err := os.OpenFile(filename, os.O_RDWR, 0644)
 	if err != nil {
 		println(fmt.Sprintf("Cannot find file %s", filename))
 		println(err)
 	}
+	defer f.Close()
+
+	// Memory map file
+	contents, err := mmap.Map(f, mmap.RDWR, 0)
+	if err != nil {
+		println("error mapping: %s", err)
+	}
+	defer contents.Unmap()
 
 	//Print titles
 	println("PatchVMKCTL")
@@ -38,20 +46,13 @@ func vmkctl() {
 	println(fmt.Sprintf("File: %s", filename))
 	println()
 
-	offset := bytes.Index(contents, []byte(APPLESMC))
-	println(fmt.Sprintf("0x%08x", offset))
+	offset := bytes.Index(contents, APPLESMC)
+	println(string(contents[offset : offset+8]))
+	copy(contents[offset:offset+8], VMKERNEL)
+	contents.Flush()
 
-	//	Open the file to write
-	f, err := os.OpenFile(filename, os.O_RDWR, 0644)
-	if err != nil {
-		println(fmt.Sprintf("Cannot find file %s", filename))
-		println(err)
-	}
-	defer f.Close()
-	f.Seek(int64(offset), 0)
-	f.Write([]byte(VMKERNEL))
-	f.Sync()
-	f.Close()
+	println(string(contents[offset : offset+8]))
+
 }
 
 func main() {

@@ -119,15 +119,14 @@ func PatchELF(contents mmap.MMap, AppleSMCHandleOSK uintptr, AppleSMCHandleDefau
 		for {
 			relaPtr = bytes.Index(contents, oskPtr)
 			if relaPtr != -1 {
+				// Replace the function pointer
 				println(fmt.Sprintf("Relocation modified at: 0x%08x", relaPtr))
-				for i := 0; i < 4; i++ {
-					contents[relaPtr+i] = defPtr[i]
+				copy(contents[relaPtr:relaPtr+8], defPtr)
 
-					//Flush to disk
-					err := contents.Flush()
-					if err != nil {
-						panic(err)
-					}
+				//Flush to disk
+				err := contents.Flush()
+				if err != nil {
+					panic(err)
 				}
 			} else {
 				break
@@ -236,11 +235,8 @@ func putkey(contents mmap.MMap, offset int, vmxKey smcKey) {
 		panic(err)
 	}
 
-	// Iterate key bytes and copy to mmap file
-	// Cannot find a copy method which works with MMap objects
-	for i := 0; i < RowLength; i++ {
-		contents[offset+i] = keyPacked[i]
-	}
+	// Copy data to mmap file
+	copy(contents[offset:offset+RowLength], keyPacked)
 
 	//Flush to disk
 	err = contents.Flush()
