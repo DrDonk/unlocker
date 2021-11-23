@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: © 2014-2021 David Parsons
+// SPDX-License-Identifier: MIT
+
 package main
 
 import (
