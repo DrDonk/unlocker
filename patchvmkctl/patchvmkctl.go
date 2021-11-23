@@ -20,6 +20,7 @@ func vmkctl() {
 	var filename string
 	if len(os.Args) < 2 {
 		println("Please pass a file name!")
+		return
 	} else {
 		filename = os.Args[1]
 	}
@@ -28,7 +29,7 @@ func vmkctl() {
 	f, err := os.OpenFile(filename, os.O_RDWR, 0644)
 	if err != nil {
 		println(fmt.Sprintf("Cannot find file %s", filename))
-		println(err)
+		panic(err)
 	}
 	defer f.Close()
 
@@ -36,6 +37,7 @@ func vmkctl() {
 	contents, err := mmap.Map(f, mmap.RDWR, 0)
 	if err != nil {
 		println("error mapping: %s", err)
+		panic(err)
 	}
 	defer contents.Unmap()
 
@@ -47,11 +49,14 @@ func vmkctl() {
 	println()
 
 	offset := bytes.Index(contents, APPLESMC)
-	println(string(contents[offset : offset+8]))
+	before := string(contents[offset : offset+8])
 	copy(contents[offset:offset+8], VMKERNEL)
-	contents.Flush()
-
-	println(string(contents[offset : offset+8]))
+	err = contents.Flush()
+	if err != nil {
+		panic(err)
+	}
+	after := string(contents[offset : offset+8])
+	println(fmt.Sprintf("Patching %s -> %s", before, after))
 
 }
 
