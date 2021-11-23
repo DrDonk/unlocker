@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: © 2014-2021 David Parsons
 // SPDX-License-Identifier: MIT
 
-package main
+package vmwpatch
 
 import (
 	"fmt"
@@ -17,7 +17,7 @@ func setBit(n int, pos uint) int {
 }
 
 //goland:noinspection GoUnhandledErrorResult
-func gostable() {
+func PatchGOS() {
 
 	// Get and check file passed as parameter
 	var filename string
@@ -44,10 +44,6 @@ func gostable() {
 	}
 	defer contents.Unmap()
 
-	// Print titles
-	println("PatchGOS")
-	println("-----------")
-	println("© 2014-2021 David Parsons\n")
 	println(fmt.Sprintf("File: %s", filename))
 
 	pattern := "\x10\x00\x00\x00[\x10|\x20]\x00\x00\x00[\x01|\x02]\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
@@ -94,8 +90,4 @@ func gostable() {
 		println(fmt.Sprintf("Flag patched @ offset: 0x%08x  Flag: 0x%01x -> 0x%01x", offset, oldFlag, newFlag))
 
 	}
-}
-
-func main() {
-	gostable()
 }

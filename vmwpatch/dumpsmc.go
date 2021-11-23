@@ -28,7 +28,7 @@ AppleSMCHandleNumKeys
 AppleSMCHandleOSK
 */
 
-package main
+package vmwpatch
 
 import (
 	"bytes"
@@ -39,10 +39,10 @@ import (
 	"os"
 )
 
-const HdrLength = 16
-const KeyLength = 24
-const DataLength = 48
-const RowLength = KeyLength + DataLength
+const hdrLength = 16
+const keyLength = 24
+const dataLength = 48
+const rowLength = keyLength + dataLength
 
 //goland:noinspection GoUnusedType
 type smcHdr struct {
@@ -62,7 +62,7 @@ type smcKey struct {
 	data     string
 }
 
-func FourCCToString(s string) (result string) {
+func fourCCToString(s string) (result string) {
 	for _, v := range s {
 		if v != 0 {
 			result = string(v) + result
@@ -74,7 +74,7 @@ func FourCCToString(s string) (result string) {
 }
 
 //goland:noinspection GoUnusedExportedFunction
-func StringToFourCC(s string) (result string) {
+func stringToFourCC(s string) (result string) {
 	for _, v := range s {
 		if v != 32 {
 			result = string(v) + result
@@ -85,7 +85,7 @@ func StringToFourCC(s string) (result string) {
 	return
 }
 
-func printhdr(version string, offset int, vmxHdr smcHdr) {
+func printHdr(version string, offset int, vmxHdr smcHdr) {
 	println(fmt.Sprintf("appleSMCTableV%s (smc.version = '%s')", version, version))
 	println(fmt.Sprintf("File Offset  : 0x%08x", offset))
 	println(fmt.Sprintf("Keys Address : 0x%08x", vmxHdr.address))
@@ -94,7 +94,7 @@ func printhdr(version string, offset int, vmxHdr smcHdr) {
 	println("")
 }
 
-func printkey(offset int, vmxKey smcKey) {
+func printKey(offset int, vmxKey smcKey) {
 	// Convert binary string to hexdump
 	data := hex.EncodeToString([]byte(vmxKey.data)[0:vmxKey.length])
 
@@ -110,7 +110,7 @@ func printkey(offset int, vmxKey smcKey) {
 	return
 }
 
-func gethdr(contents mmap.MMap, offset int) smcHdr {
+func getHdr(contents mmap.MMap, offset int) smcHdr {
 	// Setup struct pack string
 	var hdrPack = []string{"Q", "I", "I"}
 
@@ -118,7 +118,7 @@ func gethdr(contents mmap.MMap, offset int) smcHdr {
 	bp := new(binarypack.BinaryPack)
 
 	// Unpack binary key data
-	hdr, err := bp.UnPack(hdrPack, contents[offset:offset+HdrLength])
+	hdr, err := bp.UnPack(hdrPack, contents[offset:offset+hdrLength])
 	if err != nil {
 		println(err)
 	}
@@ -131,7 +131,7 @@ func gethdr(contents mmap.MMap, offset int) smcHdr {
 	return vmxHdr
 }
 
-func getkey(contents mmap.MMap, offset int) smcKey {
+func getKey(contents mmap.MMap, offset int) smcKey {
 	// Setup struct pack string
 	var keyPack = []string{"4s", "B", "4s", "B", "B", "B", "B", "B", "B", "B", "Q", "48s"}
 
@@ -139,23 +139,23 @@ func getkey(contents mmap.MMap, offset int) smcKey {
 	bp := new(binarypack.BinaryPack)
 
 	// Unpack binary key data
-	keyRow, err := bp.UnPack(keyPack, contents[offset:offset+RowLength])
+	keyRow, err := bp.UnPack(keyPack, contents[offset:offset+rowLength])
 	if err != nil {
 		println(err)
 	}
 
 	// Return the smcKey as a struct
 	var vmxKey smcKey
-	vmxKey.key = FourCCToString(keyRow[0].(string))
+	vmxKey.key = fourCCToString(keyRow[0].(string))
 	vmxKey.length = byte(keyRow[1].(int))
-	vmxKey.dataType = FourCCToString(keyRow[2].(string))
+	vmxKey.dataType = fourCCToString(keyRow[2].(string))
 	vmxKey.flag = byte(keyRow[3].(int))
 	vmxKey.ptrFunc = uintptr(keyRow[10].(int))
 	vmxKey.data = keyRow[11].(string)
 	return vmxKey
 }
 
-func dumpkeys(contents mmap.MMap, offset int, count int) {
+func dumpKeys(contents mmap.MMap, offset int, count int) {
 	println(fmt.Sprintf("Table Offset : 0x%08x", offset))
 	println("Offset     Name Len Type Flag FuncPtr    Data")
 	println("-------    ---- --- ---- ---- -------    ----")
@@ -165,14 +165,14 @@ func dumpkeys(contents mmap.MMap, offset int, count int) {
 	var vmxKey smcKey
 	for i := 0; i < count; i++ {
 		// Unpack binary key data
-		ptrCurrent := offset + (i * RowLength)
-		vmxKey = getkey(contents, ptrCurrent)
-		printkey(ptrCurrent, vmxKey)
+		ptrCurrent := offset + (i * rowLength)
+		vmxKey = getKey(contents, ptrCurrent)
+		printKey(ptrCurrent, vmxKey)
 	}
 }
 
 //goland:noinspection GoUnhandledErrorResult
-func vSMC() {
+func DumpSMC() {
 
 	//Get and check file passed as parameter
 	var filename string
@@ -198,10 +198,6 @@ func vSMC() {
 	//goland:noinspection Annotator
 	defer contents.Unmap()
 
-	// Print titles
-	println("DumpSMC")
-	println("-------")
-	println("© 2014-2021 David Parsons\n")
 	println(fmt.Sprintf("File: %s", filename))
 	println()
 
@@ -217,19 +213,15 @@ func vSMC() {
 	smcKey1 := bytes.LastIndex(contents, keyKey)
 
 	// Print vSMC0 tables and keys
-	vmxhdr0 := gethdr(contents, smcHeaderV0Offset)
-	printhdr("0", smcHeaderV0Offset, vmxhdr0)
-	dumpkeys(contents, smcKey0, int(vmxhdr0.cntPrivate))
+	vmxhdr0 := getHdr(contents, smcHeaderV0Offset)
+	printHdr("0", smcHeaderV0Offset, vmxhdr0)
+	dumpKeys(contents, smcKey0, int(vmxhdr0.cntPrivate))
 
 	println("\n")
 
 	// Print vSMC1 tables and keys
-	vmxhdr1 := gethdr(contents, smcHeaderV1Offset)
-	printhdr("1", smcHeaderV1Offset, vmxhdr1)
-	dumpkeys(contents, smcKey1, int(vmxhdr1.cntPrivate))
+	vmxhdr1 := getHdr(contents, smcHeaderV1Offset)
+	printHdr("1", smcHeaderV1Offset, vmxhdr1)
+	dumpKeys(contents, smcKey1, int(vmxhdr1.cntPrivate))
 
-}
-
-func main() {
-	vSMC()
 }

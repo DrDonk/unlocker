@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: © 2014-2021 David Parsons
 // SPDX-License-Identifier: MIT
 
-package main
+package vmwpatch
 
 import (
 	"bytes"
@@ -11,7 +11,7 @@ import (
 )
 
 //goland:noinspection GoUnhandledErrorResult
-func vmkctl() {
+func PatchVMKCTL() {
 
 	var APPLESMC = []byte("applesmc")
 	var VMKERNEL = []byte("vmkernel")
@@ -41,10 +41,6 @@ func vmkctl() {
 	}
 	defer contents.Unmap()
 
-	// Print titles
-	println("PatchVMKCTL")
-	println("-----------")
-	println("© 2014-2021 David Parsons\n")
 	println(fmt.Sprintf("File: %s", filename))
 	println()
 
@@ -58,8 +54,4 @@ func vmkctl() {
 	after := string(contents[offset : offset+8])
 	println(fmt.Sprintf("Patching %s -> %s", before, after))
 
-}
-
-func main() {
-	vmkctl()
 }
