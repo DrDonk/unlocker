@@ -95,10 +95,10 @@ func printhdr(version string, offset int, vmxHdr smcHdr) {
 }
 
 func printkey(offset int, vmxKey smcKey) {
-	//Convert binary string to hexdump
+	// Convert binary string to hexdump
 	data := hex.EncodeToString([]byte(vmxKey.data)[0:vmxKey.length])
 
-	//Print the key
+	// Print the key
 	println(fmt.Sprintf("0x%08x %04s %02d  %-04s 0x%02x 0x%08x %s",
 		offset,
 		vmxKey.key,
@@ -182,7 +182,7 @@ func vSMC() {
 		filename = os.Args[1]
 	}
 
-	//	Open the file
+	// Open the file
 	f, err := os.OpenFile(filename, os.O_RDWR, 0644)
 	if err != nil {
 		println(fmt.Sprintf("Cannot find file %s", filename))
@@ -198,7 +198,7 @@ func vSMC() {
 	//goland:noinspection Annotator
 	defer contents.Unmap()
 
-	//Print titles
+	// Print titles
 	println("DumpSMC")
 	println("-------")
 	println("© 2014-2021 David Parsons\n")

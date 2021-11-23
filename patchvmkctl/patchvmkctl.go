@@ -16,7 +16,7 @@ func vmkctl() {
 	var APPLESMC = []byte("applesmc")
 	var VMKERNEL = []byte("vmkernel")
 
-	//Get and check file passed as parameter
+	// Get and check file passed as parameter
 	var filename string
 	if len(os.Args) < 2 {
 		println("Please pass a file name!")
@@ -25,7 +25,7 @@ func vmkctl() {
 		filename = os.Args[1]
 	}
 
-	//	Open the file
+	// Open the file
 	f, err := os.OpenFile(filename, os.O_RDWR, 0644)
 	if err != nil {
 		println(fmt.Sprintf("Cannot find file %s", filename))
@@ -41,7 +41,7 @@ func vmkctl() {
 	}
 	defer contents.Unmap()
 
-	//Print titles
+	// Print titles
 	println("PatchVMKCTL")
 	println("-----------")
 	println("© 2014-2021 David Parsons\n")
