@@ -16,7 +16,6 @@ func setBit(n int, pos uint) int {
 	return n
 }
 
-//goland:noinspection GoUnhandledErrorResult
 func PatchGOS() {
 
 	// Get and check file passed as parameter
@@ -35,14 +34,24 @@ func PatchGOS() {
 		println(err)
 		return
 	}
-	defer f.Close()
+	defer func(f *os.File) {
+		err := f.Close()
+		if err != nil {
+
+		}
+	}(f)
 
 	// Memory map file
 	contents, err := mmap.Map(f, mmap.RDWR, 0)
 	if err != nil {
 		println("error mapping: %s", err)
 	}
-	defer contents.Unmap()
+	defer func(contents *mmap.MMap) {
+		err := contents.Unmap()
+		if err != nil {
+
+		}
+	}(&contents)
 
 	println(fmt.Sprintf("File: %s", filename))
 

@@ -53,14 +53,12 @@ const osk1Data = "\x65\x61\x73\x65\x64\x6f\x6e\x74\x73\x74\x65\x61\x6c\x28\x63\x
 
 const elfMagic = "7f454c46"
 
-//goland:noinspection GoUnusedType
 type smcHdr struct {
 	address    uintptr
 	cntPrivate uint16
 	cntPublic  uint16
 }
 
-//goland:noinspection GoUnusedType
 type smcKey struct {
 	key      string
 	length   byte
@@ -82,7 +80,6 @@ func fourCCToString(s string) (result string) {
 	return
 }
 
-//goland:noinspection GoUnusedExportedFunction
 func stringToFourCC(s string) (result string) {
 	for _, v := range s {
 		if v != 32 {
@@ -108,7 +105,6 @@ func ptrToBytes(ptr uintptr) []byte {
 	return bytePtr
 }
 
-//goland:noinspection Annotator
 func patchELF(contents mmap.MMap, AppleSMCHandleOSK uintptr, AppleSMCHandleDefault uintptr) {
 	// Process ELF RELA records
 	progType := hex.EncodeToString(contents[0:4])
@@ -315,7 +311,6 @@ func patchKeys(contents mmap.MMap, offset int, count int) (uintptr, uintptr) {
 	return AppleSMCHandleOSK, AppleSMCHandleDefault
 }
 
-//goland:noinspection GoUnhandledErrorResult
 func DumpSMC() {
 
 	//Get and check file passed as parameter
@@ -332,7 +327,12 @@ func DumpSMC() {
 		println(fmt.Sprintf("Cannot find file %s", filename))
 		println(err)
 	}
-	defer f.Close()
+	defer func(f *os.File) {
+		err := f.Close()
+		if err != nil {
+
+		}
+	}(f)
 
 	// Memory map file
 	contents, err := mmap.Map(f, mmap.RDWR, 0)
@@ -340,7 +340,12 @@ func DumpSMC() {
 		println("error mapping: %s", err)
 	}
 	//goland:noinspection Annotator
-	defer contents.Unmap()
+	defer func(contents *mmap.MMap) {
+		err := contents.Unmap()
+		if err != nil {
+
+		}
+	}(&contents)
 
 	println(fmt.Sprintf("File: %s", filename))
 	println()
@@ -370,7 +375,6 @@ func DumpSMC() {
 
 }
 
-//goland:noinspection GoUnhandledErrorResult,Annotator,Annotator
 func PatchSMC() {
 
 	// Get and check file passed as parameter
@@ -387,14 +391,24 @@ func PatchSMC() {
 		println(fmt.Sprintf("Cannot find file %s", filename))
 		println(err)
 	}
-	defer f.Close()
+	defer func(f *os.File) {
+		err := f.Close()
+		if err != nil {
+
+		}
+	}(f)
 
 	// Memory map file
 	contents, err := mmap.Map(f, mmap.RDWR, 0)
 	if err != nil {
 		println("error mapping: %s", err)
 	}
-	defer contents.Unmap()
+	defer func(contents *mmap.MMap) {
+		err := contents.Unmap()
+		if err != nil {
+
+		}
+	}(&contents)
 
 	println(fmt.Sprintf("File: %s", filename))
 	println()
@@ -422,5 +436,8 @@ func PatchSMC() {
 	printHdr("1", smcHeaderV1Offset, vmxhdr1)
 	AppleSMCHandleOSK, AppleSMCHandleDefault := patchKeys(contents, smcKey1, int(vmxhdr1.cntPrivate))
 	patchELF(contents, AppleSMCHandleOSK, AppleSMCHandleDefault)
-	contents.Flush()
+	err = contents.Flush()
+	if err != nil {
+		return
+	}
 }
