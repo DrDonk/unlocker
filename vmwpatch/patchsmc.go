@@ -41,57 +41,12 @@ import (
 	"unsafe"
 )
 
-const hdrLength = 16
-const keyLength = 24
-const dataLength = 48
-const rowLength = keyLength + dataLength
-
 const kpstData = "\x01"
 const kppwData = "\x53\x70\x65\x63\x69\x61\x6c\x69\x73\x52\x65\x76\x65\x6c\x69\x6f\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
 const osk0Data = "\x6f\x75\x72\x68\x61\x72\x64\x77\x6f\x72\x6b\x62\x79\x74\x68\x65\x73\x65\x77\x6f\x72\x64\x73\x67\x75\x61\x72\x64\x65\x64\x70\x6c"
 const osk1Data = "\x65\x61\x73\x65\x64\x6f\x6e\x74\x73\x74\x65\x61\x6c\x28\x63\x29\x41\x70\x70\x6c\x65\x43\x6f\x6d\x70\x75\x74\x65\x72\x49\x6e\x63"
 
 const elfMagic = "7f454c46"
-
-//goland:noinspection GoUnusedType
-type smcHdr struct {
-	address    uintptr
-	cntPrivate uint16
-	cntPublic  uint16
-}
-
-//goland:noinspection GoUnusedType
-type smcKey struct {
-	key      string
-	length   byte
-	dataType string
-	flag     byte
-	_        [6]byte
-	ptrFunc  uintptr
-	data     string
-}
-
-func fourCCToString(s string) (result string) {
-	for _, v := range s {
-		if v != 0 {
-			result = string(v) + result
-		} else {
-			result = " " + result
-		}
-	}
-	return
-}
-
-func stringToFourCC(s string) (result string) {
-	for _, v := range s {
-		if v != 32 {
-			result = string(v) + result
-		} else {
-			result = "\x00" + result
-		}
-	}
-	return
-}
 
 func ptrToBytes(ptr uintptr) []byte {
 	size := unsafe.Sizeof(ptr)
@@ -133,76 +88,6 @@ func patchELF(contents mmap.MMap, AppleSMCHandleOSK uintptr, AppleSMCHandleDefau
 			}
 		}
 	}
-}
-
-func printHdr(version string, offset int, vmxHdr smcHdr) {
-	println(fmt.Sprintf("appleSMCTableV%s (smc.version = '%s')", version, version))
-	println(fmt.Sprintf("File Offset  : 0x%08x", offset))
-	println(fmt.Sprintf("Keys Address : 0x%08x", vmxHdr.address))
-	println(fmt.Sprintf("Private Key #: 0x%04x/%04d", vmxHdr.cntPublic, vmxHdr.cntPublic))
-	println(fmt.Sprintf("Public Key  #: 0x%04x/%04d", vmxHdr.cntPrivate, vmxHdr.cntPrivate))
-	println("")
-}
-
-func printKey(offset int, vmxKey smcKey) {
-	// Convert binary string to hexdump
-	data := hex.EncodeToString([]byte(vmxKey.data)[0:vmxKey.length])
-
-	// Print the key
-	println(fmt.Sprintf("0x%08x %04s %02d  %-04s 0x%02x 0x%08x %s",
-		offset,
-		vmxKey.key,
-		vmxKey.length,
-		vmxKey.dataType,
-		vmxKey.flag,
-		vmxKey.ptrFunc,
-		data))
-	return
-}
-
-func getHdr(contents mmap.MMap, offset int) smcHdr {
-	// Setup struct pack string
-	var hdrPack = []string{"Q", "I", "I"}
-
-	// Create BinaryPack object
-	bp := new(binarypack.BinaryPack)
-
-	// Unpack binary key data
-	hdr, err := bp.UnPack(hdrPack, contents[offset:offset+hdrLength])
-	if err != nil {
-		println(err)
-	}
-
-	// Return the smcHdr as a struct
-	var vmxHdr smcHdr
-	vmxHdr.address = uintptr(hdr[0].(int))
-	vmxHdr.cntPrivate = uint16(hdr[1].(int))
-	vmxHdr.cntPublic = uint16(hdr[2].(int))
-	return vmxHdr
-}
-
-func getKey(contents mmap.MMap, offset int) smcKey {
-	// Setup struct pack string
-	var keyPack = []string{"4s", "B", "4s", "B", "B", "B", "B", "B", "B", "B", "Q", "48s"}
-
-	// Create BinaryPack object
-	bp := new(binarypack.BinaryPack)
-
-	// Unpack binary key data
-	keyRow, err := bp.UnPack(keyPack, contents[offset:offset+rowLength])
-	if err != nil {
-		println(err)
-	}
-
-	// Return the smcKey as a struct
-	var vmxKey smcKey
-	vmxKey.key = fourCCToString(keyRow[0].(string))
-	vmxKey.length = byte(keyRow[1].(int))
-	vmxKey.dataType = fourCCToString(keyRow[2].(string))
-	vmxKey.flag = byte(keyRow[3].(int))
-	vmxKey.ptrFunc = uintptr(keyRow[10].(int))
-	vmxKey.data = keyRow[11].(string)
-	return vmxKey
 }
 
 //goland:noinspection Annotator
