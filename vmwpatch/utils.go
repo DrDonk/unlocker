@@ -9,7 +9,7 @@ import (
 	"os"
 )
 
-func checkFile(filename string) (contents mmap.MMap) {
+func mapFile(filename string) (file *os.File, contents mmap.MMap) {
 
 	// Print filename
 	println(fmt.Sprintf("File: %s", filename))
@@ -17,28 +17,34 @@ func checkFile(filename string) (contents mmap.MMap) {
 	// Open the file
 	f, err := os.OpenFile(filename, os.O_RDWR, 0644)
 	if err != nil {
-		panic(fmt.Sprintf("Cannot find file %s", filename))
-		return
+		panic("Cannot find file")
 	}
-	defer func(f *os.File) {
-		err := f.Close()
-		if err != nil {
-
-		}
-	}(f)
 
 	// Memory map file
 	contents, err = mmap.Map(f, mmap.RDWR, 0)
 	if err != nil {
-		panic(fmt.Sprintf("Error mapping file %s", filename))
+		panic("Error mapping file")
 	}
-	defer func(contents *mmap.MMap) {
-		err := contents.Unmap()
-		if err != nil {
+	return f, contents
+}
 
-		}
-	}(&contents)
+func flushFile(contents mmap.MMap) {
+	err := contents.Flush()
+	if err != nil {
+		panic("Error flushing file")
+	}
+	return
+}
 
-	println(fmt.Sprintf("File: %s", filename))
-	return contents
+func unmapFile(file *os.File, contents mmap.MMap) {
+	err := contents.Unmap()
+	if err != nil {
+		panic("Error unmapping file")
+	}
+
+	err = file.Close()
+	if err != nil {
+		panic("Error closing file")
+	}
+	return
 }

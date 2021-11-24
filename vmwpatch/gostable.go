@@ -17,7 +17,7 @@ func setBit(n int, pos uint) int {
 func PatchGOS(filename string) {
 
 	// MMap the file
-	contents := checkFile(filename)
+	f, contents := mapFile(filename)
 
 	// Regexp pattern for GOS table Darwin entries
 	pattern := "\x10\x00\x00\x00[\x10|\x20]\x00\x00\x00[\x01|\x02]\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
@@ -33,9 +33,9 @@ func PatchGOS(filename string) {
 	bp := new(binarypack.BinaryPack)
 
 	for _, index := range indices {
-		offset := index[0] + 32
 
 		// Unpack binary key data
+		offset := index[0] + 32
 		unpackFlag, err := bp.UnPack(flagPack, contents[offset:offset+32])
 		if err != nil {
 			panic(err)
@@ -56,13 +56,13 @@ func PatchGOS(filename string) {
 		// Copy data to mmap file
 		copy(contents[offset:offset+1], flagPacked)
 
-		//Flush to disk
-		err = contents.Flush()
-		if err != nil {
-			panic(err)
-		}
-
+		// Print details
 		println(fmt.Sprintf("Flag patched @ offset: 0x%08x  Flag: 0x%01x -> 0x%01x", offset, oldFlag, newFlag))
 
 	}
+
+	// Flush to disk
+	flushFile(contents)
+	unmapFile(f, contents)
+
 }

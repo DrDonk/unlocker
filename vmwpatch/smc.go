@@ -120,10 +120,8 @@ func patchELF(contents mmap.MMap, AppleSMCHandleOSK uintptr, AppleSMCHandleDefau
 				copy(contents[relaPtr:relaPtr+8], defPtr)
 
 				// Flush to disk
-				err := contents.Flush()
-				if err != nil {
-					panic(err)
-				}
+				flushFile(contents)
+
 			} else {
 				break
 			}
@@ -154,6 +152,24 @@ func printKey(offset int, vmxKey smcKey) {
 		vmxKey.ptrFunc,
 		data))
 	return
+}
+
+func findHdrs(contents mmap.MMap) (int, int) {
+
+	// Find the vSMC headers
+	var smcHeaderV0 = []byte{0xF2, 0x00, 0x00, 0x00, 0xF0, 0x00, 0x00, 0x00}
+	var smcHeaderV1 = []byte{0xB4, 0x01, 0x00, 0x00, 0xB0, 0x01, 0x00, 0x00}
+	smcHeaderV0Offset := bytes.Index(contents, smcHeaderV0) - 8
+	smcHeaderV1Offset := bytes.Index(contents, smcHeaderV1) - 8
+	return smcHeaderV0Offset, smcHeaderV1Offset
+}
+
+func findKEY(contents mmap.MMap) (int, int) {
+	// Find '#KEY' keys
+	var keyKey = []byte{0x59, 0x45, 0x4B, 0x23, 0x04, 0x32, 0x33, 0x69, 0x75}
+	smcKey0 := bytes.Index(contents, keyKey)
+	smcKey1 := bytes.LastIndex(contents, keyKey)
+	return smcKey0, smcKey1
 }
 
 func getHdr(contents mmap.MMap, offset int) smcHdr {
@@ -250,10 +266,7 @@ func putKey(contents mmap.MMap, offset int, vmxKey smcKey) {
 	copy(contents[offset:offset+rowLength], keyPacked)
 
 	// Flush to disk
-	err = contents.Flush()
-	if err != nil {
-		panic(err)
-	}
+	flushFile(contents)
 	return
 }
 
@@ -313,18 +326,13 @@ func patchKeys(contents mmap.MMap, offset int, count int) (uintptr, uintptr) {
 func DumpSMC(filename string) {
 
 	// MMap the file
-	contents := checkFile(filename)
+	f, contents := mapFile(filename)
 
 	// Find the vSMC headers
-	var smcHeaderV0 = []byte{0xF2, 0x00, 0x00, 0x00, 0xF0, 0x00, 0x00, 0x00}
-	var smcHeaderV1 = []byte{0xB4, 0x01, 0x00, 0x00, 0xB0, 0x01, 0x00, 0x00}
-	smcHeaderV0Offset := bytes.Index(contents, smcHeaderV0) - 8
-	smcHeaderV1Offset := bytes.Index(contents, smcHeaderV1) - 8
+	smcHeaderV0Offset, smcHeaderV1Offset := findHdrs(contents)
 
 	// Find '#KEY' keys
-	var keyKey = []byte{0x59, 0x45, 0x4B, 0x23, 0x04, 0x32, 0x33, 0x69, 0x75}
-	smcKey0 := bytes.Index(contents, keyKey)
-	smcKey1 := bytes.LastIndex(contents, keyKey)
+	smcKey0, smcKey1 := findKEY(contents)
 
 	// Print vSMC0 tables and keys
 	vmxhdr0 := getHdr(contents, smcHeaderV0Offset)
@@ -338,23 +346,21 @@ func DumpSMC(filename string) {
 	printHdr("1", smcHeaderV1Offset, vmxhdr1)
 	dumpKeys(contents, smcKey1, int(vmxhdr1.cntPrivate))
 
+	// Unmap file
+	unmapFile(f, contents)
+
 }
 
 func PatchSMC(filename string) {
 
 	// MMap the file
-	contents := checkFile(filename)
+	f, contents := mapFile(filename)
 
 	// Find the vSMC headers
-	var smcHeaderV0 = []byte{0xF2, 0x00, 0x00, 0x00, 0xF0, 0x00, 0x00, 0x00}
-	var smcHeaderV1 = []byte{0xB4, 0x01, 0x00, 0x00, 0xB0, 0x01, 0x00, 0x00}
-	smcHeaderV0Offset := bytes.Index(contents, smcHeaderV0) - 8
-	smcHeaderV1Offset := bytes.Index(contents, smcHeaderV1) - 8
+	smcHeaderV0Offset, smcHeaderV1Offset := findHdrs(contents)
 
 	// Find '#KEY' keys
-	var keyKey = []byte{0x59, 0x45, 0x4B, 0x23, 0x04, 0x32, 0x33, 0x69, 0x75}
-	smcKey0 := bytes.Index(contents, keyKey)
-	smcKey1 := bytes.LastIndex(contents, keyKey)
+	smcKey0, smcKey1 := findKEY(contents)
 
 	// Patch vSMC0 tables and keys
 	vmxhdr0 := getHdr(contents, smcHeaderV0Offset)
@@ -368,8 +374,8 @@ func PatchSMC(filename string) {
 	printHdr("1", smcHeaderV1Offset, vmxhdr1)
 	AppleSMCHandleOSK, AppleSMCHandleDefault := patchKeys(contents, smcKey1, int(vmxhdr1.cntPrivate))
 	patchELF(contents, AppleSMCHandleOSK, AppleSMCHandleDefault)
-	err := contents.Flush()
-	if err != nil {
-		return
-	}
+
+	// Flush to disk
+	flushFile(contents)
+	unmapFile(f, contents)
 }

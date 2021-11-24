@@ -12,7 +12,7 @@ import (
 func PatchVMKCTL(filename string) {
 
 	// MMap the file
-	contents := checkFile(filename)
+	f, contents := mapFile(filename)
 
 	// Replace applesmc with variable always found on ESXi
 	var APPLESMC = []byte("applesmc")
@@ -22,11 +22,11 @@ func PatchVMKCTL(filename string) {
 	offset := bytes.Index(contents, APPLESMC)
 	before := string(contents[offset : offset+8])
 	copy(contents[offset:offset+8], VMKERNEL)
-	err := contents.Flush()
-	if err != nil {
-		panic(err)
-	}
+
 	after := string(contents[offset : offset+8])
 	println(fmt.Sprintf("Patching %s -> %s", before, after))
 
+	// Flush to disk
+	flushFile(contents)
+	unmapFile(f, contents)
 }
