@@ -6,48 +6,23 @@ package vmwpatch
 import (
 	"bytes"
 	"fmt"
-	"github.com/edsrzf/mmap-go"
-	"os"
 )
 
 //goland:noinspection GoUnhandledErrorResult
-func PatchVMKCTL() {
+func PatchVMKCTL(filename string) {
 
+	// MMap the file
+	contents := checkFile(filename)
+
+	// Replace applesmc with variable always found on ESXi
 	var APPLESMC = []byte("applesmc")
 	var VMKERNEL = []byte("vmkernel")
 
-	// Get and check file passed as parameter
-	var filename string
-	if len(os.Args) < 2 {
-		println("Please pass a file name!")
-		return
-	} else {
-		filename = os.Args[1]
-	}
-
-	// Open the file
-	f, err := os.OpenFile(filename, os.O_RDWR, 0644)
-	if err != nil {
-		println(fmt.Sprintf("Cannot find file %s", filename))
-		panic(err)
-	}
-	defer f.Close()
-
-	// Memory map file
-	contents, err := mmap.Map(f, mmap.RDWR, 0)
-	if err != nil {
-		println("error mapping: %s", err)
-		panic(err)
-	}
-	defer contents.Unmap()
-
-	println(fmt.Sprintf("File: %s", filename))
-	println()
-
+	// Find and replace string
 	offset := bytes.Index(contents, APPLESMC)
 	before := string(contents[offset : offset+8])
 	copy(contents[offset:offset+8], VMKERNEL)
-	err = contents.Flush()
+	err := contents.Flush()
 	if err != nil {
 		panic(err)
 	}

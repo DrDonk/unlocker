@@ -9,15 +9,10 @@ import (
 	"os"
 )
 
-//goland:noinspection Annotator
 func checkFile(filename string) (contents mmap.MMap) {
-	// Get and check file passed as parameter
-	if len(os.Args) < 2 {
-		panic("Please pass a file name!")
-		return
-	} else {
-		filename = os.Args[1]
-	}
+
+	// Print filename
+	println(fmt.Sprintf("File: %s", filename))
 
 	// Open the file
 	f, err := os.OpenFile(filename, os.O_RDWR, 0644)

@@ -5,6 +5,7 @@ package main
 
 import (
 	"golocker/vmwpatch"
+	"os"
 )
 
 func main() {
@@ -12,5 +13,15 @@ func main() {
 	println("PatchVMKCTL")
 	println("-----------")
 	println("© 2014-2021 David Parsons\n")
-	vmwpatch.PatchVMKCTL()
+
+	// Get and check file passed as parameter
+	var filename string
+	if len(os.Args) < 2 {
+		println("Please pass a file name!")
+		return
+	} else {
+		filename = os.Args[1]
+	}
+
+	vmwpatch.PatchVMKCTL(filename)
 }

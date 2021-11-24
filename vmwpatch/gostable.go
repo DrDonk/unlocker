@@ -6,8 +6,6 @@ package vmwpatch
 import (
 	"fmt"
 	binarypack "github.com/canhlinh/go-binary-pack"
-	"github.com/edsrzf/mmap-go"
-	"os"
 	"regexp"
 )
 
@@ -16,47 +14,15 @@ func setBit(n int, pos uint) int {
 	return n
 }
 
-func PatchGOS() {
+func PatchGOS(filename string) {
 
-	// Get and check file passed as parameter
-	var filename string
-	if len(os.Args) < 2 {
-		println("Please pass a file name!")
-		return
-	} else {
-		filename = os.Args[1]
-	}
+	// MMap the file
+	contents := checkFile(filename)
 
-	// Open the file
-	f, err := os.OpenFile(filename, os.O_RDWR, 0644)
-	if err != nil {
-		println(fmt.Sprintf("Cannot find file %s", filename))
-		println(err)
-		return
-	}
-	defer func(f *os.File) {
-		err := f.Close()
-		if err != nil {
-
-		}
-	}(f)
-
-	// Memory map file
-	contents, err := mmap.Map(f, mmap.RDWR, 0)
-	if err != nil {
-		println("error mapping: %s", err)
-	}
-	defer func(contents *mmap.MMap) {
-		err := contents.Unmap()
-		if err != nil {
-
-		}
-	}(&contents)
-
-	println(fmt.Sprintf("File: %s", filename))
-
+	// Regexp pattern for GOS table Darwin entries
 	pattern := "\x10\x00\x00\x00[\x10|\x20]\x00\x00\x00[\x01|\x02]\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
 
+	// Find all occurrences
 	re, _ := regexp.Compile(pattern)
 	indices := re.FindAllStringIndex(string(contents), -1)
 

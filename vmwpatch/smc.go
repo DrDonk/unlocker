@@ -37,7 +37,6 @@ import (
 	"fmt"
 	binarypack "github.com/canhlinh/go-binary-pack"
 	"github.com/edsrzf/mmap-go"
-	"os"
 	"unsafe"
 )
 
@@ -311,44 +310,10 @@ func patchKeys(contents mmap.MMap, offset int, count int) (uintptr, uintptr) {
 	return AppleSMCHandleOSK, AppleSMCHandleDefault
 }
 
-func DumpSMC() {
+func DumpSMC(filename string) {
 
-	//Get and check file passed as parameter
-	var filename string
-	if len(os.Args) < 2 {
-		println("Please pass a file name!")
-	} else {
-		filename = os.Args[1]
-	}
-
-	// Open the file
-	f, err := os.OpenFile(filename, os.O_RDWR, 0644)
-	if err != nil {
-		println(fmt.Sprintf("Cannot find file %s", filename))
-		println(err)
-	}
-	defer func(f *os.File) {
-		err := f.Close()
-		if err != nil {
-
-		}
-	}(f)
-
-	// Memory map file
-	contents, err := mmap.Map(f, mmap.RDWR, 0)
-	if err != nil {
-		println("error mapping: %s", err)
-	}
-	//goland:noinspection Annotator
-	defer func(contents *mmap.MMap) {
-		err := contents.Unmap()
-		if err != nil {
-
-		}
-	}(&contents)
-
-	println(fmt.Sprintf("File: %s", filename))
-	println()
+	// MMap the file
+	contents := checkFile(filename)
 
 	// Find the vSMC headers
 	var smcHeaderV0 = []byte{0xF2, 0x00, 0x00, 0x00, 0xF0, 0x00, 0x00, 0x00}
@@ -375,43 +340,10 @@ func DumpSMC() {
 
 }
 
-func PatchSMC() {
+func PatchSMC(filename string) {
 
-	// Get and check file passed as parameter
-	var filename string
-	if len(os.Args) < 2 {
-		println("Please pass a file name!")
-	} else {
-		filename = os.Args[1]
-	}
-
-	// Open the file
-	f, err := os.OpenFile(filename, os.O_RDWR, 0644)
-	if err != nil {
-		println(fmt.Sprintf("Cannot find file %s", filename))
-		println(err)
-	}
-	defer func(f *os.File) {
-		err := f.Close()
-		if err != nil {
-
-		}
-	}(f)
-
-	// Memory map file
-	contents, err := mmap.Map(f, mmap.RDWR, 0)
-	if err != nil {
-		println("error mapping: %s", err)
-	}
-	defer func(contents *mmap.MMap) {
-		err := contents.Unmap()
-		if err != nil {
-
-		}
-	}(&contents)
-
-	println(fmt.Sprintf("File: %s", filename))
-	println()
+	// MMap the file
+	contents := checkFile(filename)
 
 	// Find the vSMC headers
 	var smcHeaderV0 = []byte{0xF2, 0x00, 0x00, 0x00, 0xF0, 0x00, 0x00, 0x00}
@@ -436,7 +368,7 @@ func PatchSMC() {
 	printHdr("1", smcHeaderV1Offset, vmxhdr1)
 	AppleSMCHandleOSK, AppleSMCHandleDefault := patchKeys(contents, smcKey1, int(vmxhdr1.cntPrivate))
 	patchELF(contents, AppleSMCHandleOSK, AppleSMCHandleDefault)
-	err = contents.Flush()
+	err := contents.Flush()
 	if err != nil {
 		return
 	}
