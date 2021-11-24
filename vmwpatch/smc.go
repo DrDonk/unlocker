@@ -339,7 +339,7 @@ func DumpSMC(filename string) {
 	printHdr("0", smcHeaderV0Offset, vmxhdr0)
 	dumpKeys(contents, smcKey0, int(vmxhdr0.cntPrivate))
 
-	println("\n")
+	println("")
 
 	// Print vSMC1 tables and keys
 	vmxhdr1 := getHdr(contents, smcHeaderV1Offset)
@@ -367,7 +367,7 @@ func PatchSMC(filename string) {
 	printHdr("0", smcHeaderV0Offset, vmxhdr0)
 	patchKeys(contents, smcKey0, int(vmxhdr0.cntPrivate))
 
-	println("\n")
+	println("")
 
 	// Patch vSMC1 tables and keys
 	vmxhdr1 := getHdr(contents, smcHeaderV1Offset)
