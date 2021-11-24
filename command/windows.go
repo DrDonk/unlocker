@@ -87,7 +87,7 @@ func vmwInfo() *VMwareInfo {
 	return v
 }
 
-func getState(s *mgr.Service) svc.State {
+func svcState(s *mgr.Service) svc.State {
 	status, err := s.Query()
 	if err != nil {
 		panic(fmt.Sprintf("Query(%s) failed: %s", s.Name, err))
@@ -95,9 +95,9 @@ func getState(s *mgr.Service) svc.State {
 	return status.State
 }
 
-func waitState(s *mgr.Service, want svc.State) {
+func svcWaitState(s *mgr.Service, want svc.State) {
 	for i := 0; ; i++ {
-		have := getState(s)
+		have := svcState(s)
 		if have == want {
 			return
 		}
@@ -108,7 +108,7 @@ func waitState(s *mgr.Service, want svc.State) {
 	}
 }
 
-func startService(name string) {
+func svcStart(name string) {
 	m, err := mgr.Connect()
 	if err != nil {
 		panic("SCM connection failed")
@@ -128,22 +128,23 @@ func startService(name string) {
 	//goland:noinspection ALL
 	defer s.Close()
 
-	if getState(s) == svc.Stopped {
+	if svcState(s) == svc.Stopped {
 		err = s.Start()
 		if err != nil {
 			panic(fmt.Sprintf("Control(%s) failed: %s", name, err))
 		}
-		waitState(s, svc.Running)
+		svcWaitState(s, svc.Running)
 	}
 
 	err = m.Disconnect()
 
 }
 
-func stopService(name string) {
+func svcStop(name string) {
 	m, err := mgr.Connect()
 	if err != nil {
 		panic("SCM connection failed")
+
 	}
 
 	//goland:noinspection ALL
@@ -160,12 +161,12 @@ func stopService(name string) {
 	//goland:noinspection ALL
 	defer s.Close()
 
-	if getState(s) == svc.Running {
+	if svcState(s) == svc.Running {
 		_, err = s.Control(svc.Stop)
 		if err != nil {
 			panic(fmt.Sprintf("Control(%s) failed: %s", name, err))
 		}
-		waitState(s, svc.Stopped)
+		svcWaitState(s, svc.Stopped)
 	}
 
 	err = m.Disconnect()
@@ -206,11 +207,11 @@ func main() {
 	c := exec.Command(filepath.Join(v.InstallDir, "vmware-task.exe"))
 	println(c)
 	_ = c.Start()
-	stopService(v.AuthD)
-	stopService(v.HostD)
-	stopService(v.USBD)
-	startService(v.AuthD)
-	startService(v.HostD)
-	startService(v.USBD)
+	svcStop(v.AuthD)
+	svcStop(v.HostD)
+	svcStop(v.USBD)
+	svcStart(v.AuthD)
+	svcStart(v.HostD)
+	svcStart(v.USBD)
 	return
 }
