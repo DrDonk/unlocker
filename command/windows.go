@@ -58,7 +58,7 @@ func amAdmin() bool {
 
 //goland:noinspection GoUnhandledErrorResult
 func copyFile(src, dst string) (int64, error) {
-	println(fmt.Sprintf(" %s -> %s", src, dst))
+	println(fmt.Sprintf("%s -> %s", src, dst))
 	sourceFileStat, err := os.Stat(src)
 	if err != nil {
 		return 0, err
@@ -90,32 +90,60 @@ func copyFile(src, dst string) (int64, error) {
 }
 
 func delFile(src, dst string) error {
-	println(fmt.Sprintf(" %s -> %s", src, dst))
-
-	// Get chmod
+	// Get file mode RW/RO
 	fi, _ := os.Stat(dst)
-	println(fmt.Sprintf("%o", fi.Mode()))
 	err := os.Chmod(dst, 666)
 	if err != nil {
 		return err
 	}
+
+	// Copy file back
 	_, err = copyFile(src, dst)
 	if err != nil {
 		return err
 	}
+
+	// Remove the backup
 	err = os.Remove(src)
 	if err != nil {
 		return err
 	}
 
+	// Restore file mode
 	err = os.Chmod(dst, fi.Mode())
 	if err != nil {
 		return err
 	}
-	fi, _ = os.Stat(dst)
-	println(fmt.Sprintf("%o", fi.Mode()))
 
 	return nil
+}
+
+func efiPatch(filename string) {
+	println(fmt.Sprintf("Patching ROM file: %s", filename))
+
+	// Get file mode RW/RO
+	fi, _ := os.Stat(filename)
+	err := os.Chmod(filename, 666)
+	if err != nil {
+		panic(err)
+	}
+
+	// Run UEFIPatch
+	output, err := exec.Command("./Windows/UEFIPatch.exe", filename, "./rompatch.txt", "-o", filename).CombinedOutput()
+	if err != nil {
+		panic(err)
+	} else {
+		println(string(output))
+	}
+
+	// Restore file mode
+	err = os.Chmod(filename, fi.Mode())
+	if err != nil {
+		panic(err)
+	}
+
+	return
+
 }
 
 func printHelp() {
@@ -510,12 +538,16 @@ func main() {
 		vmwpatch.PatchSMC(v.PathVMXStats)
 		println()
 		vmwpatch.PatchGOS(v.PathVMwareBase)
+		println()
+
+		// Patch virtual EFI ROM files
+		efiPatch(v.PathEFI32ROM)
+		efiPatch(v.PathEFI64ROM)
 
 		// Copy tools ISOs
 		println("\nCopying VMware Tools...")
 		_, _ = copyFile("./tools/darwinPre15.iso", filepath.Join(v.InstallDir, "darwinPre15.iso"))
 		_, _ = copyFile("./tools/darwin.iso", filepath.Join(v.InstallDir, "darwin.iso"))
-
 	} else {
 		// Restore files
 		println("\nRestoring files...")
@@ -523,9 +555,12 @@ func main() {
 
 		// Removing tools ISOs
 		println("\nRemoving VMware Tools...")
-		_ = os.Remove(filepath.Join(v.InstallDir, "darwinPre15.iso"))
-		_ = os.Remove(filepath.Join(v.InstallDir, "darwin.iso"))
-
+		isoPath := filepath.Join(v.InstallDir, "darwinPre15.iso")
+		println(isoPath)
+		_ = os.Remove(isoPath)
+		isoPath = filepath.Join(v.InstallDir, "darwin.iso")
+		println(isoPath)
+		_ = os.Remove(isoPath)
 	}
 
 	// Start all VMW services and tasks
