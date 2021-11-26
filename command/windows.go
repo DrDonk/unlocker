@@ -35,56 +35,24 @@ type VMwareInfo struct {
 	VMwareBase     string
 }
 
-func vmwInfo() *VMwareInfo {
-	v := &VMwareInfo{}
+// unsafe.Sizeof(windows.ProcessEntry32{})
+const processEntrySize = 568
 
-	// Store known service names
-	v.AuthD = "VMAuthdService"
-	v.HostD = "VMwareHostd"
-	v.USBD = "VMUSBArbService"
-
-	// Access registry for version, build and installation path
-	var access uint32
-	access = registry.QUERY_VALUE
-	if runtime.GOARCH == "amd64" {
-		access = access | registry.WOW64_32KEY
+func processID(name string) (uint32, error) {
+	h, e := windows.CreateToolhelp32Snapshot(windows.TH32CS_SNAPPROCESS, 0)
+	if e != nil {
+		return 0, e
 	}
-	regKey, err := registry.OpenKey(registry.LOCAL_MACHINE,
-		`SOFTWARE\VMware, Inc.\VMware Player`, access)
-	if err != nil {
-		panic("Failed to open registry")
+	p := windows.ProcessEntry32{Size: processEntrySize}
+	for {
+		e := windows.Process32Next(h, &p)
+		if e != nil {
+			return 0, e
+		}
+		if windows.UTF16ToString(p.ExeFile[:]) == name {
+			return p.ProcessID, nil
+		}
 	}
-	//goland:noinspection GoUnhandledErrorResult
-	defer regKey.Close()
-
-	v.ProductVersion, _, err = regKey.GetStringValue("ProductVersion")
-	if err != nil {
-		panic("Failed to locate registry key ProductVersion")
-	}
-
-	v.BuildNumber, _, err = regKey.GetStringValue("BuildNumber")
-	if err != nil {
-		panic("Failed to locate registry key BuildNumber")
-	}
-
-	v.InstallDir, _, err = regKey.GetStringValue("InstallPath")
-	if err != nil {
-		panic("Failed to locate registry key InstallPath")
-	}
-
-	// Construct needed filenames from reg settings
-	v.InstallDir64 = filepath.Join(v.InstallDir, "x64")
-	v.Player = "vmplayer.exe"
-	v.Workstation = "vmware.exe"
-	v.KVM = "vmware-kvm.exe"
-	v.REST = "vmrest.exe"
-	v.Tray = "vmware-tray.exe"
-	v.VMXDefault = filepath.Join(v.InstallDir, "x64", "vmware-vmx.exe")
-	v.VMXDebug = filepath.Join(v.InstallDir, "x64", "vmware-vmx-debug.exe")
-	v.VMXStats = filepath.Join(v.InstallDir, "x64", "vmware-vmx-stats.exe")
-	v.VMwareBase = filepath.Join(v.InstallDir, "vmwarebase.dll")
-
-	return v
 }
 
 func svcState(s *mgr.Service) svc.State {
@@ -173,45 +141,149 @@ func svcStop(name string) {
 
 }
 
-// unsafe.Sizeof(windows.ProcessEntry32{})
-const processEntrySize = 568
+func taskStart(filename string) {
+	c := exec.Command(filename)
+	_ = c.Start()
+	return
+}
 
-func processID(name string) (uint32, error) {
-	h, e := windows.CreateToolhelp32Snapshot(windows.TH32CS_SNAPPROCESS, 0)
-	if e != nil {
-		return 0, e
-	}
-	p := windows.ProcessEntry32{Size: processEntrySize}
-	for {
-		e := windows.Process32Next(h, &p)
-		if e != nil {
-			return 0, e
-		}
-		if windows.UTF16ToString(p.ExeFile[:]) == name {
-			return p.ProcessID, nil
-		}
+func taskRunning(name string) bool {
+	pid, err := processID(name)
+	if (pid != 0) && (err == nil) {
+		return true
+	} else {
+		return false
 	}
 }
 
+func taskStop(name string) {
+	if taskRunning(name) {
+		c := exec.Command("taskkill.exe", "/F", "/IM", name)
+		_ = c.Run()
+	}
+	return
+}
+
+func vmwInfo() *VMwareInfo {
+	v := &VMwareInfo{}
+
+	// Store known service names
+	v.AuthD = "VMAuthdService"
+	v.HostD = "VMwareHostd"
+	v.USBD = "VMUSBArbService"
+
+	// Access registry for version, build and installation path
+	var access uint32
+	access = registry.QUERY_VALUE
+	if runtime.GOARCH == "amd64" {
+		access = access | registry.WOW64_32KEY
+	}
+	regKey, err := registry.OpenKey(registry.LOCAL_MACHINE,
+		`SOFTWARE\VMware, Inc.\VMware Player`, access)
+	if err != nil {
+		panic("Failed to open registry")
+	}
+	//goland:noinspection GoUnhandledErrorResult
+	defer regKey.Close()
+
+	v.ProductVersion, _, err = regKey.GetStringValue("ProductVersion")
+	if err != nil {
+		panic("Failed to locate registry key ProductVersion")
+	}
+
+	v.BuildNumber, _, err = regKey.GetStringValue("BuildNumber")
+	if err != nil {
+		panic("Failed to locate registry key BuildNumber")
+	}
+
+	v.InstallDir, _, err = regKey.GetStringValue("InstallPath")
+	if err != nil {
+		panic("Failed to locate registry key InstallPath")
+	}
+
+	// Construct needed filenames from reg settings
+	v.InstallDir64 = filepath.Join(v.InstallDir, "x64")
+	v.Player = "vmplayer.exe"
+	v.Workstation = "vmware.exe"
+	v.KVM = "vmware-kvm.exe"
+	v.REST = "vmrest.exe"
+	v.Tray = "vmware-tray.exe"
+	v.VMXDefault = filepath.Join(v.InstallDir, "x64", "vmware-vmx.exe")
+	v.VMXDebug = filepath.Join(v.InstallDir, "x64", "vmware-vmx-debug.exe")
+	v.VMXStats = filepath.Join(v.InstallDir, "x64", "vmware-vmx-stats.exe")
+	v.VMwareBase = filepath.Join(v.InstallDir, "vmwarebase.dll")
+
+	return v
+}
+
+func vmwRunning(v *VMwareInfo) bool {
+	if taskRunning(v.Workstation) {
+		println("VMware Workstation is running")
+		return true
+	}
+	if taskRunning(v.Player) {
+		println("VMware Player is running")
+		return true
+	}
+	if taskRunning(v.KVM) {
+		println("VMware KVM is running")
+		return true
+	}
+	if taskRunning(v.REST) {
+		println("VMware REST API is running")
+		return true
+	}
+	if taskRunning(v.VMXDefault) {
+		println("VMware VM (vmware-vmx) is running")
+		return true
+	}
+	if taskRunning(v.VMXDebug) {
+		println("VMware VM (vmware-vmx-debug) is running")
+		return true
+	}
+	if taskRunning(v.VMXStats) {
+		println("VMware VM (vmware-vmx-stats) is running")
+		return true
+	}
+	return false
+}
+
 func main() {
+	// Titles
 	println(fmt.Sprintf("Unlocker %s for VMware Workstation/Player", vmwpatch.VERSION))
 	println("============================================")
 	println(fmt.Sprintf("%s \n", vmwpatch.COPYRIGHT))
 
+	// Get VMware product details from registry and file system
 	v := vmwInfo()
-	println(fmt.Sprintf("Patching version %s", v.ProductVersion))
-	println(v.InstallDir)
+	println(fmt.Sprintf("VMware is installed at: %s", v.InstallDir))
+	println(fmt.Sprintf("Patching VMware product version %s", v.ProductVersion))
 
-	tray, _ := processID(v.Tray)
-	println(tray)
-	c := exec.Command(filepath.Join(v.InstallDir, "vmware-task.exe"))
-	println(c)
-	_ = c.Start()
+	// Check no VMs running
+	if vmwRunning(v) {
+		println("Aborting patching!")
+		return
+	}
+
+	// Stop all services and task with open handles to the exe/dll files
+	println("Stopping VMware services and tasks...")
 	svcStop(v.AuthD)
 	svcStop(v.HostD)
 	svcStop(v.USBD)
+	taskStop(v.Tray)
+
+	//Backing up files...
+
+	//Patching...
+
+	//Getting VMware Tools...
+
+	println("Starting VMware services and tasks...")
 	svcStart(v.AuthD)
 	svcStart(v.HostD)
 	svcStart(v.USBD)
+	taskStart(filepath.Join(v.InstallDir, v.Tray))
+
+	println("Finished!")
 	return
 }
