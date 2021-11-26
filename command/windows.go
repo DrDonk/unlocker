@@ -56,6 +56,16 @@ func amAdmin() bool {
 	return true
 }
 
+func backupExists(v *VMwareInfo) bool {
+	currentFolder, _ := os.Getwd()
+	backupFolder := filepath.Join(currentFolder, "backup", v.ProductVersion)
+	if _, err := os.Stat(backupFolder); !os.IsNotExist(err) {
+		return true
+	} else {
+		return false
+	}
+}
+
 //goland:noinspection GoUnhandledErrorResult
 func copyFile(src, dst string) (int64, error) {
 	println(fmt.Sprintf("%s -> %s", src, dst))
@@ -352,6 +362,7 @@ func vmwBackup(v *VMwareInfo) {
 	if err != nil {
 		panic(err)
 	}
+	return
 }
 
 func vmwRestore(v *VMwareInfo) {
@@ -384,6 +395,7 @@ func vmwRestore(v *VMwareInfo) {
 	}
 
 	err = os.RemoveAll(backupFolder)
+	return
 }
 
 func vmwInfo() *VMwareInfo {
@@ -509,12 +521,28 @@ func main() {
 	// Get VMware product details from registry and file system
 	v := vmwInfo()
 	println(fmt.Sprintf("VMware is installed at: %s", v.InstallDir))
-	println(fmt.Sprintf("Patching VMware version %s", v.ProductVersion))
+	println(fmt.Sprintf("VMware version %s", v.ProductVersion))
 
 	// Check no VMs running
 	if vmwRunning(v) {
 		println("Aborting patching!")
 		return
+	}
+
+	// Abort if installing and backup is present
+	if install {
+		println("Installing unlocker")
+		if backupExists(v) {
+			println("Aborting install as backup folder already exists!")
+		}
+	}
+
+	// Abort if uninstalling and backup is missing
+	if !install {
+		println("Uninstalling unlocker")
+		if !backupExists(v) {
+			println("Aborting uninstall as backup folder does not exist!")
+		}
 	}
 
 	// Stop all VMW services and tasks
