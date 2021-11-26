@@ -10,6 +10,8 @@ import (
 	"golang.org/x/sys/windows/svc"
 	"golang.org/x/sys/windows/svc/mgr"
 	"golocker/vmwpatch"
+	"io"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
@@ -33,10 +35,79 @@ type VMwareInfo struct {
 	VMXDebug       string
 	VMXStats       string
 	VMwareBase     string
+	EFI32ROM       string
+	EFI64ROM       string
+	PathVMXDefault string
+	PathVMXDebug   string
+	PathVMXStats   string
+	PathVMwareBase string
+	PathEFI32ROM   string
+	PathEFI64ROM   string
 }
 
 // unsafe.Sizeof(windows.ProcessEntry32{})
 const processEntrySize = 568
+
+//goland:noinspection GoUnhandledErrorResult
+func copyFile(src, dst string) (int64, error) {
+	println(fmt.Sprintf(" %s -> %s", src, dst))
+	sourceFileStat, err := os.Stat(src)
+	if err != nil {
+		return 0, err
+	}
+
+	if !sourceFileStat.Mode().IsRegular() {
+		return 0, fmt.Errorf("%s is not a regular file", src)
+	}
+
+	source, err := os.Open(src)
+	if err != nil {
+		return 0, err
+	}
+	defer source.Close()
+
+	destination, err := os.Create(dst)
+	if err != nil {
+		return 0, err
+	}
+	defer destination.Close()
+	nBytes, err := io.Copy(destination, source)
+	return nBytes, err
+}
+
+func copyFiles(v *VMwareInfo) {
+	currentFolder, _ := os.Getwd()
+	backupFolder := filepath.Join(currentFolder, "backup", v.ProductVersion)
+	backupFolder64 := filepath.Join(backupFolder, "x64")
+	err := os.MkdirAll(backupFolder64, os.ModePerm)
+	if err != nil {
+		panic(err)
+	}
+	_, err = copyFile(v.PathVMwareBase, filepath.Join(backupFolder, v.VMwareBase))
+	if err != nil {
+		panic(err)
+	}
+	_, err = copyFile(v.PathVMXDefault, filepath.Join(backupFolder64, v.VMXDefault))
+	if err != nil {
+		panic(err)
+	}
+	_, err = copyFile(v.PathVMXDebug, filepath.Join(backupFolder64, v.VMXDebug))
+	if err != nil {
+		panic(err)
+	}
+	_, err = copyFile(v.PathVMXStats, filepath.Join(backupFolder64, v.VMXStats))
+	if err != nil {
+		panic(err)
+	}
+	_, err = copyFile(v.PathEFI32ROM, filepath.Join(backupFolder64, v.EFI32ROM))
+	if err != nil {
+		panic(err)
+	}
+	_, err = copyFile(v.PathEFI64ROM, filepath.Join(backupFolder64, v.EFI64ROM))
+	if err != nil {
+		panic(err)
+	}
+}
 
 func processID(name string) (uint32, error) {
 	h, e := windows.CreateToolhelp32Snapshot(windows.TH32CS_SNAPPROCESS, 0)
@@ -208,10 +279,18 @@ func vmwInfo() *VMwareInfo {
 	v.KVM = "vmware-kvm.exe"
 	v.REST = "vmrest.exe"
 	v.Tray = "vmware-tray.exe"
-	v.VMXDefault = filepath.Join(v.InstallDir, "x64", "vmware-vmx.exe")
-	v.VMXDebug = filepath.Join(v.InstallDir, "x64", "vmware-vmx-debug.exe")
-	v.VMXStats = filepath.Join(v.InstallDir, "x64", "vmware-vmx-stats.exe")
-	v.VMwareBase = filepath.Join(v.InstallDir, "vmwarebase.dll")
+	v.VMXDefault = "vmware-vmx.exe"
+	v.VMXDebug = "vmware-vmx-debug.exe"
+	v.VMXStats = "vmware-vmx-stats.exe"
+	v.VMwareBase = "vmwarebase.dll"
+	v.EFI32ROM = "EFI32.ROM"
+	v.EFI64ROM = "EFI64.ROM"
+	v.PathVMXDefault = filepath.Join(v.InstallDir64, "vmware-vmx.exe")
+	v.PathVMXDebug = filepath.Join(v.InstallDir64, "vmware-vmx-debug.exe")
+	v.PathVMXStats = filepath.Join(v.InstallDir64, "vmware-vmx-stats.exe")
+	v.PathVMwareBase = filepath.Join(v.InstallDir, "vmwarebase.dll")
+	v.PathEFI32ROM = filepath.Join(v.InstallDir64, "EFI32.ROM")
+	v.PathEFI64ROM = filepath.Join(v.InstallDir64, "EFI64.ROM")
 
 	return v
 }
@@ -254,10 +333,17 @@ func main() {
 	println("============================================")
 	println(fmt.Sprintf("%s \n", vmwpatch.COPYRIGHT))
 
+	//ex, err := os.Executable()
+	//if err != nil {
+	//	panic(err)
+	//}
+	//exPath := filepath.Dir(ex)
+	//fmt.Println(exPath)
+
 	// Get VMware product details from registry and file system
 	v := vmwInfo()
 	println(fmt.Sprintf("VMware is installed at: %s", v.InstallDir))
-	println(fmt.Sprintf("Patching VMware product version %s", v.ProductVersion))
+	println(fmt.Sprintf("Patching VMware version %s", v.ProductVersion))
 
 	// Check no VMs running
 	if vmwRunning(v) {
@@ -265,25 +351,32 @@ func main() {
 		return
 	}
 
-	// Stop all services and task with open handles to the exe/dll files
-	println("Stopping VMware services and tasks...")
+	// Stop all VMW services and tasks
+	println("\nStopping VMware services and tasks...")
 	svcStop(v.AuthD)
 	svcStop(v.HostD)
 	svcStop(v.USBD)
 	taskStop(v.Tray)
 
-	//Backing up files...
+	// Copy files
+	println("\nBacking up files...")
+	copyFiles(v)
 
-	//Patching...
+	// Patch files
+	println("\nPatching...")
 
-	//Getting VMware Tools...
+	// Copy tools ISOs
+	println("\nCopying VMware Tools...")
+	_, _ = copyFile("./tools/darwinPre15.iso", filepath.Join(v.InstallDir, "darwinPre15.iso"))
+	_, _ = copyFile("./tools/darwin.iso", filepath.Join(v.InstallDir, "darwin.iso"))
 
-	println("Starting VMware services and tasks...")
+	// Start all VMW services and tasks
+	println("\nStarting VMware services and tasks...")
 	svcStart(v.AuthD)
 	svcStart(v.HostD)
 	svcStart(v.USBD)
 	taskStart(filepath.Join(v.InstallDir, v.Tray))
 
-	println("Finished!")
+	println("\nFinished!")
 	return
 }
