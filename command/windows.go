@@ -38,14 +38,10 @@ type VMwareInfo struct {
 	VMXDebug       string
 	VMXStats       string
 	VMwareBase     string
-	EFI32ROM       string
-	EFI64ROM       string
 	PathVMXDefault string
 	PathVMXDebug   string
 	PathVMXStats   string
 	PathVMwareBase string
-	PathEFI32ROM   string
-	PathEFI64ROM   string
 }
 
 func amAdmin() bool {
@@ -126,34 +122,6 @@ func delFile(src, dst string) error {
 	}
 
 	return nil
-}
-
-func efiPatch(filename string) {
-	println(fmt.Sprintf("Patching ROM file: %s", filename))
-
-	// Get file mode RW/RO
-	fi, _ := os.Stat(filename)
-	err := os.Chmod(filename, 666)
-	if err != nil {
-		panic(err)
-	}
-
-	// Run UEFIPatch
-	output, err := exec.Command("./Windows/UEFIPatch.exe", filename, "./rompatch.txt", "-o", filename).CombinedOutput()
-	if err != nil {
-		panic(err)
-	} else {
-		println(string(output))
-	}
-
-	// Restore file mode
-	err = os.Chmod(filename, fi.Mode())
-	if err != nil {
-		panic(err)
-	}
-
-	return
-
 }
 
 func printHelp() {
@@ -354,14 +322,6 @@ func vmwBackup(v *VMwareInfo) {
 	if err != nil {
 		panic(err)
 	}
-	_, err = copyFile(v.PathEFI32ROM, filepath.Join(backupFolder64, v.EFI32ROM))
-	if err != nil {
-		panic(err)
-	}
-	_, err = copyFile(v.PathEFI64ROM, filepath.Join(backupFolder64, v.EFI64ROM))
-	if err != nil {
-		panic(err)
-	}
 	return
 }
 
@@ -382,14 +342,6 @@ func vmwRestore(v *VMwareInfo) {
 		panic(err)
 	}
 	err = delFile(filepath.Join(backupFolder64, v.VMXStats), v.PathVMXStats)
-	if err != nil {
-		panic(err)
-	}
-	err = delFile(filepath.Join(backupFolder64, v.EFI32ROM), v.PathEFI32ROM)
-	if err != nil {
-		panic(err)
-	}
-	err = delFile(filepath.Join(backupFolder64, v.EFI64ROM), v.PathEFI64ROM)
 	if err != nil {
 		panic(err)
 	}
@@ -446,15 +398,10 @@ func vmwInfo() *VMwareInfo {
 	v.VMXDebug = "vmware-vmx-debug.exe"
 	v.VMXStats = "vmware-vmx-stats.exe"
 	v.VMwareBase = "vmwarebase.dll"
-	v.EFI32ROM = "EFI32.ROM"
-	v.EFI64ROM = "EFI64.ROM"
 	v.PathVMXDefault = filepath.Join(v.InstallDir64, "vmware-vmx.exe")
 	v.PathVMXDebug = filepath.Join(v.InstallDir64, "vmware-vmx-debug.exe")
 	v.PathVMXStats = filepath.Join(v.InstallDir64, "vmware-vmx-stats.exe")
 	v.PathVMwareBase = filepath.Join(v.InstallDir, "vmwarebase.dll")
-	v.PathEFI32ROM = filepath.Join(v.InstallDir64, "EFI32.ROM")
-	v.PathEFI64ROM = filepath.Join(v.InstallDir64, "EFI64.ROM")
-
 	return v
 }
 
@@ -567,10 +514,6 @@ func main() {
 		println()
 		vmwpatch.PatchGOS(v.PathVMwareBase)
 		println()
-
-		// Patch virtual EFI ROM files
-		efiPatch(v.PathEFI32ROM)
-		efiPatch(v.PathEFI64ROM)
 
 		// Copy tools ISOs
 		println("\nCopying VMware Tools...")
