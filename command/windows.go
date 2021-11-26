@@ -5,6 +5,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/djherbis/times"
 	"golang.org/x/sys/windows"
 	"golang.org/x/sys/windows/registry"
 	"golang.org/x/sys/windows/svc"
@@ -15,6 +16,8 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strings"
+	"syscall"
 	"time"
 )
 
@@ -45,8 +48,13 @@ type VMwareInfo struct {
 	PathEFI64ROM   string
 }
 
-// unsafe.Sizeof(windows.ProcessEntry32{})
-const processEntrySize = 568
+func amAdmin() bool {
+	_, err := os.Open("\\\\.\\PHYSICALDRIVE0")
+	if err != nil {
+		return false
+	}
+	return true
+}
 
 //goland:noinspection GoUnhandledErrorResult
 func copyFile(src, dst string) (int64, error) {
@@ -72,44 +80,52 @@ func copyFile(src, dst string) (int64, error) {
 	}
 	defer destination.Close()
 	nBytes, err := io.Copy(destination, source)
+
+	// Ensure timestamops are correct
+	srcTimes, _ := times.Stat(src)
+	_ = os.Chtimes(dst, srcTimes.AccessTime(), srcTimes.ModTime())
+	_ = setCTime(dst, srcTimes.BirthTime())
+
 	return nBytes, err
 }
 
-func copyFiles(v *VMwareInfo) {
-	currentFolder, _ := os.Getwd()
-	backupFolder := filepath.Join(currentFolder, "backup", v.ProductVersion)
-	backupFolder64 := filepath.Join(backupFolder, "x64")
-	err := os.MkdirAll(backupFolder64, os.ModePerm)
+func delFile(src, dst string) error {
+	println(fmt.Sprintf(" %s -> %s", src, dst))
+
+	// Get chmod
+	fi, _ := os.Stat(dst)
+	println(fmt.Sprintf("%o", fi.Mode()))
+	err := os.Chmod(dst, 666)
 	if err != nil {
-		panic(err)
+		return err
 	}
-	_, err = copyFile(v.PathVMwareBase, filepath.Join(backupFolder, v.VMwareBase))
+	_, err = copyFile(src, dst)
 	if err != nil {
-		panic(err)
+		return err
 	}
-	_, err = copyFile(v.PathVMXDefault, filepath.Join(backupFolder64, v.VMXDefault))
+	err = os.Remove(src)
 	if err != nil {
-		panic(err)
+		return err
 	}
-	_, err = copyFile(v.PathVMXDebug, filepath.Join(backupFolder64, v.VMXDebug))
+
+	err = os.Chmod(dst, fi.Mode())
 	if err != nil {
-		panic(err)
+		return err
 	}
-	_, err = copyFile(v.PathVMXStats, filepath.Join(backupFolder64, v.VMXStats))
-	if err != nil {
-		panic(err)
-	}
-	_, err = copyFile(v.PathEFI32ROM, filepath.Join(backupFolder64, v.EFI32ROM))
-	if err != nil {
-		panic(err)
-	}
-	_, err = copyFile(v.PathEFI64ROM, filepath.Join(backupFolder64, v.EFI64ROM))
-	if err != nil {
-		panic(err)
-	}
+	fi, _ = os.Stat(dst)
+	println(fmt.Sprintf("%o", fi.Mode()))
+
+	return nil
+}
+
+func printHelp() {
+	println("usage: unlocker.exe <install | uninstall>")
+	println("\tinstall - install patches")
+	println("\tuninstall - uninstall patches")
 }
 
 func processID(name string) (uint32, error) {
+	const processEntrySize = 568
 	h, e := windows.CreateToolhelp32Snapshot(windows.TH32CS_SNAPPROCESS, 0)
 	if e != nil {
 		return 0, e
@@ -124,6 +140,45 @@ func processID(name string) (uint32, error) {
 			return p.ProcessID, nil
 		}
 	}
+}
+
+func runElevated() {
+	verb := "runas"
+	exe, _ := os.Executable()
+	cwd, _ := os.Getwd()
+	args := strings.Join(os.Args[1:], " ")
+
+	verbPtr, _ := syscall.UTF16PtrFromString(verb)
+	exePtr, _ := syscall.UTF16PtrFromString(exe)
+	cwdPtr, _ := syscall.UTF16PtrFromString(cwd)
+	argPtr, _ := syscall.UTF16PtrFromString(args)
+
+	var showCmd int32 = 1 //SW_NORMAL
+
+	err := windows.ShellExecute(0, verbPtr, exePtr, argPtr, cwdPtr, showCmd)
+	if err != nil {
+		fmt.Println(err)
+	}
+}
+
+//goland:noinspection GrazieInspection,GoUnhandledErrorResult
+func setCTime(path string, ctime time.Time) error {
+	//setCTime will set the create time on a file. On Windows, this requires
+	//calling SetFileTime and explicitly including the create time.
+	ctimespec := syscall.NsecToTimespec(ctime.UnixNano())
+	pathp, e := syscall.UTF16PtrFromString(path)
+	if e != nil {
+		return e
+	}
+	h, e := syscall.CreateFile(pathp,
+		syscall.FILE_WRITE_ATTRIBUTES, syscall.FILE_SHARE_WRITE, nil,
+		syscall.OPEN_EXISTING, syscall.FILE_FLAG_BACKUP_SEMANTICS, 0)
+	if e != nil {
+		return e
+	}
+	defer syscall.Close(h)
+	c := syscall.NsecToFiletime(syscall.TimespecToNsec(ctimespec))
+	return syscall.SetFileTime(h, &c, nil, nil)
 }
 
 func svcState(s *mgr.Service) svc.State {
@@ -213,6 +268,7 @@ func svcStop(name string) {
 }
 
 func taskStart(filename string) {
+	println(fmt.Sprintf("Starting task %s", filename))
 	c := exec.Command(filename)
 	_ = c.Start()
 	return
@@ -229,10 +285,77 @@ func taskRunning(name string) bool {
 
 func taskStop(name string) {
 	if taskRunning(name) {
+		println(fmt.Sprintf("Stopping task %s", name))
 		c := exec.Command("taskkill.exe", "/F", "/IM", name)
 		_ = c.Run()
 	}
 	return
+}
+
+func vmwBackup(v *VMwareInfo) {
+	currentFolder, _ := os.Getwd()
+	backupFolder := filepath.Join(currentFolder, "backup", v.ProductVersion)
+	backupFolder64 := filepath.Join(backupFolder, "x64")
+	err := os.MkdirAll(backupFolder64, os.ModePerm)
+	if err != nil {
+		panic(err)
+	}
+	_, err = copyFile(v.PathVMwareBase, filepath.Join(backupFolder, v.VMwareBase))
+	if err != nil {
+		panic(err)
+	}
+	_, err = copyFile(v.PathVMXDefault, filepath.Join(backupFolder64, v.VMXDefault))
+	if err != nil {
+		panic(err)
+	}
+	_, err = copyFile(v.PathVMXDebug, filepath.Join(backupFolder64, v.VMXDebug))
+	if err != nil {
+		panic(err)
+	}
+	_, err = copyFile(v.PathVMXStats, filepath.Join(backupFolder64, v.VMXStats))
+	if err != nil {
+		panic(err)
+	}
+	_, err = copyFile(v.PathEFI32ROM, filepath.Join(backupFolder64, v.EFI32ROM))
+	if err != nil {
+		panic(err)
+	}
+	_, err = copyFile(v.PathEFI64ROM, filepath.Join(backupFolder64, v.EFI64ROM))
+	if err != nil {
+		panic(err)
+	}
+}
+
+func vmwRestore(v *VMwareInfo) {
+	currentFolder, _ := os.Getwd()
+	backupFolder := filepath.Join(currentFolder, "backup", v.ProductVersion)
+	backupFolder64 := filepath.Join(backupFolder, "x64")
+	err := delFile(filepath.Join(backupFolder, v.VMwareBase), v.PathVMwareBase)
+	if err != nil {
+		panic(err)
+	}
+	err = delFile(filepath.Join(backupFolder64, v.VMXDefault), v.PathVMXDefault)
+	if err != nil {
+		panic(err)
+	}
+	err = delFile(filepath.Join(backupFolder64, v.VMXDebug), v.PathVMXDebug)
+	if err != nil {
+		panic(err)
+	}
+	err = delFile(filepath.Join(backupFolder64, v.VMXStats), v.PathVMXStats)
+	if err != nil {
+		panic(err)
+	}
+	err = delFile(filepath.Join(backupFolder64, v.EFI32ROM), v.PathEFI32ROM)
+	if err != nil {
+		panic(err)
+	}
+	err = delFile(filepath.Join(backupFolder64, v.EFI64ROM), v.PathEFI64ROM)
+	if err != nil {
+		panic(err)
+	}
+
+	err = os.RemoveAll(backupFolder)
 }
 
 func vmwInfo() *VMwareInfo {
@@ -333,12 +456,27 @@ func main() {
 	println("============================================")
 	println(fmt.Sprintf("%s \n", vmwpatch.COPYRIGHT))
 
-	//ex, err := os.Executable()
-	//if err != nil {
-	//	panic(err)
-	//}
-	//exPath := filepath.Dir(ex)
-	//fmt.Println(exPath)
+	// Simple arg parser
+	if len(os.Args) < 2 {
+		printHelp()
+		return
+	}
+	var install bool
+	switch os.Args[1] {
+	case "install":
+		install = true
+	case "uninstall":
+		install = false
+	default:
+		printHelp()
+		return
+	}
+
+	// Check admin rights
+	// https://gist.github.com/jerblack/d0eb182cc5a1c1d92d92a4c4fcc416c6
+	if !amAdmin() {
+		runElevated()
+	}
 
 	// Get VMware product details from registry and file system
 	v := vmwInfo()
@@ -358,17 +496,37 @@ func main() {
 	svcStop(v.USBD)
 	taskStop(v.Tray)
 
-	// Copy files
-	println("\nBacking up files...")
-	copyFiles(v)
+	if install {
+		// Backup files
+		println("\nBacking up files...")
+		vmwBackup(v)
 
-	// Patch files
-	println("\nPatching...")
+		// Patch files
+		println("\nPatching...")
+		vmwpatch.PatchSMC(v.PathVMXDefault)
+		println()
+		vmwpatch.PatchSMC(v.PathVMXDebug)
+		println()
+		vmwpatch.PatchSMC(v.PathVMXStats)
+		println()
+		vmwpatch.PatchGOS(v.PathVMwareBase)
 
-	// Copy tools ISOs
-	println("\nCopying VMware Tools...")
-	_, _ = copyFile("./tools/darwinPre15.iso", filepath.Join(v.InstallDir, "darwinPre15.iso"))
-	_, _ = copyFile("./tools/darwin.iso", filepath.Join(v.InstallDir, "darwin.iso"))
+		// Copy tools ISOs
+		println("\nCopying VMware Tools...")
+		_, _ = copyFile("./tools/darwinPre15.iso", filepath.Join(v.InstallDir, "darwinPre15.iso"))
+		_, _ = copyFile("./tools/darwin.iso", filepath.Join(v.InstallDir, "darwin.iso"))
+
+	} else {
+		// Restore files
+		println("\nRestoring files...")
+		vmwRestore(v)
+
+		// Removing tools ISOs
+		println("\nRemoving VMware Tools...")
+		_ = os.Remove(filepath.Join(v.InstallDir, "darwinPre15.iso"))
+		_ = os.Remove(filepath.Join(v.InstallDir, "darwin.iso"))
+
+	}
 
 	// Start all VMW services and tasks
 	println("\nStarting VMware services and tasks...")
