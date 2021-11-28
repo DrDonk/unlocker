@@ -108,7 +108,7 @@ func patchELF(contents mmap.MMap, AppleSMCHandleOSK uintptr, AppleSMCHandleDefau
 	// Process ELF RELA records
 	progType := hex.EncodeToString(contents[0:4])
 	if progType == elfMagic {
-		println(fmt.Sprintf("\nModifying ELF RELA records from 0x%08x -> 0x%08x", AppleSMCHandleOSK, AppleSMCHandleDefault))
+		fmt.Printf("\nModifying ELF RELA records from 0x%08x -> 0x%08x", AppleSMCHandleOSK, AppleSMCHandleDefault)
 		defPtr := ptrToBytes(AppleSMCHandleDefault)
 		oskPtr := ptrToBytes(AppleSMCHandleOSK)
 		var relaPtr int
@@ -116,7 +116,7 @@ func patchELF(contents mmap.MMap, AppleSMCHandleOSK uintptr, AppleSMCHandleDefau
 			relaPtr = bytes.Index(contents, oskPtr)
 			if relaPtr != -1 {
 				// Replace the function pointer
-				println(fmt.Sprintf("Relocation modified at: 0x%08x", relaPtr))
+				fmt.Printf("Relocation modified at: 0x%08x", relaPtr)
 				copy(contents[relaPtr:relaPtr+8], defPtr)
 
 				// Flush to disk
@@ -130,11 +130,11 @@ func patchELF(contents mmap.MMap, AppleSMCHandleOSK uintptr, AppleSMCHandleDefau
 }
 
 func printHdr(version string, offset int, vmxHdr smcHdr) {
-	println(fmt.Sprintf("appleSMCTableV%s (smc.version = '%s')", version, version))
-	println(fmt.Sprintf("File Offset  : 0x%08x", offset))
-	println(fmt.Sprintf("Keys Address : 0x%08x", vmxHdr.address))
-	println(fmt.Sprintf("Private Key #: 0x%04x/%04d", vmxHdr.cntPublic, vmxHdr.cntPublic))
-	println(fmt.Sprintf("Public Key  #: 0x%04x/%04d", vmxHdr.cntPrivate, vmxHdr.cntPrivate))
+	fmt.Printf("appleSMCTableV%s (smc.version = '%s')\n", version, version)
+	fmt.Printf("File Offset  : 0x%08x\n", offset)
+	fmt.Printf("Keys Address : 0x%08x\n", vmxHdr.address)
+	fmt.Printf("Private Key #: 0x%04x/%04d\n", vmxHdr.cntPublic, vmxHdr.cntPublic)
+	fmt.Printf("Public Key  #: 0x%04x/%04d\n", vmxHdr.cntPrivate, vmxHdr.cntPrivate)
 	println("")
 }
 
@@ -143,14 +143,14 @@ func printKey(offset int, vmxKey smcKey) {
 	data := hex.EncodeToString([]byte(vmxKey.data)[0:vmxKey.length])
 
 	// Print the key
-	println(fmt.Sprintf("0x%08x %04s %02d  %-04s 0x%02x 0x%08x %s",
+	fmt.Printf("0x%08x %04s %02d  %-04s 0x%02x 0x%08x %s\n",
 		offset,
 		vmxKey.key,
 		vmxKey.length,
 		vmxKey.dataType,
 		vmxKey.flag,
 		vmxKey.ptrFunc,
-		data))
+		data)
 	return
 }
 
@@ -218,7 +218,7 @@ func getKey(contents mmap.MMap, offset int) smcKey {
 }
 
 func dumpKeys(contents mmap.MMap, offset int, count int) {
-	println(fmt.Sprintf("Table Offset : 0x%08x", offset))
+	fmt.Printf("Table Offset : 0x%08x", offset)
 	println("Offset     Name Len Type Flag FuncPtr    Data")
 	println("-------    ---- --- ---- ---- -------    ----")
 
@@ -277,7 +277,7 @@ func patchKeys(contents mmap.MMap, offset int, count int) (uintptr, uintptr) {
 	var AppleSMCHandleDefault uintptr
 	var AppleSMCHandleOSK uintptr
 
-	println(fmt.Sprintf("Table Offset : 0x%08x", offset))
+	fmt.Printf("Table Offset : 0x%08x", offset)
 	for i := 0; i < count; i++ {
 		// Unpack binary key data
 		ptrCurrent := offset + (i * rowLength)

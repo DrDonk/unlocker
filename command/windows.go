@@ -64,7 +64,7 @@ func backupExists(v *VMwareInfo) bool {
 
 //goland:noinspection GoUnhandledErrorResult
 func copyFile(src, dst string) (int64, error) {
-	println(fmt.Sprintf("%s -> %s", src, dst))
+	fmt.Printf("%s -> %s\n", src, dst)
 	sourceFileStat, err := os.Stat(src)
 	if err != nil {
 		return 0, err
@@ -219,10 +219,10 @@ func svcStart(name string) {
 
 	s, err := m.OpenService(name)
 	if err != nil {
-		//println(fmt.Sprintf("Invalid service %s", name))
+		//fmt.Printf("Invalid service %s", name))
 		return
 	} else {
-		println(fmt.Sprintf("Starting service %s", name))
+		fmt.Printf("Starting service %s\n", name)
 	}
 
 	//goland:noinspection ALL
@@ -252,10 +252,10 @@ func svcStop(name string) {
 
 	s, err := m.OpenService(name)
 	if err != nil {
-		//println(fmt.Sprintf("Invalid service %s", name))
+		//fmt.Printf("Invalid service %s", name))
 		return
 	} else {
-		println(fmt.Sprintf("Stopping service %s", name))
+		fmt.Printf("Stopping service %s\n", name)
 	}
 
 	//goland:noinspection ALL
@@ -274,7 +274,7 @@ func svcStop(name string) {
 }
 
 func taskStart(filename string) {
-	println(fmt.Sprintf("Starting task %s", filename))
+	fmt.Printf("Starting task %s\n", filename)
 	c := exec.Command(filename)
 	_ = c.Start()
 	return
@@ -291,7 +291,7 @@ func taskRunning(name string) bool {
 
 func taskStop(name string) {
 	if taskRunning(name) {
-		println(fmt.Sprintf("Stopping task %s", name))
+		fmt.Printf("Stopping task %s\n", name)
 		c := exec.Command("taskkill.exe", "/F", "/IM", name)
 		_ = c.Run()
 	}
@@ -439,9 +439,9 @@ func vmwRunning(v *VMwareInfo) bool {
 
 func main() {
 	// Titles
-	println(fmt.Sprintf("Unlocker %s for VMware Workstation/Player", vmwpatch.VERSION))
+	fmt.Printf("Unlocker %s for VMware Workstation/Player\n", vmwpatch.VERSION)
 	println("============================================")
-	println(fmt.Sprintf("%s \n", vmwpatch.COPYRIGHT))
+	fmt.Printf("%s \n\n", vmwpatch.COPYRIGHT)
 
 	// Simple arg parser
 	if len(os.Args) < 2 {
@@ -467,8 +467,8 @@ func main() {
 
 	// Get VMware product details from registry and file system
 	v := vmwInfo()
-	println(fmt.Sprintf("VMware is installed at: %s", v.InstallDir))
-	println(fmt.Sprintf("VMware version %s", v.ProductVersion))
+	fmt.Printf("VMware is installed at: %s\n", v.InstallDir)
+	fmt.Printf("VMware version %s\n", v.ProductVersion)
 
 	// Check no VMs running
 	if vmwRunning(v) {

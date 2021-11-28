@@ -12,7 +12,7 @@ import (
 func mapFile(filename string) (file *os.File, contents mmap.MMap) {
 
 	// Print filename
-	println(fmt.Sprintf("File: %s", filename))
+	fmt.Printf("File: %s\n", filename)
 
 	// Open the file
 	f, err := os.OpenFile(filename, os.O_RDWR, 0644)

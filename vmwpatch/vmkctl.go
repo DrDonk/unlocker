@@ -24,7 +24,7 @@ func PatchVMKCTL(filename string) {
 	copy(contents[offset:offset+8], VMKERNEL)
 
 	after := string(contents[offset : offset+8])
-	println(fmt.Sprintf("Patching %s -> %s", before, after))
+	fmt.Printf("Patching %s -> %s\n", before, after)
 
 	// Flush to disk
 	flushFile(contents)

@@ -57,7 +57,7 @@ func PatchGOS(filename string) {
 		copy(contents[offset:offset+1], flagPacked)
 
 		// Print details
-		println(fmt.Sprintf("Flag patched @ offset: 0x%08x  Flag: 0x%01x -> 0x%01x", offset, oldFlag, newFlag))
+		fmt.Printf("Flag patched @ offset: 0x%08x  Flag: 0x%01x -> 0x%01x\n", offset, oldFlag, newFlag)
 
 	}
 
