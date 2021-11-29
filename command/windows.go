@@ -6,7 +6,7 @@ package main
 import (
 	"fmt"
 	"github.com/djherbis/times"
-	"golang.org/x/sys/windows"
+	"github.com/mitchellh/go-ps"
 	"golang.org/x/sys/windows/registry"
 	"golang.org/x/sys/windows/svc"
 	"golang.org/x/sys/windows/svc/mgr"
@@ -16,7 +16,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
-	"strings"
+	//"strings"
 	"syscall"
 	"time"
 )
@@ -128,43 +128,6 @@ func printHelp() {
 	println("usage: unlocker.exe <install | uninstall>")
 	println("\tinstall - install patches")
 	println("\tuninstall - uninstall patches")
-}
-
-func processID(name string) (uint32, error) {
-	const processEntrySize = 568
-	h, e := windows.CreateToolhelp32Snapshot(windows.TH32CS_SNAPPROCESS, 0)
-	if e != nil {
-		return 0, e
-	}
-	p := windows.ProcessEntry32{Size: processEntrySize}
-	for {
-		e := windows.Process32Next(h, &p)
-		if e != nil {
-			return 0, e
-		}
-		if windows.UTF16ToString(p.ExeFile[:]) == name {
-			return p.ProcessID, nil
-		}
-	}
-}
-
-func runElevated() {
-	verb := "runas"
-	exe, _ := os.Executable()
-	cwd, _ := os.Getwd()
-	args := strings.Join(os.Args[1:], " ")
-
-	verbPtr, _ := syscall.UTF16PtrFromString(verb)
-	exePtr, _ := syscall.UTF16PtrFromString(exe)
-	cwdPtr, _ := syscall.UTF16PtrFromString(cwd)
-	argPtr, _ := syscall.UTF16PtrFromString(args)
-
-	var showCmd int32 = 1 //SW_NORMAL
-
-	err := windows.ShellExecute(0, verbPtr, exePtr, argPtr, cwdPtr, showCmd)
-	if err != nil {
-		fmt.Println(err)
-	}
 }
 
 //goland:noinspection GrazieInspection,GoUnhandledErrorResult
@@ -280,17 +243,20 @@ func taskStart(filename string) {
 	return
 }
 
-func taskRunning(name string) bool {
-	pid, err := processID(name)
-	if (pid != 0) && (err == nil) {
-		return true
-	} else {
-		return false
+func taskRunning(name string) int {
+	pid := 0
+	tasks, _ := ps.Processes()
+
+	for i := range tasks {
+		if tasks[i].Executable() == name {
+			pid = tasks[i].Pid()
+		}
 	}
+	return pid
 }
 
 func taskStop(name string) {
-	if taskRunning(name) {
+	if taskRunning(name) != 0 {
 		fmt.Printf("Stopping task %s\n", name)
 		c := exec.Command("taskkill.exe", "/F", "/IM", name)
 		_ = c.Run()
@@ -406,31 +372,31 @@ func vmwInfo() *VMwareInfo {
 }
 
 func vmwRunning(v *VMwareInfo) bool {
-	if taskRunning(v.Workstation) {
+	if taskRunning(v.Workstation) != 0 {
 		println("VMware Workstation is running")
 		return true
 	}
-	if taskRunning(v.Player) {
+	if taskRunning(v.Player) != 0 {
 		println("VMware Player is running")
 		return true
 	}
-	if taskRunning(v.KVM) {
+	if taskRunning(v.KVM) != 0 {
 		println("VMware KVM is running")
 		return true
 	}
-	if taskRunning(v.REST) {
+	if taskRunning(v.REST) != 0 {
 		println("VMware REST API is running")
 		return true
 	}
-	if taskRunning(v.VMXDefault) {
+	if taskRunning(v.VMXDefault) != 0 {
 		println("VMware VM (vmware-vmx) is running")
 		return true
 	}
-	if taskRunning(v.VMXDebug) {
+	if taskRunning(v.VMXDebug) != 0 {
 		println("VMware VM (vmware-vmx-debug) is running")
 		return true
 	}
-	if taskRunning(v.VMXStats) {
+	if taskRunning(v.VMXStats) != 0 {
 		println("VMware VM (vmware-vmx-stats) is running")
 		return true
 	}
@@ -462,7 +428,9 @@ func main() {
 	// Check admin rights
 	// https://gist.github.com/jerblack/d0eb182cc5a1c1d92d92a4c4fcc416c6
 	if !amAdmin() {
-		runElevated()
+		//runElevated()
+		println("Run as Administrator ")
+		return
 	}
 
 	// Get VMware product details from registry and file system
