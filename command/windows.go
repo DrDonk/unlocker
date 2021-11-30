@@ -128,9 +128,9 @@ func delFile(src, dst string) error {
 }
 
 func printHelp() {
-	println("usage: unlocker.exe <install | uninstall>")
-	println("\tinstall - install patches")
-	println("\tuninstall - uninstall patches")
+	fmt.Printf("usage: unlocker.exe <install | uninstall>\n")
+	fmt.Printf("\tinstall - install patches\n")
+	fmt.Printf("\tuninstall - uninstall patches\n")
 }
 
 //goland:noinspection GrazieInspection,GoUnhandledErrorResult
@@ -376,31 +376,31 @@ func vmwInfo() *VMwareInfo {
 
 func vmwRunning(v *VMwareInfo) bool {
 	if taskRunning(v.Workstation) != 0 {
-		println("VMware Workstation is running")
+		fmt.Printf("VMware Workstation is running\n")
 		return true
 	}
 	if taskRunning(v.Player) != 0 {
-		println("VMware Player is running")
+		fmt.Printf("VMware Player is running\n")
 		return true
 	}
 	if taskRunning(v.KVM) != 0 {
-		println("VMware KVM is running")
+		fmt.Printf("VMware KVM is running\n")
 		return true
 	}
 	if taskRunning(v.REST) != 0 {
-		println("VMware REST API is running")
+		fmt.Printf("VMware REST API is running\n")
 		return true
 	}
 	if taskRunning(v.VMXDefault) != 0 {
-		println("VMware VM (vmware-vmx) is running")
+		fmt.Printf("VMware VM (vmware-vmx) is running\n")
 		return true
 	}
 	if taskRunning(v.VMXDebug) != 0 {
-		println("VMware VM (vmware-vmx-debug) is running")
+		fmt.Printf("VMware VM (vmware-vmx-debug) is running\n")
 		return true
 	}
 	if taskRunning(v.VMXStats) != 0 {
-		println("VMware VM (vmware-vmx-stats) is running")
+		fmt.Printf("VMware VM (vmware-vmx-stats) is running\n")
 		return true
 	}
 	return false
@@ -409,7 +409,7 @@ func vmwRunning(v *VMwareInfo) bool {
 func main() {
 	// Titles
 	fmt.Printf("Unlocker %s for VMware Workstation/Player\n", vmwpatch.VERSION)
-	println("============================================")
+	fmt.Printf("============================================\n")
 	fmt.Printf("%s \n\n", vmwpatch.COPYRIGHT)
 
 	// Simple arg parser
@@ -432,39 +432,39 @@ func main() {
 	// https://gist.github.com/jerblack/d0eb182cc5a1c1d92d92a4c4fcc416c6
 	if !amAdmin() {
 		//runElevated()
-		println("Run as Administrator ")
+		fmt.Printf("Run as Administrator/root\n")
 		return
 	}
 
 	// Get VMware product details from registry and file system
 	v := vmwInfo()
 	fmt.Printf("VMware is installed at: %s\n", v.InstallDir)
-	fmt.Printf("VMware version %s\n", v.ProductVersion)
+	fmt.Printf("VMware version %s\n\n", v.ProductVersion)
 
 	// Check no VMs running
 	if vmwRunning(v) {
-		println("Aborting patching!")
+		fmt.Printf("Aborting patching!\n")
 		return
 	}
 
 	// Abort if installing and backup is present
 	if install {
-		println("Installing unlocker")
+		fmt.Printf("Installing unlocker\n")
 		if backupExists(v) {
-			println("Aborting install as backup folder already exists!")
+			fmt.Printf("Aborting install as backup folder already exists!\n")
 		}
 	}
 
 	// Abort if uninstalling and backup is missing
 	if !install {
-		println("Uninstalling unlocker")
+		fmt.Printf("Uninstalling unlocker\n")
 		if !backupExists(v) {
-			println("Aborting uninstall as backup folder does not exist!")
+			fmt.Printf("Aborting uninstall as backup folder does not exist!\n")
 		}
 	}
 
 	// Stop all VMW services and tasks
-	println("\nStopping VMware services and tasks...")
+	fmt.Printf("\nStopping VMware services and tasks...\n")
 	svcStop(v.AuthD)
 	svcStop(v.HostD)
 	svcStop(v.USBD)
@@ -472,46 +472,48 @@ func main() {
 
 	if install {
 		// Backup files
-		println("\nBacking up files...")
+		fmt.Printf("\nBacking up files...\n")
 		vmwBackup(v)
 
 		// Patch files
-		println("\nPatching...")
+		fmt.Printf("\nPatching...\n")
 		vmwpatch.PatchSMC(v.PathVMXDefault)
-		println()
+		fmt.Printf("\n")
 		vmwpatch.PatchSMC(v.PathVMXDebug)
-		println()
+		fmt.Printf("\n")
 		vmwpatch.PatchSMC(v.PathVMXStats)
-		println()
+		fmt.Printf("\n")
 		vmwpatch.PatchGOS(v.PathVMwareBase)
-		println()
+		fmt.Printf("\n")
 
 		// Copy tools ISOs
-		println("\nCopying VMware Tools...")
+		fmt.Printf("\nCopying VMware Tools...\n")
 		_, _ = copyFile("./tools/darwinPre15.iso", filepath.Join(v.InstallDir, "darwinPre15.iso"))
 		_, _ = copyFile("./tools/darwin.iso", filepath.Join(v.InstallDir, "darwin.iso"))
 	} else {
 		// Restore files
-		println("\nRestoring files...")
+		fmt.Printf("\nRestoring files...\n")
 		vmwRestore(v)
 
 		// Removing tools ISOs
-		println("\nRemoving VMware Tools...")
+		fmt.Printf("\nRemoving VMware Tools...\n")
 		isoPath := filepath.Join(v.InstallDir, "darwinPre15.iso")
-		println(isoPath)
+		fmt.Printf("%s\n", isoPath)
 		_ = os.Remove(isoPath)
 		isoPath = filepath.Join(v.InstallDir, "darwin.iso")
-		println(isoPath)
+		fmt.Printf("%s\n", isoPath)
 		_ = os.Remove(isoPath)
 	}
 
 	// Start all VMW services and tasks
-	println("\nStarting VMware services and tasks...")
+	fmt.Printf("\nStarting VMware services and tasks...\n")
 	svcStart(v.AuthD)
 	svcStart(v.HostD)
 	svcStart(v.USBD)
 	taskStart(filepath.Join(v.InstallDir, v.Tray))
 
-	println("\nFinished!")
+	fmt.Printf("\nPress any key to finish...")
+	//goland:noinspection GoUnhandledErrorResult
+	fmt.Scanln()
 	return
 }
