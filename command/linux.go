@@ -376,6 +376,8 @@ func main() {
 		_ = os.Remove(isoPath)
 	}
 
-	fmt.Printf("\nFinished!\n")
+	fmt.Printf("\nPress any key to finish...")
+	//goland:noinspection GoUnhandledErrorResult
+	fmt.Scanln()
 	return
 }
