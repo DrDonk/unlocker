@@ -1,6 +1,9 @@
 // SPDX-FileCopyrightText: © 2014-2021 David Parsons
 // SPDX-License-Identifier: MIT
 
+//go:build windows
+// +build windows
+
 package main
 
 import (

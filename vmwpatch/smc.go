@@ -108,22 +108,19 @@ func patchELF(contents mmap.MMap, AppleSMCHandleOSK uintptr, AppleSMCHandleDefau
 	// Process ELF RELA records
 	progType := hex.EncodeToString(contents[0:4])
 	if progType == elfMagic {
-		fmt.Printf("\nModifying ELF RELA records from 0x%08x -> 0x%08x", AppleSMCHandleOSK, AppleSMCHandleDefault)
+		fmt.Printf("\nModifying ELF RELA records from 0x%08x -> 0x%08x\n", AppleSMCHandleOSK, AppleSMCHandleDefault)
 		defPtr := ptrToBytes(AppleSMCHandleDefault)
 		oskPtr := ptrToBytes(AppleSMCHandleOSK)
 		var relaPtr int
-		for {
+		for i := 0; i < 4; i++ {
 			relaPtr = bytes.Index(contents, oskPtr)
 			if relaPtr != -1 {
 				// Replace the function pointer
-				fmt.Printf("Relocation modified at: 0x%08x", relaPtr)
+				fmt.Printf("Relocation modified at: 0x%08x\n", relaPtr)
 				copy(contents[relaPtr:relaPtr+8], defPtr)
 
 				// Flush to disk
 				flushFile(contents)
-
-			} else {
-				break
 			}
 		}
 	}
@@ -135,7 +132,7 @@ func printHdr(version string, offset int, vmxHdr smcHdr) {
 	fmt.Printf("Keys Address : 0x%08x\n", vmxHdr.address)
 	fmt.Printf("Private Key #: 0x%04x/%04d\n", vmxHdr.cntPublic, vmxHdr.cntPublic)
 	fmt.Printf("Public Key  #: 0x%04x/%04d\n", vmxHdr.cntPrivate, vmxHdr.cntPrivate)
-	println("")
+	fmt.Printf("\n")
 }
 
 func printKey(offset int, vmxKey smcKey) {
@@ -182,7 +179,7 @@ func getHdr(contents mmap.MMap, offset int) smcHdr {
 	// Unpack binary key data
 	hdr, err := bp.UnPack(hdrPack, contents[offset:offset+hdrLength])
 	if err != nil {
-		println(err)
+		panic(err)
 	}
 
 	// Return the smcHdr as a struct
@@ -203,7 +200,7 @@ func getKey(contents mmap.MMap, offset int) smcKey {
 	// Unpack binary key data
 	keyRow, err := bp.UnPack(keyPack, contents[offset:offset+rowLength])
 	if err != nil {
-		println(err)
+		panic(err)
 	}
 
 	// Return the smcKey as a struct
@@ -218,9 +215,9 @@ func getKey(contents mmap.MMap, offset int) smcKey {
 }
 
 func dumpKeys(contents mmap.MMap, offset int, count int) {
-	fmt.Printf("Table Offset : 0x%08x", offset)
-	println("Offset     Name Len Type Flag FuncPtr    Data")
-	println("-------    ---- --- ---- ---- -------    ----")
+	fmt.Printf("Table Offset : 0x%08x\n", offset)
+	fmt.Printf("Offset     Name Len Type Flag FuncPtr    Data\n")
+	fmt.Printf("-------    ---- --- ---- ---- -------    ----\n")
 
 	// Loop for each count and print key
 	// Last key should be OSK1
@@ -277,32 +274,32 @@ func patchKeys(contents mmap.MMap, offset int, count int) (uintptr, uintptr) {
 	var AppleSMCHandleDefault uintptr
 	var AppleSMCHandleOSK uintptr
 
-	fmt.Printf("Table Offset : 0x%08x", offset)
+	fmt.Printf("Table Offset : 0x%08x\n", offset)
 	for i := 0; i < count; i++ {
 		// Unpack binary key data
 		ptrCurrent := offset + (i * rowLength)
 		vmxKey = getKey(contents, ptrCurrent)
 		switch vmxKey.key {
 		case "+LKS":
-			println("Getting +LKS:")
+			fmt.Printf("Getting +LKS:\n")
 			printKey(ptrCurrent, vmxKey)
 			AppleSMCHandleDefault = vmxKey.ptrFunc
 		case "KPPW":
-			println("Patching KPPW:")
+			fmt.Printf("Patching KPPW:\n")
 			printKey(ptrCurrent, vmxKey)
 			vmxKey.data = kppwData
 			putKey(contents, ptrCurrent, vmxKey)
 			vmxKey = getKey(contents, ptrCurrent)
 			printKey(ptrCurrent, vmxKey)
 		case "KPST":
-			println("Patching KPST:")
+			fmt.Printf("Patching KPST:\n")
 			printKey(ptrCurrent, vmxKey)
 			vmxKey.data = kpstData
 			putKey(contents, ptrCurrent, vmxKey)
 			vmxKey = getKey(contents, ptrCurrent)
 			printKey(ptrCurrent, vmxKey)
 		case "OSK0":
-			println("Patching OSK0:")
+			fmt.Printf("Patching OSK0:\n")
 			printKey(ptrCurrent, vmxKey)
 			AppleSMCHandleOSK = vmxKey.ptrFunc
 			vmxKey.ptrFunc = AppleSMCHandleDefault
@@ -311,7 +308,7 @@ func patchKeys(contents mmap.MMap, offset int, count int) (uintptr, uintptr) {
 			vmxKey = getKey(contents, ptrCurrent)
 			printKey(ptrCurrent, vmxKey)
 		case "OSK1":
-			println("Patching OSK1:")
+			fmt.Printf("Patching OSK1:\n")
 			printKey(ptrCurrent, vmxKey)
 			vmxKey.ptrFunc = AppleSMCHandleDefault
 			vmxKey.data = osk1Data
@@ -339,7 +336,7 @@ func DumpSMC(filename string) {
 	printHdr("0", smcHeaderV0Offset, vmxhdr0)
 	dumpKeys(contents, smcKey0, int(vmxhdr0.cntPrivate))
 
-	println("")
+	fmt.Printf("\n")
 
 	// Print vSMC1 tables and keys
 	vmxhdr1 := getHdr(contents, smcHeaderV1Offset)
@@ -356,6 +353,14 @@ func PatchSMC(filename string) {
 	// MMap the file
 	f, contents := mapFile(filename)
 
+	// Check if the file is already patched
+	patched := bytes.Index(contents, []byte(osk0Data))
+	if patched != -1 {
+		fmt.Printf("Aborting as file %s already patched\n", filename)
+		unmapFile(f, contents)
+		return
+	}
+
 	// Find the vSMC headers
 	smcHeaderV0Offset, smcHeaderV1Offset := findHdrs(contents)
 
@@ -367,7 +372,7 @@ func PatchSMC(filename string) {
 	printHdr("0", smcHeaderV0Offset, vmxhdr0)
 	patchKeys(contents, smcKey0, int(vmxhdr0.cntPrivate))
 
-	println("")
+	fmt.Printf("\n")
 
 	// Patch vSMC1 tables and keys
 	vmxhdr1 := getHdr(contents, smcHeaderV1Offset)
