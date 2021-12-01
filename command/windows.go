@@ -486,16 +486,16 @@ func main() {
 		vmwpatch.PatchGOS(v.PathVMwareBase)
 		fmt.Printf("\n")
 
-		// Copy tools ISOs
+		// Copy iso ISOs
 		fmt.Printf("\nCopying VMware Tools...\n")
-		_, _ = copyFile("./tools/darwinPre15.iso", filepath.Join(v.InstallDir, "darwinPre15.iso"))
-		_, _ = copyFile("./tools/darwin.iso", filepath.Join(v.InstallDir, "darwin.iso"))
+		_, _ = copyFile("./iso/darwinPre15.iso", filepath.Join(v.InstallDir, "darwinPre15.iso"))
+		_, _ = copyFile("./iso/darwin.iso", filepath.Join(v.InstallDir, "darwin.iso"))
 	} else {
 		// Restore files
 		fmt.Printf("\nRestoring files...\n")
 		vmwRestore(v)
 
-		// Removing tools ISOs
+		// Removing iso ISOs
 		fmt.Printf("\nRemoving VMware Tools...\n")
 		isoPath := filepath.Join(v.InstallDir, "darwinPre15.iso")
 		fmt.Printf("%s\n", isoPath)

@@ -11,9 +11,9 @@ import (
 
 func main() {
 	// Print titles
-	fmt.Printf("PatchVMKCTL\n")
-	fmt.Printf("-----------\n")
-	fmt.Printf("© 2014-2021 David Parsons\n\n")
+	fmt.Printf("PatchSMC\n")
+	fmt.Printf("--------\n")
+	fmt.Printf("%s \n\n", vmwpatch.COPYRIGHT)
 
 	// Get and check file passed as parameter
 	var filename string
@@ -24,5 +24,6 @@ func main() {
 		filename = os.Args[1]
 	}
 
-	vmwpatch.PatchVMKCTL(filename)
+	vmwpatch.PatchSMC(filename)
+	fmt.Printf("%s \n\n", vmwpatch.COPYRIGHT)
 }
