@@ -37,9 +37,8 @@ type VMwareInfo struct {
 
 func Backup(v *VMwareInfo) {
 	currentFolder, _ := os.Getwd()
-	backupFolder := filepath.Join(currentFolder, "backup", v.ProductVersion)
-	backupFolder64 := filepath.Join(backupFolder, "x64")
-	err := os.MkdirAll(backupFolder64, os.ModePerm)
+	backupFolder := filepath.Join(currentFolder, "backup", v.BuildNumber)
+	err := os.MkdirAll(backupFolder, os.ModePerm)
 	if err != nil {
 		panic(err)
 	}
@@ -47,15 +46,15 @@ func Backup(v *VMwareInfo) {
 	if err != nil {
 		panic(err)
 	}
-	_, err = CopyFile(v.PathVMXDefault, filepath.Join(backupFolder64, v.VMXDefault))
+	_, err = CopyFile(v.PathVMXDefault, filepath.Join(backupFolder, v.VMXDefault))
 	if err != nil {
 		panic(err)
 	}
-	_, err = CopyFile(v.PathVMXDebug, filepath.Join(backupFolder64, v.VMXDebug))
+	_, err = CopyFile(v.PathVMXDebug, filepath.Join(backupFolder, v.VMXDebug))
 	if err != nil {
 		panic(err)
 	}
-	_, err = CopyFile(v.PathVMXStats, filepath.Join(backupFolder64, v.VMXStats))
+	_, err = CopyFile(v.PathVMXStats, filepath.Join(backupFolder, v.VMXStats))
 	if err != nil {
 		panic(err)
 	}
@@ -64,21 +63,20 @@ func Backup(v *VMwareInfo) {
 
 func Restore(v *VMwareInfo) {
 	currentFolder, _ := os.Getwd()
-	backupFolder := filepath.Join(currentFolder, "backup", v.ProductVersion)
-	backupFolder64 := filepath.Join(backupFolder, "x64")
+	backupFolder := filepath.Join(currentFolder, "backup", v.BuildNumber)
 	err := DelFile(filepath.Join(backupFolder, v.VMwareBase), v.PathVMwareBase)
 	if err != nil {
 		panic(err)
 	}
-	err = DelFile(filepath.Join(backupFolder64, v.VMXDefault), v.PathVMXDefault)
+	err = DelFile(filepath.Join(backupFolder, v.VMXDefault), v.PathVMXDefault)
 	if err != nil {
 		panic(err)
 	}
-	err = DelFile(filepath.Join(backupFolder64, v.VMXDebug), v.PathVMXDebug)
+	err = DelFile(filepath.Join(backupFolder, v.VMXDebug), v.PathVMXDebug)
 	if err != nil {
 		panic(err)
 	}
-	err = DelFile(filepath.Join(backupFolder64, v.VMXStats), v.PathVMXStats)
+	err = DelFile(filepath.Join(backupFolder, v.VMXStats), v.PathVMXStats)
 	if err != nil {
 		panic(err)
 	}
@@ -125,7 +123,9 @@ func CopyFile(src, dst string) (int64, error) {
 	// Ensure timestamps are correct
 	srcTimes, _ := times.Stat(src)
 	_ = os.Chtimes(dst, srcTimes.AccessTime(), srcTimes.ModTime())
-	_ = setCTime(dst, srcTimes.BirthTime())
+	if srcTimes.HasBirthTime() {
+		_ = setCTime(dst, srcTimes.BirthTime())
+	}
 
 	return nBytes, err
 }

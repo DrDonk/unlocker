@@ -47,7 +47,7 @@ func main() {
 	// Get VMware product details from registry and file system
 	v := vmwpatch.VMWInfo()
 	fmt.Printf("VMware is installed at: %s\n", v.InstallDir)
-	fmt.Printf("VMware version %s\n\n", v.ProductVersion)
+	fmt.Printf("VMware version: %s\n\n", v.BuildNumber)
 
 	// Check no VMs running
 	if vmwpatch.IsRunning(v) {

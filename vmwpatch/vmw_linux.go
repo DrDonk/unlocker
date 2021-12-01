@@ -9,13 +9,10 @@ package vmwpatch
 import (
 	"bufio"
 	"fmt"
-	"github.com/djherbis/times"
-	"github.com/mitchellh/go-ps"
-	"golocker/vmwpatch"
-	"io"
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 )
 
 func IsAdmin() bool {
@@ -25,11 +22,13 @@ func IsAdmin() bool {
 	return false
 }
 
+//goland:noinspection GoUnusedParameter
 func VMWStart(v *VMwareInfo) {
 	// Dummy function on Linux
 	return
 }
 
+//goland:noinspection GoUnusedParameter
 func VMWStop(v *VMwareInfo) {
 	// Dummy function on Linux
 	return
@@ -49,6 +48,7 @@ func VMWInfo() *VMwareInfo {
 	if err != nil {
 		panic(err)
 	}
+	//goland:noinspection GoUnhandledErrorResult
 	defer file.Close()
 	config := map[string]string{}
 	scanner := bufio.NewScanner(file)
@@ -68,7 +68,7 @@ func VMWInfo() *VMwareInfo {
 
 	// Basic product settings
 	v.ProductVersion = config["product.version"]
-	v.BuildNumber = config["product.buildNumber"]
+	v.BuildNumber = fmt.Sprintf("%s.%s", v.ProductVersion, config["product.buildNumber"])
 	v.InstallDir = config["libdir"]
 
 	// Construct needed filenames from reg settings
@@ -89,6 +89,7 @@ func VMWInfo() *VMwareInfo {
 	return v
 }
 
+//goland:noinspection GoUnusedParameter
 func setCTime(path string, ctime time.Time) error {
 	// Dummy function on Linux
 	return nil
