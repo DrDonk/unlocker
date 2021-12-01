@@ -8,7 +8,6 @@ package vmwpatch
 
 import (
 	"os"
-	"path/filepath"
 	"time"
 )
 
@@ -32,14 +31,6 @@ func VMWStop(v *VMwareInfo) {
 }
 
 func VMWInfo() *VMwareInfo {
-	v := &VMwareInfo{}
-
-	// Store known service names
-	// Not used on macOS
-	v.AuthD = ""
-	v.HostD = ""
-	v.USBD = ""
-
 	// TODO: Parse macOS Fusion specific files
 	// /Library/Preferences/VMware Fusion/lastLocationUsed --> App Bundle
 	// /Applications/VMware Fusion.app/Contents/Info.plist
@@ -48,34 +39,7 @@ func VMWInfo() *VMwareInfo {
 	//	<key>CFBundleVersion</key>
 	//	<string>18811640</string>
 
-	// Access /etc/vmware/config for version, build and installation path
-	file, err := os.Open("/Library/Preferences/VMware Fusion/lastLocationUsed")
-	if err != nil {
-		panic(err)
-	}
-	//goland:noinspection GoUnhandledErrorResult
-	defer file.Close()
-
-	// Basic product settings
-	v.ProductVersion = ""
-	v.BuildNumber = ""
-	v.InstallDir = ""
-
-	// Construct needed filenames from reg settings
-	v.InstallDir64 = ""
-	v.Player = ""
-	v.Workstation = "/Applications/VMware Fusion.app/Contents/MacOS/VMware Fusion"
-	v.KVM = ""
-	v.REST = "vmrest"
-	v.Tray = ""
-	v.VMXDefault = "vmware-vmx"
-	v.VMXDebug = "vmware-vmx-debug"
-	v.VMXStats = "vmware-vmx-stats"
-	v.VMwareBase = "libvmwarebase.dylib"
-	v.PathVMXDefault = filepath.Join(v.InstallDir, "Contents", "Library", "vmware-vmx")
-	v.PathVMXDebug = filepath.Join(v.InstallDir, "Contents", "Library", "vmware-vmx-debug")
-	v.PathVMXStats = filepath.Join(v.InstallDir, "Contents", "Library", "vmware-vmx-stats")
-	v.PathVMwareBase = filepath.Join(v.InstallDir, "Contents", "Frameworks", "libvmwarebase.dylib")
+	v := &VMwareInfo{}
 	return v
 }
 
