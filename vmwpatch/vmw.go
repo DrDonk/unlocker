@@ -98,12 +98,12 @@ func BackupExists(v *VMwareInfo) bool {
 //goland:noinspection GoUnhandledErrorResult
 func CopyFile(src, dst string) (int64, error) {
 	fmt.Printf("%s -> %s\n", src, dst)
-	sourceFileStat, err := os.Stat(src)
+	srcFileStat, err := os.Stat(src)
 	if err != nil {
 		return 0, err
 	}
 
-	if !sourceFileStat.Mode().IsRegular() {
+	if !srcFileStat.Mode().IsRegular() {
 		return 0, fmt.Errorf("%s is not a regular file", src)
 	}
 
@@ -119,6 +119,9 @@ func CopyFile(src, dst string) (int64, error) {
 	}
 	defer destination.Close()
 	nBytes, err := io.Copy(destination, source)
+
+	// Ensure file mode and ownership is correct
+	_ = os.Chmod(dst, srcFileStat.Mode())
 
 	// Ensure timestamps are correct
 	srcTimes, _ := times.Stat(src)
