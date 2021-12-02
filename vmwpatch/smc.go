@@ -32,6 +32,7 @@ package vmwpatch
 
 import (
 	"bytes"
+	"crypto/sha256"
 	"encoding/binary"
 	"encoding/hex"
 	"fmt"
@@ -45,8 +46,9 @@ const keyLength = 24
 const dataLength = 48
 const rowLength = keyLength + dataLength
 
-const kpstData = "\x01"
+//goland:noinspection GoUnusedConst
 const kppwData = "\x53\x70\x65\x63\x69\x61\x6c\x69\x73\x52\x65\x76\x65\x6c\x69\x6f\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
+const kpstData = "\x01"
 const osk0Data = "\x6f\x75\x72\x68\x61\x72\x64\x77\x6f\x72\x6b\x62\x79\x74\x68\x65\x73\x65\x77\x6f\x72\x64\x73\x67\x75\x61\x72\x64\x65\x64\x70\x6c"
 const osk1Data = "\x65\x61\x73\x65\x64\x6f\x6e\x74\x73\x74\x65\x61\x6c\x28\x63\x29\x41\x70\x70\x6c\x65\x43\x6f\x6d\x70\x75\x74\x65\x72\x49\x6e\x63"
 
@@ -287,7 +289,10 @@ func patchKeys(contents mmap.MMap, offset int, count int) (uintptr, uintptr) {
 		case "KPPW":
 			fmt.Printf("Patching KPPW:\n")
 			printKey(ptrCurrent, vmxKey)
-			vmxKey.data = kppwData
+			//vmxKey.data = kppwData
+			hash := sha256.Sum256(contents)
+			vmxKey.length = 32
+			vmxKey.data = string(hash[:])
 			putKey(contents, ptrCurrent, vmxKey)
 			vmxKey = getKey(contents, ptrCurrent)
 			printKey(ptrCurrent, vmxKey)
