@@ -11,8 +11,8 @@ import (
 
 func main() {
 	// Print titles
-	fmt.Printf("PatchGOS\n")
-	fmt.Printf("-----------\n")
+	fmt.Printf("PatchGOS %s\n", vmwpatch.VERSION)
+	fmt.Printf("===============\n")
 	fmt.Printf("%s \n\n", vmwpatch.COPYRIGHT)
 
 	// Get and check file passed as parameter

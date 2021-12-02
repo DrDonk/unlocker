@@ -11,8 +11,8 @@ import (
 
 func main() {
 	// Print titles
-	fmt.Printf("PatchSMC\n")
-	fmt.Printf("--------\n")
+	fmt.Printf("PatchSMC %s\n", vmwpatch.VERSION)
+	fmt.Printf("===============\n")
 	fmt.Printf("%s \n\n", vmwpatch.COPYRIGHT)
 
 	// Get and check file passed as parameter
@@ -25,5 +25,4 @@ func main() {
 	}
 
 	vmwpatch.PatchSMC(filename)
-	fmt.Printf("%s \n\n", vmwpatch.COPYRIGHT)
 }
