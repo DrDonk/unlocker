@@ -32,7 +32,6 @@ package vmwpatch
 
 import (
 	"bytes"
-	"crypto/sha256"
 	"encoding/binary"
 	"encoding/hex"
 	"fmt"
@@ -163,7 +162,7 @@ func findHdrs(contents mmap.MMap) (int, int) {
 	return smcHeaderV0Offset, smcHeaderV1Offset
 }
 
-func findKEY(contents mmap.MMap) (int, int) {
+func findKey(contents mmap.MMap) (int, int) {
 	// Find '#KEY' keys
 	var keyKey = []byte{0x59, 0x45, 0x4B, 0x23, 0x04, 0x32, 0x33, 0x69, 0x75}
 	smcKey0 := bytes.Index(contents, keyKey)
@@ -289,10 +288,7 @@ func patchKeys(contents mmap.MMap, offset int, count int) (uintptr, uintptr) {
 		case "KPPW":
 			fmt.Printf("Patching KPPW:\n")
 			printKey(ptrCurrent, vmxKey)
-			//vmxKey.data = kppwData
-			hash := sha256.Sum256(contents)
-			vmxKey.length = 32
-			vmxKey.data = string(hash[:])
+			vmxKey.data = kppwData
 			putKey(contents, ptrCurrent, vmxKey)
 			vmxKey = getKey(contents, ptrCurrent)
 			printKey(ptrCurrent, vmxKey)
@@ -334,7 +330,7 @@ func DumpSMC(filename string) {
 	smcHeaderV0Offset, smcHeaderV1Offset := findHdrs(contents)
 
 	// Find '#KEY' keys
-	smcKey0, smcKey1 := findKEY(contents)
+	smcKey0, smcKey1 := findKey(contents)
 
 	// Print vSMC0 tables and keys
 	vmxhdr0 := getHdr(contents, smcHeaderV0Offset)
@@ -353,24 +349,17 @@ func DumpSMC(filename string) {
 
 }
 
-func PatchSMC(filename string) {
+func PatchSMC(filename string) (string, string) {
 
 	// MMap the file
 	f, contents := mapFile(filename)
-
-	// Check if the file is already patched
-	patched := bytes.Index(contents, []byte(osk0Data))
-	if patched != -1 {
-		fmt.Printf("Aborting as file %s already patched\n", filename)
-		unmapFile(f, contents)
-		return
-	}
+	unpatched256 := sha256File(contents)
 
 	// Find the vSMC headers
 	smcHeaderV0Offset, smcHeaderV1Offset := findHdrs(contents)
 
 	// Find '#KEY' keys
-	smcKey0, smcKey1 := findKEY(contents)
+	smcKey0, smcKey1 := findKey(contents)
 
 	// Patch vSMC0 tables and keys
 	vmxhdr0 := getHdr(contents, smcHeaderV0Offset)
@@ -387,5 +376,31 @@ func PatchSMC(filename string) {
 
 	// Flush to disk
 	flushFile(contents)
+	patched256 := sha256File(contents)
 	unmapFile(f, contents)
+
+	return unpatched256, patched256
+}
+
+func IsPatched(filename string) (int, string) {
+
+	// MMap the file
+	f, contents := mapFile(filename)
+
+	// Check if the file is already patched
+	osk0 := bytes.Index(contents, []byte(osk0Data))
+	osk1 := bytes.Index(contents, []byte(osk1Data))
+	kppw := bytes.Index(contents, []byte(kppwData))
+
+	patched := 0
+	if osk0 == -1 && osk1 == -1 && kppw == -1 {
+		patched = 0
+	} else if osk0 != -1 && osk1 != -1 && kppw != -1 {
+		patched = 1
+	} else {
+		patched = 2
+	}
+	hash256 := sha256File(contents)
+	unmapFile(f, contents)
+	return patched, hash256
 }

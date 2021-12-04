@@ -4,6 +4,7 @@
 package vmwpatch
 
 import (
+	"crypto/sha256"
 	"fmt"
 	"github.com/edsrzf/mmap-go"
 	"os"
@@ -47,4 +48,8 @@ func unmapFile(file *os.File, contents mmap.MMap) {
 		panic("Error closing file")
 	}
 	return
+}
+
+func sha256File(contents mmap.MMap) string {
+	return fmt.Sprintf("%x", sha256.Sum256(contents))
 }

@@ -24,5 +24,6 @@ func main() {
 		filename = os.Args[1]
 	}
 
-	vmwpatch.PatchSMC(filename)
+	unpatched, patched := vmwpatch.PatchSMC(filename)
+	fmt.Printf("\nSHA256\nunpatched: %s\npatched:   %s", unpatched, patched)
 }
