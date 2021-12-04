@@ -24,7 +24,7 @@ func main() {
 		filename = os.Args[1]
 	}
 
-	//vmwpatch.DumpSMC(filename)
+	vmwpatch.DumpSMC(filename)
 	state, hash256 := vmwpatch.IsPatched(filename)
 	fmt.Printf("Patch Status: %d\nSHA256: %s\n", state, hash256)
 
