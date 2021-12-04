@@ -10,10 +10,20 @@ import (
 	"path/filepath"
 )
 
+func waitExit() {
+	quiet := os.Getenv("UNLOCK_QUIET")
+	if quiet != "1" {
+		fmt.Printf("\nPress any key to continue...")
+		//goland:noinspection GoUnhandledErrorResult
+		fmt.Scanln()
+	}
+}
+
 func printHelp() {
 	fmt.Printf("usage: unlocker.exe <install | uninstall>\n")
 	fmt.Printf("\tinstall - install patches\n")
 	fmt.Printf("\tuninstall - uninstall patches\n")
+	waitExit()
 }
 
 func main() {
@@ -41,6 +51,7 @@ func main() {
 	// Check admin rights
 	if !vmwpatch.IsAdmin() {
 		fmt.Printf("Re-run with admin/root privileges\n")
+		waitExit()
 		return
 	}
 
@@ -52,14 +63,22 @@ func main() {
 	// Check no VMs running
 	if vmwpatch.IsRunning(v) {
 		fmt.Printf("Aborting patching!\n")
+		waitExit()
 		return
 	}
 
 	// Abort if installing and backup is present
 	if install {
 		fmt.Printf("Installing unlocker\n")
+		fmt.Printf("Checking patch status of files...\n")
+		if vmwpatch.CheckStatus(v) != 0 {
+			fmt.Printf("Aborting install as files already patched!\n")
+			waitExit()
+			return
+		}
 		if vmwpatch.BackupExists(v) {
 			fmt.Printf("Aborting install as backup folder already exists!\n")
+			waitExit()
 			return
 		}
 	}
@@ -67,8 +86,15 @@ func main() {
 	// Abort if uninstalling and backup is missing
 	if !install {
 		fmt.Printf("Uninstalling unlocker\n")
+		fmt.Printf("Checking patch status of files...\n")
+		if vmwpatch.CheckStatus(v) != 1 {
+			fmt.Printf("Aborting install as files already unpatched!\n")
+			waitExit()
+			return
+		}
 		if !vmwpatch.BackupExists(v) {
 			fmt.Printf("Aborting uninstall as backup folder does not exist!\n")
+			waitExit()
 			return
 		}
 	}
@@ -84,14 +110,17 @@ func main() {
 
 		// Patch files
 		fmt.Printf("\nPatching...\n")
-		vmwpatch.PatchSMC(v.PathVMXDefault)
+		unpatched, patched := vmwpatch.PatchSMC(v.PathVMXDefault)
+		vmwpatch.WriteHashes(v.BackVMXDefault, unpatched, patched)
 		fmt.Printf("\n")
-		vmwpatch.PatchSMC(v.PathVMXDebug)
+		unpatched, patched = vmwpatch.PatchSMC(v.PathVMXDebug)
+		vmwpatch.WriteHashes(v.BackVMXDebug, unpatched, patched)
 		fmt.Printf("\n")
-		vmwpatch.PatchSMC(v.PathVMXStats)
+		unpatched, patched = vmwpatch.PatchSMC(v.PathVMXStats)
+		vmwpatch.WriteHashes(v.BackVMXStats, unpatched, patched)
 		fmt.Printf("\n")
-		vmwpatch.PatchGOS(v.PathVMwareBase)
-		fmt.Printf("\n")
+		unpatched, patched = vmwpatch.PatchGOS(v.PathVMwareBase)
+		vmwpatch.WriteHashes(v.BackVMwareBase, unpatched, patched)
 
 		// Copy iso ISOs
 		fmt.Printf("\nCopying VMware Tools...\n")
@@ -116,8 +145,6 @@ func main() {
 	// Dummy calls on Linux
 	vmwpatch.VMWStart(v)
 
-	fmt.Printf("\nPress any key to finish...")
-	//goland:noinspection GoUnhandledErrorResult
-	fmt.Scanln()
+	waitExit()
 	return
 }

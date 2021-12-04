@@ -82,10 +82,16 @@ func VMWInfo() *VMwareInfo {
 	v.VMXDebug = "vmware-vmx-debug"
 	v.VMXStats = "vmware-vmx-stats"
 	v.VMwareBase = "libvmwarebase.so"
-	v.PathVMXDefault = filepath.Join(v.InstallDir, "bin", "vmware-vmx")
-	v.PathVMXDebug = filepath.Join(v.InstallDir, "bin", "vmware-vmx-debug")
-	v.PathVMXStats = filepath.Join(v.InstallDir, "bin", "vmware-vmx-stats")
-	v.PathVMwareBase = filepath.Join(v.InstallDir, "lib", "libvmwarebase.so", "libvmwarebase.so")
+	v.PathVMXDefault = filepath.Join(v.InstallDir, "bin", v.VMXDefault)
+	v.PathVMXDebug = filepath.Join(v.InstallDir, "bin", v.VMXDebug)
+	v.PathVMXStats = filepath.Join(v.InstallDir, "bin", v.VMXStats)
+	v.PathVMwareBase = filepath.Join(v.InstallDir, "lib", v.VMwareBase, v.VMwareBase)
+	currentFolder, _ := os.Getwd()
+	v.BackDir = filepath.Join(currentFolder, "backup", v.BuildNumber)
+	v.BackVMXDefault = filepath.Join(v.BackDir, v.VMXDefault)
+	v.BackVMXDebug = filepath.Join(v.BackDir, v.VMXDebug)
+	v.BackVMXStats = filepath.Join(v.BackDir, v.VMXStats)
+	v.BackVMwareBase = filepath.Join(v.BackDir, v.VMwareBase)
 	return v
 }
 

@@ -170,6 +170,23 @@ func findKey(contents mmap.MMap) (int, int) {
 	return smcKey0, smcKey1
 }
 
+func checkPatch(contents mmap.MMap) int {
+	// Check if the file is already patched
+	osk0 := bytes.Index(contents, []byte(osk0Data))
+	osk1 := bytes.Index(contents, []byte(osk1Data))
+	kppw := bytes.Index(contents, []byte(kppwData))
+
+	patched := 0
+	if osk0 == -1 && osk1 == -1 && kppw == -1 {
+		patched = 0
+	} else if osk0 != -1 && osk1 != -1 && kppw != -1 {
+		patched = 1
+	} else {
+		patched = 2
+	}
+	return patched
+}
+
 func getHdr(contents mmap.MMap, offset int) smcHdr {
 	// Setup struct pack string
 	var hdrPack = []string{"Q", "I", "I"}
@@ -387,19 +404,10 @@ func IsSMCPatched(filename string) (int, string) {
 	// MMap the file
 	f, contents := mapFile(filename)
 
-	// Check if the file is already patched
-	osk0 := bytes.Index(contents, []byte(osk0Data))
-	osk1 := bytes.Index(contents, []byte(osk1Data))
-	kppw := bytes.Index(contents, []byte(kppwData))
+	// Internal patch checker
+	patched := checkPatch(contents)
 
-	patched := 0
-	if osk0 == -1 && osk1 == -1 && kppw == -1 {
-		patched = 0
-	} else if osk0 != -1 && osk1 != -1 && kppw != -1 {
-		patched = 1
-	} else {
-		patched = 2
-	}
+	// Calc sha256
 	hash256 := sha256File(contents)
 	unmapFile(f, contents)
 	return patched, hash256

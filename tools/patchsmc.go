@@ -30,6 +30,7 @@ func main() {
 	case 0:
 		unpatched, patched := vmwpatch.PatchSMC(filename)
 		fmt.Printf("\nSHA256\nunpatched: %s\npatched:   %s\n", unpatched, patched)
+		return
 	case 1:
 		fmt.Printf("File %s is already patched\n", filename)
 		fmt.Printf("Patch Status: %d\nSHA256: %s\n", state, hash256)
