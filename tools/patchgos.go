@@ -24,5 +24,10 @@ func main() {
 		filename = os.Args[1]
 	}
 
-	vmwpatch.PatchGOS(filename)
+	state, hash256 := vmwpatch.IsGOSPatched(filename)
+	fmt.Printf("Patch Status: %d\nSHA256: %s\n", state, hash256)
+
+	unpatched, patched := vmwpatch.PatchGOS(filename)
+	fmt.Printf("\nSHA256\nunpatched: %s\npatched:   %s", unpatched, patched)
+
 }
