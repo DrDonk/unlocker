@@ -92,6 +92,8 @@ func VMWInfo() *VMwareInfo {
 	v.BackVMXDebug = filepath.Join(v.BackDir, v.VMXDebug)
 	v.BackVMXStats = filepath.Join(v.BackDir, v.VMXStats)
 	v.BackVMwareBase = filepath.Join(v.BackDir, v.VMwareBase)
+	v.PathISOMacOSX = filepath.Join(v.InstallDir, "isoimages", "darwinPre15.iso")
+	v.PathISOmacOS = filepath.Join(v.InstallDir, "isoimages", "darwin.iso")
 	return v
 }
 

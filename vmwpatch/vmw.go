@@ -32,6 +32,8 @@ type VMwareInfo struct {
 	PathVMXDebug   string
 	PathVMXStats   string
 	PathVMwareBase string
+	PathISOmacOS   string
+	PathISOMacOSX  string
 	BackDir        string
 	BackVMXDefault string
 	BackVMXDebug   string

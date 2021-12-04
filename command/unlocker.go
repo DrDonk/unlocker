@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"golocker/vmwpatch"
 	"os"
-	"path/filepath"
 )
 
 func waitExit() {
@@ -124,8 +123,15 @@ func main() {
 
 		// Copy iso ISOs
 		fmt.Printf("\nCopying VMware Tools...\n")
-		_, _ = vmwpatch.CopyFile("./iso/darwinPre15.iso", filepath.Join(v.InstallDir, "darwinPre15.iso"))
-		_, _ = vmwpatch.CopyFile("./iso/darwin.iso", filepath.Join(v.InstallDir, "darwin.iso"))
+		_, err := vmwpatch.CopyFile("./iso/darwinPre15.iso", v.PathISOMacOSX)
+		if err != nil {
+			panic(err)
+		}
+		_, err = vmwpatch.CopyFile("./iso/darwin.iso", v.PathISOmacOS)
+		if err != nil {
+			panic(err)
+		}
+
 	} else {
 		// Restore files
 		fmt.Printf("\nRestoring files...\n")
@@ -133,12 +139,10 @@ func main() {
 
 		// Removing iso ISOs
 		fmt.Printf("\nRemoving VMware Tools...\n")
-		isoPath := filepath.Join(v.InstallDir, "darwinPre15.iso")
-		fmt.Printf("%s\n", isoPath)
-		_ = os.Remove(isoPath)
-		isoPath = filepath.Join(v.InstallDir, "darwin.iso")
-		fmt.Printf("%s\n", isoPath)
-		_ = os.Remove(isoPath)
+		fmt.Printf("%s\n", v.PathISOMacOSX)
+		_ = os.Remove(v.PathISOMacOSX)
+		fmt.Printf("%s\n", v.PathISOmacOS)
+		_ = os.Remove(v.PathISOmacOS)
 	}
 
 	// Start all VMW services and tasks on Windows
