@@ -382,7 +382,7 @@ func PatchSMC(filename string) (string, string) {
 	return unpatched256, patched256
 }
 
-func IsPatched(filename string) (int, string) {
+func IsSMCPatched(filename string) (int, string) {
 
 	// MMap the file
 	f, contents := mapFile(filename)
