@@ -20,6 +20,19 @@ func findGOSTable(contents mmap.MMap) [][]int {
 	return indices
 }
 
+//goland:noinspection GoUnusedFunction
+//goland:noinspection GoUnusedFunction
+func clearBit(n int, pos uint) int {
+	mask := ^(1 << pos)
+	n &= mask
+	return n
+}
+
+func hasBit(n int, pos uint) bool {
+	val := n & (1 << pos)
+	return val > 0
+}
+
 func setBit(n int, pos uint) int {
 	n |= 1 << pos
 	return n
@@ -41,8 +54,9 @@ func PatchGOS(filename string) (string, string) {
 	// Create BinaryPack object
 	bp := new(binarypack.BinaryPack)
 
+	count := 0
 	for _, index := range indices {
-
+		count++
 		// Unpack binary key data
 		offset := index[0] + 32
 		unpackFlag, err := bp.UnPack(flagPack, contents[offset:offset+32])
@@ -67,8 +81,8 @@ func PatchGOS(filename string) (string, string) {
 
 		// Print details
 		fmt.Printf("Flag patched @ offset: 0x%08x  Flag: 0x%01x -> 0x%01x\n", offset, oldFlag, newFlag)
-
 	}
+	fmt.Printf("Patched %d flags\n", count)
 
 	// Flush to disk
 	flushFile(contents)
@@ -86,10 +100,44 @@ func IsGOSPatched(filename string) (int, string) {
 
 	// Check if the file is already patched
 	indices := findGOSTable(contents)
+
+	// Setup struct pack string
+	var flagPack = []string{"b"}
+
+	// Create BinaryPack object
+	bp := new(binarypack.BinaryPack)
 	patched := 0
-	if indices == nil {
-		patched = 1
+	count := 0
+	for _, index := range indices {
+
+		// Keep a counter for checks
+		count++
+
+		// Unpack binary key data
+		offset := index[0] + 32
+		unpackFlag, err := bp.UnPack(flagPack, contents[offset:offset+32])
+		if err != nil {
+			panic(err)
+		}
+
+		// Loop through each entry and test top bit
+		// 0xBF (WKS 12/13)
+		// 0x3F (WKS 14+)
+		oldFlag := unpackFlag[0].(int)
+		if hasBit(oldFlag, 0) {
+			patched++
+		}
 	}
+
+	// Check patched byte count
+	if patched == 0 {
+		patched = 0
+	} else if patched == count {
+		patched = 1
+	} else {
+		patched = 2
+	}
+
 	hash256 := sha256File(contents)
 	unmapFile(f, contents)
 	return patched, hash256
