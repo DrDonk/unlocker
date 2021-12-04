@@ -1,10 +1,11 @@
 #!/bin/bash
 set -e
 
-echo "Repair Vmware using"
-
 # Ensure we only use unmodified commands
 export PATH=/bin:/sbin:/usr/bin:/usr/sbin
+
+# Info
+echo "Repair VMware using $1"
 
 # Make sure only root can run our script
 if [[ $EUID -ne 0 ]]; then
@@ -12,16 +13,17 @@ if [[ $EUID -ne 0 ]]; then
    exit 1
 fi
 
-version=$(grep -i player.product.version /etc/vmware/config | cut -d'"' -f2- | rev | cut -c 2- | rev)
-build=$(grep -i product.buildnumber /etc/vmware/config | cut -d'"' -f2- | rev | cut -c 2- | rev)
-IFS='.' read -r -a product <<< "$version"
-
-printf "VMware product version: %s.%s\n\n" "$version" "$build"
-#printf "Major:    ${product[0]}\n"
-#printf "Minor:    ${product[1]}\n"
-#printf "Revision: ${product[2]}\n"
-#printf "Build:    ${build}\n"
+# Get a temp folder for extract
+$1 -x ./repair
 
 
+echo "Restoring unpatched files..."
+cp -fpv ./repair/vmware-vmx/lib/bin/vmware-vmx /usr/lib/vmware/bin/vmware-vmx
+cp -fpv ./repair/vmware-vmx/lib/bin/vmware-vmx-debug /usr/lib/vmware/bin/vmware-vmx-debug
+cp -fpv ./repair/vmware-vmx/lib/bin/vmware-vmx-stats /usr/lib/vmware/bin/vmware-vmx-stats
+cp -fpv ./repair/vmware-vmx/lib/lib/libvmwarebase.so/libvmwarebase.so /usr/lib/vmware/lib/libvmwarebase.so/libvmwarebase.so
+
+echo Removing extracted setup...
+rm -rf ./repair
 echo Finished!
 
