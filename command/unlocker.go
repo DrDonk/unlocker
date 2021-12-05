@@ -125,11 +125,11 @@ func main() {
 		fmt.Printf("\nCopying VMware Tools...\n")
 		_, err := vmwpatch.CopyFile("./iso/darwinPre15.iso", v.PathISOMacOSX)
 		if err != nil {
-			panic(err)
+			fmt.Printf("Error copying darwinPre15.iso")
 		}
 		_, err = vmwpatch.CopyFile("./iso/darwin.iso", v.PathISOmacOS)
 		if err != nil {
-			panic(err)
+			fmt.Printf("Error copying darwin.iso")
 		}
 
 	} else {
