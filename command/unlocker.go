@@ -29,7 +29,7 @@ func main() {
 	// Titles
 	fmt.Printf("Unlocker %s for VMware Workstation/Player\n", vmwpatch.VERSION)
 	fmt.Printf("============================================\n")
-	fmt.Printf("%s \n\n", vmwpatch.COPYRIGHT)
+	fmt.Printf("%s\n\n", vmwpatch.COPYRIGHT)
 
 	// Simple arg parser
 	if len(os.Args) < 2 {
@@ -57,7 +57,7 @@ func main() {
 	// Get VMware product details from registry and file system
 	v := vmwpatch.VMWInfo()
 	fmt.Printf("VMware is installed at: %s\n", v.InstallDir)
-	fmt.Printf("VMware version: %s\n\n", v.BuildNumber)
+	fmt.Printf("VMware version: %s\nn", v.BuildNumber)
 
 	// Check no VMs running
 	if vmwpatch.IsRunning(v) {
@@ -71,7 +71,7 @@ func main() {
 	vmwpatch.VMWStop(v)
 
 	if install {
-		fmt.Printf("Installing unlocker\n")
+		fmt.Printf("\nInstalling unlocker\n")
 
 		// Check patch status
 		fmt.Printf("Checking patch status of files...\n")
@@ -100,15 +100,18 @@ func main() {
 		unpatched, patched = vmwpatch.PatchSMC(v.PathVMXDebug)
 		vmwpatch.WriteHashes(v.BackVMXDebug, unpatched, patched)
 		fmt.Printf("\n")
-		unpatched, patched = vmwpatch.PatchSMC(v.PathVMXStats)
-		vmwpatch.WriteHashes(v.BackVMXStats, unpatched, patched)
-		fmt.Printf("\n")
+		_, err := os.Stat(v.PathVMXStats)
+		if err == nil {
+			unpatched, patched = vmwpatch.PatchSMC(v.PathVMXStats)
+			vmwpatch.WriteHashes(v.BackVMXStats, unpatched, patched)
+			fmt.Printf("\n")
+		}
 		unpatched, patched = vmwpatch.PatchGOS(v.PathVMwareBase)
 		vmwpatch.WriteHashes(v.BackVMwareBase, unpatched, patched)
 
 		// Copy iso ISOs
 		fmt.Printf("\nCopying VMware Tools...\n")
-		_, err := vmwpatch.CopyFile("./iso/darwinPre15.iso", v.PathISOMacOSX)
+		_, err = vmwpatch.CopyFile("./iso/darwinPre15.iso", v.PathISOMacOSX)
 		if err != nil {
 			fmt.Printf("Error copying darwinPre15.iso")
 		}
@@ -118,7 +121,7 @@ func main() {
 		}
 
 	} else {
-		fmt.Printf("Uninstalling unlocker\n")
+		fmt.Printf("\nUninstalling unlocker\n")
 
 		// Check patch status
 		fmt.Printf("Checking patch status of files...\n")

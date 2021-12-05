@@ -47,7 +47,8 @@ func CheckStatus(v *VMwareInfo) int {
 	vmxBase, _ := IsGOSPatched(v.PathVMwareBase)
 	vmxDefault, _ := IsSMCPatched(v.PathVMXDefault)
 	vmxDebug, _ := IsSMCPatched(v.PathVMXDebug)
-	if v.PathVMXStats != "" {
+	_, err := os.Stat(v.PathVMXStats)
+	if err == nil {
 		vmxStats, _ := IsSMCPatched(v.PathVMXStats)
 		status = vmxBase + vmxDefault + vmxDebug + vmxStats
 		switch status {
@@ -89,10 +90,7 @@ func Backup(v *VMwareInfo) {
 	if err != nil {
 		panic(err)
 	}
-	_, err = CopyFile(v.PathVMXStats, v.BackVMXStats)
-	if err != nil {
-		panic(err)
-	}
+	_, _ = CopyFile(v.PathVMXStats, v.BackVMXStats)
 	return
 }
 
@@ -109,12 +107,8 @@ func Restore(v *VMwareInfo) {
 	if err != nil {
 		panic(err)
 	}
-	err = DelFile(v.BackVMXStats, v.PathVMXStats)
-	if err != nil {
-		panic(err)
-	}
-
-	err = os.RemoveAll(v.BackDir)
+	_ = DelFile(v.BackVMXStats, v.PathVMXStats)
+	_ = os.RemoveAll(v.BackDir)
 	return
 }
 
