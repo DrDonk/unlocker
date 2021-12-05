@@ -342,7 +342,7 @@ func patchKeys(contents mmap.MMap, offset int, count int) (uintptr, uintptr) {
 func DumpSMC(filename string) {
 
 	// MMap the file
-	f, contents := mapFile(filename, os.O_RDONLY)
+	f, contents := mapFile(filename, os.O_RDWR)
 
 	// Find the vSMC headers
 	smcHeaderV0Offset, smcHeaderV1Offset := findHdrs(contents)
@@ -403,7 +403,7 @@ func PatchSMC(filename string) (string, string) {
 func IsSMCPatched(filename string) (int, string) {
 
 	// MMap the file
-	f, contents := mapFile(filename, os.O_RDONLY)
+	f, contents := mapFile(filename, os.O_RDWR)
 
 	// Internal patch checker
 	patched := checkPatch(contents)

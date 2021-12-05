@@ -97,7 +97,7 @@ func PatchGOS(filename string) (string, string) {
 func IsGOSPatched(filename string) (int, string) {
 
 	// MMap the file
-	f, contents := mapFile(filename, os.O_RDONLY)
+	f, contents := mapFile(filename, os.O_RDWR)
 
 	// Check if the file is already patched
 	indices := findGOSTable(contents)

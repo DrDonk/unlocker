@@ -66,43 +66,28 @@ func main() {
 		return
 	}
 
-	// Abort if installing and backup is present
+	// Stop all VMW services and tasks on Windows
+	// Dummy calls on Linux
+	vmwpatch.VMWStop(v)
+
 	if install {
 		fmt.Printf("Installing unlocker\n")
+
+		// Check patch status
 		fmt.Printf("Checking patch status of files...\n")
 		if vmwpatch.CheckStatus(v) != 0 {
 			fmt.Printf("Aborting install as files already patched!\n")
 			waitExit()
 			return
 		}
+
+		// Check backup status
 		if vmwpatch.BackupExists(v) {
 			fmt.Printf("Aborting install as backup folder already exists!\n")
 			waitExit()
 			return
 		}
-	}
 
-	// Abort if uninstalling and backup is missing
-	if !install {
-		fmt.Printf("Uninstalling unlocker\n")
-		fmt.Printf("Checking patch status of files...\n")
-		if vmwpatch.CheckStatus(v) != 1 {
-			fmt.Printf("Aborting install as files already unpatched!\n")
-			waitExit()
-			return
-		}
-		if !vmwpatch.BackupExists(v) {
-			fmt.Printf("Aborting uninstall as backup folder does not exist!\n")
-			waitExit()
-			return
-		}
-	}
-
-	// Stop all VMW services and tasks on Windows
-	// Dummy calls on Linux
-	vmwpatch.VMWStop(v)
-
-	if install {
 		// Backup files
 		fmt.Printf("\nBacking up files...\n")
 		vmwpatch.Backup(v)
@@ -133,6 +118,23 @@ func main() {
 		}
 
 	} else {
+		fmt.Printf("Uninstalling unlocker\n")
+
+		// Check patch status
+		fmt.Printf("Checking patch status of files...\n")
+		if vmwpatch.CheckStatus(v) != 1 {
+			fmt.Printf("Aborting install as files already unpatched!\n")
+			waitExit()
+			return
+		}
+
+		// Check backup status
+		if !vmwpatch.BackupExists(v) {
+			fmt.Printf("Aborting uninstall as backup folder does not exist!\n")
+			waitExit()
+			return
+		}
+
 		// Restore files
 		fmt.Printf("\nRestoring files...\n")
 		vmwpatch.Restore(v)
