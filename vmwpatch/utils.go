@@ -10,19 +10,32 @@ import (
 	"os"
 )
 
-func mapFile(filename string) (file *os.File, contents mmap.MMap) {
+func mapFile(filename string, flag int) (file *os.File, contents mmap.MMap) {
+
+	// Check valid flag of R0 or RDWR
+	var mapFlag int
+	switch flag {
+	case os.O_RDONLY:
+		mapFlag = mmap.RDONLY
+	case os.O_RDWR:
+		mapFlag = mmap.RDWR
+	default:
+		flag = os.O_RDONLY
+		mapFlag = mmap.RDONLY
+	}
 
 	// Print filename
-	fmt.Printf("File: %s\n", filename)
+	fmt.Printf("File: %s Mode: %d\n", filename, flag)
 
 	// Open the file
-	f, err := os.OpenFile(filename, os.O_RDWR, 0644)
+	f, err := os.OpenFile(filename, flag, 0444)
+
 	if err != nil {
 		panic("Cannot find file")
 	}
 
 	// Memory map file
-	contents, err = mmap.Map(f, mmap.RDWR, 0)
+	contents, err = mmap.Map(f, mapFlag, 0)
 	if err != nil {
 		panic("Error mapping file")
 	}
@@ -38,12 +51,8 @@ func flushFile(contents mmap.MMap) {
 }
 
 func unmapFile(file *os.File, contents mmap.MMap) {
-	err := contents.Unmap()
-	if err != nil {
-		panic("Error unmapping file")
-	}
-
-	err = file.Close()
+	_ = contents.Unmap()
+	err := file.Close()
 	if err != nil {
 		panic("Error closing file")
 	}

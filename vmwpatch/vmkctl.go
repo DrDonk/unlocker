@@ -6,13 +6,14 @@ package vmwpatch
 import (
 	"bytes"
 	"fmt"
+	"os"
 )
 
 //goland:noinspection GoUnhandledErrorResult
 func PatchVMKCTL(filename string) {
 
 	// MMap the file
-	f, contents := mapFile(filename)
+	f, contents := mapFile(filename, os.O_RDWR)
 
 	// Replace applesmc with variable always found on ESXi
 	var APPLESMC = []byte("applesmc")

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	binarypack "github.com/canhlinh/go-binary-pack"
 	"github.com/edsrzf/mmap-go"
+	"os"
 	"regexp"
 )
 
@@ -41,7 +42,7 @@ func setBit(n int, pos uint) int {
 func PatchGOS(filename string) (string, string) {
 
 	// MMap the file
-	f, contents := mapFile(filename)
+	f, contents := mapFile(filename, os.O_RDWR)
 
 	unpatched := sha256File(contents)
 
@@ -96,7 +97,7 @@ func PatchGOS(filename string) (string, string) {
 func IsGOSPatched(filename string) (int, string) {
 
 	// MMap the file
-	f, contents := mapFile(filename)
+	f, contents := mapFile(filename, os.O_RDONLY)
 
 	// Check if the file is already patched
 	indices := findGOSTable(contents)
@@ -130,11 +131,12 @@ func IsGOSPatched(filename string) (int, string) {
 	}
 
 	// Check patched byte count
-	if patched == 0 {
+	switch patched {
+	case 0:
 		patched = 0
-	} else if patched == count {
+	case count:
 		patched = 1
-	} else {
+	default:
 		patched = 2
 	}
 
