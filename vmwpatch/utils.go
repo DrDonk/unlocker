@@ -6,8 +6,9 @@ package vmwpatch
 import (
 	"crypto/sha256"
 	"fmt"
-	"github.com/edsrzf/mmap-go"
 	"os"
+
+	"github.com/edsrzf/mmap-go"
 )
 
 func mapFile(filename string, flag int) (file *os.File, contents mmap.MMap) {

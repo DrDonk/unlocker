@@ -5,10 +5,11 @@ package vmwpatch
 
 import (
 	"fmt"
-	binarypack "github.com/canhlinh/go-binary-pack"
-	"github.com/edsrzf/mmap-go"
 	"os"
 	"regexp"
+
+	binarypack "github.com/canhlinh/go-binary-pack"
+	"github.com/edsrzf/mmap-go"
 )
 
 func findGOSTable(contents mmap.MMap) [][]int {
@@ -106,7 +107,6 @@ func IsGOSPatched(filename string) (int, string) {
 	var flagPack = []string{"b"}
 
 	// Create BinaryPack object
-	bp := new(binarypack.BinaryPack)
 	patched := 0
 	count := 0
 	for _, index := range indices {
@@ -116,7 +116,7 @@ func IsGOSPatched(filename string) (int, string) {
 
 		// Unpack binary key data
 		offset := index[0] + 32
-		unpackFlag, err := bp.UnPack(flagPack, contents[offset:offset+32])
+		unpackFlag, err := binarypack.New().UnPack(flagPack, contents[offset:offset+32])
 		if err != nil {
 			panic(err)
 		}

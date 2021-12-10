@@ -78,6 +78,8 @@ func VMWInfo() *VMwareInfo {
 	v.KVM = "vmware-kvm"
 	v.REST = "vmrest"
 	v.Tray = "vmware-tray"
+	// Linux has no shell extension
+	v.ShellExt = ""
 	v.VMXDefault = "vmware-vmx"
 	v.VMXDebug = "vmware-vmx-debug"
 	v.VMXStats = "vmware-vmx-stats"

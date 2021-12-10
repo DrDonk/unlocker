@@ -5,31 +5,34 @@ package main
 
 import (
 	"fmt"
-	"golocker/vmwpatch"
 	"os"
+
+	"golocker/vmwpatch"
 )
 
 func waitExit() {
 	quiet := os.Getenv("UNLOCK_QUIET")
 	if quiet != "1" {
-		fmt.Printf("\nPress any key to continue...")
-		//goland:noinspection GoUnhandledErrorResult
-		fmt.Scanln()
+		fmt.Println()
+		fmt.Println("\nPress any key to continue...")
+
+		_, _ = fmt.Scanln()
 	}
 }
 
 func printHelp() {
-	fmt.Printf("usage: unlocker.exe <install | uninstall>\n")
-	fmt.Printf("\tinstall - install patches\n")
-	fmt.Printf("\tuninstall - uninstall patches\n")
+	fmt.Println("usage: unlocker.exe <install | uninstall>")
+	fmt.Println("\tinstall - install patches")
+	fmt.Println("\tuninstall - uninstall patches")
 	waitExit()
 }
 
 func main() {
 	// Titles
 	fmt.Printf("Unlocker %s for VMware Workstation/Player\n", vmwpatch.VERSION)
-	fmt.Printf("============================================\n")
-	fmt.Printf("%s\n\n", vmwpatch.COPYRIGHT)
+	fmt.Println("============================================")
+	fmt.Println(vmwpatch.COPYRIGHT)
+	fmt.Println()
 
 	// Simple arg parser
 	if len(os.Args) < 2 {
@@ -49,19 +52,19 @@ func main() {
 
 	// Check admin rights
 	if !vmwpatch.IsAdmin() {
-		fmt.Printf("Re-run with admin/root privileges\n")
+		fmt.Println("Re-run with admin/root privileges")
 		waitExit()
 		return
 	}
 
 	// Get VMware product details from registry and file system
 	v := vmwpatch.VMWInfo()
-	fmt.Printf("VMware is installed at: %s\n", v.InstallDir)
-	fmt.Printf("VMware version: %s\n", v.BuildNumber)
+	fmt.Println("VMware is installed at: ", v.InstallDir)
+	fmt.Println("VMware version: ", v.BuildNumber)
 
 	// Check no VMs running
 	if vmwpatch.IsRunning(v) {
-		fmt.Printf("Aborting patching!\n")
+		fmt.Println("Aborting patching!")
 		waitExit()
 		return
 	}
@@ -71,87 +74,91 @@ func main() {
 	vmwpatch.VMWStop(v)
 
 	if install {
-		fmt.Printf("\nInstalling unlocker\n")
+		fmt.Println()
+		fmt.Println("Installing unlocker")
 
-		// Check patch status
-		fmt.Printf("Checking patch status of files...\n")
-		if vmwpatch.CheckStatus(v) != 0 {
-			fmt.Printf("Aborting install as files already patched!\n")
-			waitExit()
-			return
-		}
-
-		// Check backup status
-		if vmwpatch.BackupExists(v) {
-			fmt.Printf("Aborting install as backup folder already exists!\n")
-			waitExit()
-			return
-		}
-
-		// Backup files
-		fmt.Printf("\nBacking up files...\n")
-		vmwpatch.Backup(v)
+		patchSmc := make(chan *vmwpatch.PatchOperation)
+		patchGos := make(chan *vmwpatch.PatchOperation)
+		done := make(chan int)
+		go func() {
+			for {
+				select {
+				case smc := <-patchSmc:
+					p, _ := vmwpatch.IsSMCPatched(smc.FileToPatch)
+					if p == 0 {
+						fmt.Println("Patching", smc.FileToPatch)
+						backupSuccessful := smc.Backup()
+						if !backupSuccessful {
+							fmt.Println(smc.BackupLocation, "already exists, skipping backup, still patching")
+						}
+						unpatched, patched := vmwpatch.PatchSMC(smc.FileToPatch)
+						vmwpatch.WriteHashes(smc.BackupLocation, unpatched, patched)
+						fmt.Println()
+					} else {
+						fmt.Println(smc.FileToPatch, "already patched, skipping")
+					}
+				case gos := <-patchGos:
+					p, _ := vmwpatch.IsGOSPatched(gos.FileToPatch)
+					if p == 0 {
+						fmt.Println("Patching", gos.FileToPatch)
+						backupSuccessful := gos.Backup()
+						if !backupSuccessful {
+							fmt.Println(gos.BackupLocation, "already exists, skipping backup, still patching")
+						}
+						unpatched, patched := vmwpatch.PatchGOS(gos.FileToPatch)
+						vmwpatch.WriteHashes(gos.BackupLocation, unpatched, patched)
+						fmt.Println()
+					} else {
+						fmt.Println(gos.FileToPatch, "already patched, skipping")
+					}
+				case <-done:
+					fmt.Println("Patching Complete!")
+					return
+				}
+			}
+		}()
 
 		// Patch files
-		fmt.Printf("\nPatching...\n")
-		unpatched, patched := vmwpatch.PatchSMC(v.PathVMXDefault)
-		vmwpatch.WriteHashes(v.BackVMXDefault, unpatched, patched)
-		fmt.Printf("\n")
-		unpatched, patched = vmwpatch.PatchSMC(v.PathVMXDebug)
-		vmwpatch.WriteHashes(v.BackVMXDebug, unpatched, patched)
-		fmt.Printf("\n")
-		_, err := os.Stat(v.PathVMXStats)
-		if err == nil {
-			unpatched, patched = vmwpatch.PatchSMC(v.PathVMXStats)
-			vmwpatch.WriteHashes(v.BackVMXStats, unpatched, patched)
-			fmt.Printf("\n")
-		}
-		unpatched, patched = vmwpatch.PatchGOS(v.PathVMwareBase)
-		vmwpatch.WriteHashes(v.BackVMwareBase, unpatched, patched)
+		fmt.Println("Patching...")
+		v.PatchFiles(patchGos, patchSmc, done)
 
 		// Copy iso ISOs
-		fmt.Printf("\nCopying VMware Tools...\n")
-		_, err = vmwpatch.CopyFile("./iso/darwinPre15.iso", v.PathISOMacOSX)
+		fmt.Println()
+		fmt.Println("Copying VMware Tools...")
+		_, err := vmwpatch.CopyFile("./iso/darwinPre15.iso", v.PathISOMacOSX)
 		if err != nil {
-			fmt.Printf("Error copying darwinPre15.iso")
+			fmt.Println("Error copying darwinPre15.iso")
 		}
 		_, err = vmwpatch.CopyFile("./iso/darwin.iso", v.PathISOmacOS)
 		if err != nil {
-			fmt.Printf("Error copying darwin.iso")
+			fmt.Println("Error copying darwin.iso")
 		}
 
 	} else {
-		fmt.Printf("\nUninstalling unlocker\n")
-
-		// Check patch status
-		fmt.Printf("Checking patch status of files...\n")
-		if vmwpatch.CheckStatus(v) != 1 {
-			fmt.Printf("Aborting install as files already unpatched!\n")
-			waitExit()
-			return
-		}
+		fmt.Println("Uninstalling unlocker")
 
 		// Check backup status
-		if !vmwpatch.BackupExists(v) {
-			fmt.Printf("Aborting uninstall as backup folder does not exist!\n")
+		if !v.BackupExists() {
+			fmt.Println("Aborting uninstall as backup folder does not exist!")
 			waitExit()
 			return
 		}
 
 		// Restore files
-		fmt.Printf("\nRestoring files...\n")
-		vmwpatch.Restore(v)
+		fmt.Println()
+		fmt.Println("Restoring files...")
+		v.Restore()
 
 		// Removing iso ISOs
-		fmt.Printf("\nRemoving VMware Tools...\n")
-		fmt.Printf("%s\n", v.PathISOMacOSX)
+		fmt.Println()
+		fmt.Println("Removing VMware Tools...")
+		fmt.Printf(v.PathISOMacOSX)
 		_ = os.Remove(v.PathISOMacOSX)
-		fmt.Printf("%s\n", v.PathISOmacOS)
+		fmt.Println(v.PathISOmacOS)
 		_ = os.Remove(v.PathISOmacOS)
 	}
 
 	// Start all VMW services and tasks on Windows
-	// Dummy calls on Linux
 	vmwpatch.VMWStart(v)
 
 	waitExit()
