@@ -2,7 +2,7 @@
 ## 12/09/21 4.1.0
 
 Changed version to 4.1.0 due to the large number of changes to code submitted by boostchicken. 
-Thanks to boostchicken for the fixes and improvements to the code
+Thanks to boostchicken for the fixes and improvements to the code.
 
 _boostchicken:_
 * Refactor to be more go like
