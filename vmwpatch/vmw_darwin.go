@@ -20,13 +20,13 @@ func IsAdmin() bool {
 
 //goland:noinspection GoUnusedParameter
 func VMWStart(v *VMwareInfo) {
-	// Dummy function on Linux
+	// Dummy function on macOS
 	return
 }
 
 //goland:noinspection GoUnusedParameter
 func VMWStop(v *VMwareInfo) {
-	// Dummy function on Linux
+	// Dummy function on macOS
 	return
 }
 
@@ -45,6 +45,6 @@ func VMWInfo() *VMwareInfo {
 
 //goland:noinspection GoUnusedParameter
 func setCTime(path string, ctime time.Time) error {
-	// Dummy function on Linux
+	// Dummy function on macOS
 	return nil
 }

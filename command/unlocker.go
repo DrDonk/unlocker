@@ -14,7 +14,7 @@ func waitExit() {
 	quiet := os.Getenv("UNLOCK_QUIET")
 	if quiet != "1" {
 		fmt.Println()
-		fmt.Println("\nPress any key to continue...")
+		fmt.Println("\nPress Enter key to continue...")
 
 		_, _ = fmt.Scanln()
 	}
