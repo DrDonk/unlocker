@@ -5,10 +5,10 @@ package vmwpatch
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/djherbis/times"
 	"github.com/mitchellh/go-ps"
-	"io"
-	"os"
 )
 
 type VMwareInfo struct {
@@ -24,6 +24,7 @@ type VMwareInfo struct {
 	AuthD          string
 	HostD          string
 	USBD           string
+	ShellExt       string
 	VMXDefault     string
 	VMXDebug       string
 	VMXStats       string
@@ -41,60 +42,39 @@ type VMwareInfo struct {
 	BackVMwareBase string
 }
 
-func CheckStatus(v *VMwareInfo) int {
-	// TODO: Find a better way to check combinations
-	var status = -1
-	vmxBase, _ := IsGOSPatched(v.PathVMwareBase)
-	vmxDefault, _ := IsSMCPatched(v.PathVMXDefault)
-	vmxDebug, _ := IsSMCPatched(v.PathVMXDebug)
-	_, err := os.Stat(v.PathVMXStats)
-	if err == nil {
-		vmxStats, _ := IsSMCPatched(v.PathVMXStats)
-		status = vmxBase + vmxDefault + vmxDebug + vmxStats
-		switch status {
-		case 0:
-			status = 0
-		case 4:
-			status = 1
-		default:
-			status = 2
-		}
-	} else {
-		status = vmxBase + vmxDefault + vmxDebug
-		switch status {
-		case 0:
-			status = 0
-		case 3:
-			status = 1
-		default:
-			status = 2
-		}
-	}
-	return status
+type PatchOperation struct {
+	FileToPatch    string
+	BackupLocation string
 }
 
-func Backup(v *VMwareInfo) {
+func (v *VMwareInfo) PatchFiles(gos chan *PatchOperation, smc chan *PatchOperation, done chan int) {
 	err := os.MkdirAll(v.BackDir, os.ModePerm)
 	if err != nil {
 		panic(err)
 	}
-	_, err = CopyFile(v.PathVMwareBase, v.BackVMwareBase)
-	if err != nil {
-		panic(err)
+	gos <- &PatchOperation{FileToPatch: v.PathVMwareBase, BackupLocation: v.BackVMwareBase}
+	smc <- &PatchOperation{FileToPatch: v.PathVMXDefault, BackupLocation: v.BackVMXDefault}
+	smc <- &PatchOperation{FileToPatch: v.PathVMXDebug, BackupLocation: v.BackVMXDebug}
+	_, err = os.Stat(v.PathVMXStats)
+	if err == nil {
+		smc <- &PatchOperation{FileToPatch: v.PathVMXStats, BackupLocation: v.BackVMXStats}
 	}
-	_, err = CopyFile(v.PathVMXDefault, v.BackVMXDefault)
-	if err != nil {
-		panic(err)
-	}
-	_, err = CopyFile(v.PathVMXDebug, v.BackVMXDebug)
-	if err != nil {
-		panic(err)
-	}
-	_, _ = CopyFile(v.PathVMXStats, v.BackVMXStats)
-	return
+	done <- 1
 }
 
-func Restore(v *VMwareInfo) {
+func (p *PatchOperation) Backup() bool {
+	_, err := os.Stat(p.BackupLocation)
+	if err != nil {
+		_, err = CopyFile(p.FileToPatch, p.BackupLocation)
+		if err != nil {
+			panic(err)
+		}
+		return true
+	}
+	return false
+}
+
+func (v *VMwareInfo) Restore() {
 	err := DelFile(v.BackVMwareBase, v.PathVMwareBase)
 	if err != nil {
 		panic(err)
@@ -112,7 +92,7 @@ func Restore(v *VMwareInfo) {
 	return
 }
 
-func BackupExists(v *VMwareInfo) bool {
+func (v *VMwareInfo) BackupExists() bool {
 	if _, err := os.Stat(v.BackDir); !os.IsNotExist(err) {
 		return true
 	} else {
@@ -143,8 +123,8 @@ func CopyFile(src, dst string) (int64, error) {
 		return 0, err
 	}
 	defer destination.Close()
-	nBytes, err := io.Copy(destination, source)
-
+	var nBytes int64
+	nBytes, err = destination.ReadFrom(source)
 	// Ensure file mode and ownership is correct
 	_ = os.Chmod(dst, srcFileStat.Mode())
 
@@ -220,15 +200,14 @@ func IsRunning(v *VMwareInfo) bool {
 }
 
 func TaskRunning(name string) int {
-	pid := 0
 	tasks, _ := ps.Processes()
 
-	for i := range tasks {
-		if tasks[i].Executable() == name {
-			pid = tasks[i].Pid()
+	for _, task := range tasks {
+		if task.Executable() == name {
+			return task.Pid()
 		}
 	}
-	return pid
+	return 0
 }
 
 func WriteHashes(filename string, unpatched string, patched string) {
@@ -248,5 +227,4 @@ func WriteHashes(filename string, unpatched string, patched string) {
 
 	//goland:noinspection GoUnhandledErrorResult
 	f.Sync()
-	return
 }

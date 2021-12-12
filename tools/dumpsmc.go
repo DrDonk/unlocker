@@ -5,16 +5,18 @@ package main
 
 import (
 	"fmt"
-	"golocker/vmwpatch"
 	"os"
+
+	"golocker/vmwpatch"
 )
 
 func main() {
+	vmwpatch.IsAdmin()
+
 	// Print titles
 	fmt.Printf("DumpSMC %s\n", vmwpatch.VERSION)
 	fmt.Printf("==============\n")
 	fmt.Printf("%s \n\n", vmwpatch.COPYRIGHT)
-
 	// Get and check file passed as parameter
 	var filename string
 	if len(os.Args) < 2 {

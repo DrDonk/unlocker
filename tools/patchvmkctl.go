@@ -5,8 +5,9 @@ package main
 
 import (
 	"fmt"
-	"golocker/vmwpatch"
 	"os"
+
+	"golocker/vmwpatch"
 )
 
 func main() {

@@ -8,38 +8,70 @@ package vmwpatch
 
 import (
 	"fmt"
-	"golang.org/x/sys/windows/registry"
-	"golang.org/x/sys/windows/svc"
-	"golang.org/x/sys/windows/svc/mgr"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"syscall"
 	"time"
+
+	"golang.org/x/sys/windows"
+	"golang.org/x/sys/windows/registry"
+	"golang.org/x/sys/windows/svc"
+	"golang.org/x/sys/windows/svc/mgr"
 )
+
+var manager *mgr.Mgr
 
 func IsAdmin() bool {
 	_, err := os.Open("\\\\.\\PHYSICALDRIVE0")
 	if err != nil {
-		return false
+		exe, _ := os.Executable()
+		cwd, _ := os.Getwd()
+
+		verbPtr, _ := syscall.UTF16PtrFromString("runas")
+		exePtr, _ := syscall.UTF16PtrFromString(exe)
+		cwdPtr, _ := syscall.UTF16PtrFromString(cwd)
+		argPtr, _ := syscall.UTF16PtrFromString(strings.Join(os.Args[1:], " "))
+
+		err := windows.ShellExecute(0, verbPtr, exePtr, argPtr, cwdPtr, 1)
+		if err != nil {
+			fmt.Println(err)
+		}
+		os.Exit(1)
 	}
 	return true
 }
 
 func VMWStart(v *VMwareInfo) {
-	fmt.Printf("\nStarting VMware services and tasks...\n")
+	fmt.Println()
+	fmt.Println("Starting VMware services and tasks...")
 	svcStart(v.AuthD)
 	svcStart(v.HostD)
 	svcStart(v.USBD)
+	err := manager.Disconnect()
+	if err != nil {
+		fmt.Println("Disconnect from SCM failed")
+		// Not stopping the process over this one
+	}
 	taskStart(filepath.Join(v.InstallDir, v.Tray))
 }
 
 func VMWStop(v *VMwareInfo) {
-	fmt.Printf("\nStopping VMware services and tasks...\n")
+	fmt.Println()
+	fmt.Println("Stopping VMware services and tasks...")
+
+	var err error
+	manager, err = mgr.Connect()
+	if err != nil {
+		panic("SCM connection failed")
+	}
+
 	svcStop(v.AuthD)
 	svcStop(v.HostD)
 	svcStop(v.USBD)
+	taskStop(v.ShellExt) // No Need to re-exec this, it's part of a registered shell extension
 	taskStop(v.Tray)
 }
 
@@ -86,6 +118,7 @@ func VMWInfo() *VMwareInfo {
 	v.Workstation = "vmware.exe"
 	v.KVM = "vmware-kvm.exe"
 	v.REST = "vmrest.exe"
+	v.ShellExt = "vmware-shell-ext-thunker.exe"
 	v.Tray = "vmware-tray.exe"
 	v.VMXDefault = "vmware-vmx.exe"
 	v.VMXDebug = "vmware-vmx-debug.exe"
@@ -109,21 +142,21 @@ func VMWInfo() *VMwareInfo {
 func setCTime(path string, ctime time.Time) error {
 	//setCTime will set the create time on a file. On Windows, this requires
 	//calling SetFileTime and explicitly including the create time.
-	ctimespec := syscall.NsecToTimespec(ctime.UnixNano())
-	pathp, e := syscall.UTF16PtrFromString(path)
+	ctimespec := windows.NsecToTimespec(ctime.UnixNano())
+	pathp, e := windows.UTF16PtrFromString(path)
 	if e != nil {
 		return e
 	}
-	h, e := syscall.CreateFile(pathp,
-		syscall.FILE_WRITE_ATTRIBUTES, syscall.FILE_SHARE_WRITE, nil,
-		syscall.OPEN_EXISTING, syscall.FILE_FLAG_BACKUP_SEMANTICS, 0)
+	h, e := windows.CreateFile(pathp,
+		windows.FILE_WRITE_ATTRIBUTES, windows.FILE_SHARE_WRITE, nil,
+		windows.OPEN_EXISTING, windows.FILE_FLAG_BACKUP_SEMANTICS, 0)
 	if e != nil {
 		return e
 	}
 	//goland:noinspection GoUnhandledErrorResult
-	defer syscall.Close(h)
-	c := syscall.NsecToFiletime(syscall.TimespecToNsec(ctimespec))
-	return syscall.SetFileTime(h, &c, nil, nil)
+	defer windows.CloseHandle(h)
+	c := windows.NsecToFiletime(windows.TimespecToNsec(ctimespec))
+	return windows.SetFileTime(h, &c, nil, nil)
 }
 
 func svcState(s *mgr.Service) svc.State {
@@ -135,34 +168,31 @@ func svcState(s *mgr.Service) svc.State {
 }
 
 func svcWaitState(s *mgr.Service, want svc.State) {
-	for i := 0; ; i++ {
-		have := svcState(s)
-		if have == want {
-			return
+	state := make(chan svc.State, 1)
+	defer close(state)
+	t := time.NewTimer(3 * time.Second)
+	for {
+		select {
+		case <-t.C:
+			panic(fmt.Sprintf("%s state change timeout", s.Name))
+		case currentState := <-state:
+			if currentState == want {
+				t.Stop()
+				return
+			}
+		case <-time.After(300 * time.Millisecond):
+			state <- svcState(s)
 		}
-		if i > 10 {
-			panic(fmt.Sprintf("%s state is=%d, waiting timeout", s.Name, have))
-		}
-		time.Sleep(300 * time.Millisecond)
 	}
 }
 
 func svcStart(name string) {
-	m, err := mgr.Connect()
+	s, err := manager.OpenService(name)
 	if err != nil {
-		panic("SCM connection failed")
-	}
-
-	//goland:noinspection ALL
-	defer m.Disconnect()
-
-	s, err := m.OpenService(name)
-	if err != nil {
-		//fmt.Printf("Invalid service %s", name))
 		return
-	} else {
-		fmt.Printf("Starting service %s\n", name)
 	}
+
+	fmt.Println("Starting service ", name)
 
 	//goland:noinspection ALL
 	defer s.Close()
@@ -174,28 +204,15 @@ func svcStart(name string) {
 		}
 		svcWaitState(s, svc.Running)
 	}
-
-	err = m.Disconnect()
-
 }
 
 func svcStop(name string) {
-	m, err := mgr.Connect()
+	s, err := manager.OpenService(name)
 	if err != nil {
-		panic("SCM connection failed")
-
-	}
-
-	//goland:noinspection ALL
-	defer m.Disconnect()
-
-	s, err := m.OpenService(name)
-	if err != nil {
-		//fmt.Printf("Invalid service %s", name))
 		return
-	} else {
-		fmt.Printf("Stopping service %s\n", name)
 	}
+
+	fmt.Println("Stopping service ", name)
 
 	//goland:noinspection ALL
 	defer s.Close()
@@ -207,23 +224,18 @@ func svcStop(name string) {
 		}
 		svcWaitState(s, svc.Stopped)
 	}
-
-	err = m.Disconnect()
-
 }
 
 func taskStart(filename string) {
-	fmt.Printf("Starting task %s\n", filename)
+	fmt.Println("Starting task ", filename)
 	c := exec.Command(filename)
 	_ = c.Start()
-	return
 }
 
 func taskStop(name string) {
 	if TaskRunning(name) != 0 {
-		fmt.Printf("Stopping task %s\n", name)
+		fmt.Println("Stopping task ", name)
 		c := exec.Command("taskkill.exe", "/F", "/IM", name)
 		_ = c.Run()
 	}
-	return
 }

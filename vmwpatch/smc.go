@@ -35,10 +35,11 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"fmt"
-	binarypack "github.com/canhlinh/go-binary-pack"
-	"github.com/edsrzf/mmap-go"
 	"os"
 	"unsafe"
+
+	binarypack "github.com/canhlinh/go-binary-pack"
+	"github.com/edsrzf/mmap-go"
 )
 
 const hdrLength = 16
@@ -192,11 +193,8 @@ func getHdr(contents mmap.MMap, offset int) smcHdr {
 	// Setup struct pack string
 	var hdrPack = []string{"Q", "I", "I"}
 
-	// Create BinaryPack object
-	bp := new(binarypack.BinaryPack)
-
 	// Unpack binary key data
-	hdr, err := bp.UnPack(hdrPack, contents[offset:offset+hdrLength])
+	hdr, err := binarypack.New().UnPack(hdrPack, contents[offset:offset+hdrLength])
 	if err != nil {
 		panic(err)
 	}
@@ -213,11 +211,8 @@ func getKey(contents mmap.MMap, offset int) smcKey {
 	// Setup struct pack string
 	var keyPack = []string{"4s", "B", "4s", "B", "B", "B", "B", "B", "B", "B", "Q", "48s"}
 
-	// Create BinaryPack object
-	bp := new(binarypack.BinaryPack)
-
 	// Unpack binary key data
-	keyRow, err := bp.UnPack(keyPack, contents[offset:offset+rowLength])
+	keyRow, err := binarypack.New().UnPack(keyPack, contents[offset:offset+rowLength])
 	if err != nil {
 		panic(err)
 	}
@@ -253,9 +248,6 @@ func putKey(contents mmap.MMap, offset int, vmxKey smcKey) {
 	// Setup struct pack string
 	var keyPack = []string{"4s", "B", "4s", "B", "B", "B", "B", "B", "B", "B", "Q", "48s"}
 
-	// Create BinaryPack object
-	bp := new(binarypack.BinaryPack)
-
 	//keyData, _ := hex.DecodeString(vmxKey.data)
 	keyRow := []interface{}{
 		stringToFourCC(vmxKey.key),
@@ -273,7 +265,7 @@ func putKey(contents mmap.MMap, offset int, vmxKey smcKey) {
 	}
 
 	// Pack binary key data
-	keyPacked, err := bp.Pack(keyPack, keyRow)
+	keyPacked, err := binarypack.New().Pack(keyPack, keyRow)
 	if err != nil {
 		panic(err)
 	}
@@ -384,7 +376,7 @@ func PatchSMC(filename string) (string, string) {
 	printHdr("0", smcHeaderV0Offset, vmxhdr0)
 	patchKeys(contents, smcKey0, int(vmxhdr0.cntPrivate))
 
-	fmt.Printf("\n")
+	fmt.Println()
 
 	// Patch vSMC1 tables and keys
 	vmxhdr1 := getHdr(contents, smcHeaderV1Offset)
