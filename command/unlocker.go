@@ -70,7 +70,6 @@ func main() {
 	}
 
 	// Stop all VMW services and tasks on Windows
-	// Dummy calls on Linux
 	vmwpatch.VMWStop(v)
 
 	if install {

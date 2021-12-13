@@ -23,7 +23,6 @@ func findGOSTable(contents mmap.MMap) [][]int {
 }
 
 //goland:noinspection GoUnusedFunction
-//goland:noinspection GoUnusedFunction
 func clearBit(n int, pos uint) int {
 	mask := ^(1 << pos)
 	n &= mask
