@@ -1,4 +1,4 @@
-module golocker
+module github.com/drdonk/golocker
 
 go 1.17
 

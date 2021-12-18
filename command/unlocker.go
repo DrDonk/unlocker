@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"os"
 
-	"golocker/vmwpatch"
+	"github.com/drdonk/golocker/vmwpatch"
 )
 
 func waitExit() {
