@@ -35,11 +35,9 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"fmt"
-	"os"
 	"unsafe"
 
 	binarypack "github.com/canhlinh/go-binary-pack"
-	"github.com/edsrzf/mmap-go"
 )
 
 const hdrLength = 16
@@ -107,7 +105,7 @@ func ptrToBytes(ptr uintptr) []byte {
 	return bytePtr
 }
 
-func patchELF(contents mmap.MMap, AppleSMCHandleOSK uintptr, AppleSMCHandleDefault uintptr) {
+func patchELF(contents []byte, AppleSMCHandleOSK uintptr, AppleSMCHandleDefault uintptr) {
 	// Process ELF RELA records
 	progType := hex.EncodeToString(contents[0:4])
 	if progType == elfMagic {
@@ -121,9 +119,6 @@ func patchELF(contents mmap.MMap, AppleSMCHandleOSK uintptr, AppleSMCHandleDefau
 				// Replace the function pointer
 				fmt.Printf("Relocation modified at: 0x%08x\n", relaPtr)
 				copy(contents[relaPtr:relaPtr+8], defPtr)
-
-				// Flush to disk
-				flushFile(contents)
 			}
 		}
 	}
@@ -154,7 +149,7 @@ func printKey(offset int, vmxKey smcKey) {
 	return
 }
 
-func findHdrs(contents mmap.MMap) (int, int) {
+func findHdrs(contents []byte) (int, int) {
 
 	// Find the vSMC headers
 	var smcHeaderV0 = []byte{0xF2, 0x00, 0x00, 0x00, 0xF0, 0x00, 0x00, 0x00}
@@ -164,7 +159,7 @@ func findHdrs(contents mmap.MMap) (int, int) {
 	return smcHeaderV0Offset, smcHeaderV1Offset
 }
 
-func findKey(contents mmap.MMap) (int, int) {
+func findKey(contents []byte) (int, int) {
 	// Find '#KEY' keys
 	var keyKey = []byte{0x59, 0x45, 0x4B, 0x23, 0x04, 0x32, 0x33, 0x69, 0x75}
 	smcKey0 := bytes.Index(contents, keyKey)
@@ -172,7 +167,7 @@ func findKey(contents mmap.MMap) (int, int) {
 	return smcKey0, smcKey1
 }
 
-func checkPatch(contents mmap.MMap) int {
+func checkPatch(contents []byte) int {
 	// Check if the file is already patched
 	osk0 := bytes.Index(contents, []byte(osk0Data))
 	osk1 := bytes.Index(contents, []byte(osk1Data))
@@ -189,7 +184,7 @@ func checkPatch(contents mmap.MMap) int {
 	return patched
 }
 
-func getHdr(contents mmap.MMap, offset int) smcHdr {
+func getHdr(contents []byte, offset int) smcHdr {
 	// Setup struct pack string
 	var hdrPack = []string{"Q", "I", "I"}
 
@@ -207,7 +202,7 @@ func getHdr(contents mmap.MMap, offset int) smcHdr {
 	return vmxHdr
 }
 
-func getKey(contents mmap.MMap, offset int) smcKey {
+func getKey(contents []byte, offset int) smcKey {
 	// Setup struct pack string
 	var keyPack = []string{"4s", "B", "4s", "B", "B", "B", "B", "B", "B", "B", "Q", "48s"}
 
@@ -228,7 +223,7 @@ func getKey(contents mmap.MMap, offset int) smcKey {
 	return vmxKey
 }
 
-func dumpKeys(contents mmap.MMap, offset int, count int) {
+func dumpKeys(contents []byte, offset int, count int) {
 	fmt.Printf("Table Offset : 0x%08x\n", offset)
 	fmt.Printf("Offset     Name Len Type Flag FuncPtr    Data\n")
 	fmt.Printf("-------    ---- --- ---- ---- -------    ----\n")
@@ -244,7 +239,7 @@ func dumpKeys(contents mmap.MMap, offset int, count int) {
 	}
 }
 
-func putKey(contents mmap.MMap, offset int, vmxKey smcKey) {
+func putKey(contents []byte, offset int, vmxKey smcKey) {
 	// Setup struct pack string
 	var keyPack = []string{"4s", "B", "4s", "B", "B", "B", "B", "B", "B", "B", "Q", "48s"}
 
@@ -270,15 +265,13 @@ func putKey(contents mmap.MMap, offset int, vmxKey smcKey) {
 		panic(err)
 	}
 
-	// Copy data to mmap file
+	// Copy data to file
 	copy(contents[offset:offset+rowLength], keyPacked)
 
-	// Flush to disk
-	flushFile(contents)
 	return
 }
 
-func patchKeys(contents mmap.MMap, offset int, count int) (uintptr, uintptr) {
+func patchKeys(contents []byte, offset int, count int) (uintptr, uintptr) {
 	// Loop for each count and print key
 	// Last key should be OSK1
 	var vmxKey smcKey
@@ -333,8 +326,8 @@ func patchKeys(contents mmap.MMap, offset int, count int) (uintptr, uintptr) {
 
 func DumpSMC(filename string) {
 
-	// MMap the file
-	f, contents := mapFile(filename, os.O_RDWR)
+	// Read the file
+	contents := loadFile(filename)
 
 	// Find the vSMC headers
 	smcHeaderV0Offset, smcHeaderV1Offset := findHdrs(contents)
@@ -354,15 +347,15 @@ func DumpSMC(filename string) {
 	printHdr("1", smcHeaderV1Offset, vmxhdr1)
 	dumpKeys(contents, smcKey1, int(vmxhdr1.cntPrivate))
 
-	// Unmap file
-	unmapFile(f, contents)
-
+	// Save file
+	saveFile(filename, contents)
+	return
 }
 
 func PatchSMC(filename string) (string, string) {
 
-	// MMap the file
-	f, contents := mapFile(filename, os.O_RDWR)
+	// Read the file
+	contents := loadFile(filename)
 	unpatched256 := sha256File(contents)
 
 	// Find the vSMC headers
@@ -385,23 +378,22 @@ func PatchSMC(filename string) (string, string) {
 	patchELF(contents, AppleSMCHandleOSK, AppleSMCHandleDefault)
 
 	// Flush to disk
-	flushFile(contents)
 	patched256 := sha256File(contents)
-	unmapFile(f, contents)
+	saveFile(filename, contents)
 
 	return unpatched256, patched256
 }
 
 func IsSMCPatched(filename string) (int, string) {
 
-	// MMap the file
-	f, contents := mapFile(filename, os.O_RDWR)
+	// Read the file
+	contents := loadFile(filename)
 
 	// Internal patch checker
 	patched := checkPatch(contents)
 
 	// Calc sha256
 	hash256 := sha256File(contents)
-	unmapFile(f, contents)
+	saveFile(filename, contents)
 	return patched, hash256
 }

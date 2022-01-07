@@ -21,7 +21,7 @@ func waitExit() {
 }
 
 func printHelp() {
-	fmt.Println("usage: unlocker.exe <install | uninstall>")
+	fmt.Println("usage: unlocker.py.exe <install | uninstall>")
 	fmt.Println("\tinstall - install patches")
 	fmt.Println("\tuninstall - uninstall patches")
 	waitExit()
@@ -74,7 +74,7 @@ func main() {
 
 	if install {
 		fmt.Println()
-		fmt.Println("Installing unlocker")
+		fmt.Println("Installing unlocker.py")
 
 		patchSmc := make(chan *vmwpatch.PatchOperation)
 		patchGos := make(chan *vmwpatch.PatchOperation)
@@ -134,7 +134,7 @@ func main() {
 		}
 
 	} else {
-		fmt.Println("Uninstalling unlocker")
+		fmt.Println("Uninstalling unlocker.py")
 
 		// Check backup status
 		if !v.BackupExists() {

@@ -5,14 +5,12 @@ package vmwpatch
 
 import (
 	"fmt"
-	"os"
 	"regexp"
 
 	binarypack "github.com/canhlinh/go-binary-pack"
-	"github.com/edsrzf/mmap-go"
 )
 
-func findGOSTable(contents mmap.MMap) [][]int {
+func findGOSTable(contents []byte) [][]int {
 	// Regexp pattern for GOS table Darwin entries
 	pattern := "\x10\x00\x00\x00[\x10|\x20]\x00\x00\x00[\x01|\x02]\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
 
@@ -41,8 +39,8 @@ func setBit(n int, pos uint) int {
 
 func PatchGOS(filename string) (string, string) {
 
-	// MMap the file
-	f, contents := mapFile(filename, os.O_RDWR)
+	// Read the file
+	contents := loadFile(filename)
 
 	unpatched := sha256File(contents)
 
@@ -77,7 +75,7 @@ func PatchGOS(filename string) (string, string) {
 			panic(err)
 		}
 
-		// Copy data to mmap file
+		// Copy data to file
 		copy(contents[offset:offset+1], flagPacked)
 
 		// Print details
@@ -86,9 +84,8 @@ func PatchGOS(filename string) (string, string) {
 	fmt.Printf("Patched %d flags\n", count)
 
 	// Flush to disk
-	flushFile(contents)
 	patched := sha256File(contents)
-	unmapFile(f, contents)
+	saveFile(filename, contents)
 
 	return unpatched, patched
 
@@ -97,7 +94,7 @@ func PatchGOS(filename string) (string, string) {
 func IsGOSPatched(filename string) (int, string) {
 
 	// MMap the file
-	f, contents := mapFile(filename, os.O_RDWR)
+	contents := loadFile(filename)
 
 	// Check if the file is already patched
 	indices := findGOSTable(contents)
@@ -140,6 +137,6 @@ func IsGOSPatched(filename string) (int, string) {
 	}
 
 	hash256 := sha256File(contents)
-	unmapFile(f, contents)
+	saveFile(filename, contents)
 	return patched, hash256
 }
