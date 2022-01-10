@@ -167,21 +167,25 @@ func findKey(contents []byte) (int, int) {
 	return smcKey0, smcKey1
 }
 
-func checkPatch(contents []byte) int {
+func checkPatch(contents []byte) (int, string) {
 	// Check if the file is already patched
 	osk0 := bytes.Index(contents, []byte(osk0Data))
 	osk1 := bytes.Index(contents, []byte(osk1Data))
 	kppw := bytes.Index(contents, []byte(kppwData))
 
-	patched := 0
+	patchFlag := 0
+	patchStatus := ""
 	if osk0 == -1 && osk1 == -1 && kppw == -1 {
-		patched = 0
+		patchFlag = 0
+		patchStatus = "Unpatched"
 	} else if osk0 != -1 && osk1 != -1 && kppw != -1 {
-		patched = 1
+		patchFlag = 1
+		patchStatus = "Patched"
 	} else {
-		patched = 2
+		patchFlag = 2
+		patchStatus = "Unknown"
 	}
-	return patched
+	return patchFlag, patchStatus
 }
 
 func getHdr(contents []byte, offset int) smcHdr {
@@ -347,8 +351,6 @@ func DumpSMC(filename string) {
 	printHdr("1", smcHeaderV1Offset, vmxhdr1)
 	dumpKeys(contents, smcKey1, int(vmxhdr1.cntPrivate))
 
-	// Save file
-	saveFile(filename, contents)
 	return
 }
 
@@ -384,16 +386,15 @@ func PatchSMC(filename string) (string, string) {
 	return unpatched256, patched256
 }
 
-func IsSMCPatched(filename string) (int, string) {
+func IsSMCPatched(filename string) (int, string, string) {
 
 	// Read the file
 	contents := loadFile(filename)
 
 	// Internal patch checker
-	patched := checkPatch(contents)
+	patchFlag, patchStatus := checkPatch(contents)
 
 	// Calc sha256
 	hash256 := sha256File(contents)
-	saveFile(filename, contents)
-	return patched, hash256
+	return patchFlag, patchStatus, hash256
 }
