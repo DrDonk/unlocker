@@ -83,7 +83,7 @@ func main() {
 			for {
 				select {
 				case smc := <-patchSmc:
-					p, _ := vmwpatch.IsSMCPatched(smc.FileToPatch)
+					p, _, _ := vmwpatch.IsSMCPatched(smc.FileToPatch)
 					if p == 0 {
 						fmt.Println("Patching", smc.FileToPatch)
 						backupSuccessful := smc.Backup()
@@ -124,11 +124,11 @@ func main() {
 		// Copy iso ISOs
 		fmt.Println()
 		fmt.Println("Copying VMware Tools...")
-		_, err := vmwpatch.CopyFile("./iso/darwinPre15.iso", v.PathISOMacOSX)
+		_, err := vmwpatch.CopyFile("../iso/darwinPre15.iso", v.PathISOMacOSX)
 		if err != nil {
 			fmt.Println("Error copying darwinPre15.iso")
 		}
-		_, err = vmwpatch.CopyFile("./iso/darwin.iso", v.PathISOmacOS)
+		_, err = vmwpatch.CopyFile("../iso/darwin.iso", v.PathISOmacOS)
 		if err != nil {
 			fmt.Println("Error copying darwin.iso")
 		}
