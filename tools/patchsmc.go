@@ -25,7 +25,7 @@ func main() {
 		filename = os.Args[1]
 	}
 
-	state, hash256 := vmwpatch.IsSMCPatched(filename)
+	state, _, hash256 := vmwpatch.IsSMCPatched(filename)
 
 	switch state {
 	case 0:
