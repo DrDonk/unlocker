@@ -1,4 +1,14 @@
 # Changes
+
+All dates are UK format.
+
+## 26/01/22 4.1.1
+
+_drdonk:_
+* Fix copying of VMware tools ISO to the VMware installation folder
+* Added a new troubleshooting page
+* Updated copyright to 2022
+
 ## 09/12/21 4.1.0
 
 Changed version to 4.1.0 due to the large number of changes to code submitted by boostchicken. 
