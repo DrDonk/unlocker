@@ -1,4 +1,4 @@
-# macOS Unlocker V4.0 for VMware Workstation
+# macOS Unlocker V4 for VMware Workstation
 
 ---
 **IMPORTANT**
@@ -15,21 +15,28 @@ Unlocker 4 is designed for VMware Workstation and Player 16 and has been tested 
 * Workstation Pro 16 on Windows and Linux
 * Workstation Player 16 on Windows and Linux
 
-It is important to understand that the Unlocker does not add any new capabilities to VMware Workstation and Player
-but enables support for macOS that is disabled in the VMware products that do not run on Apple Hardware.
-These capabiltiites are normally exposed in Fusion and ESXi when running on Apple hardware. The Unlocker cannot add
-support for new versions of macOS, add paravirtualized GPU support or any other features that are not already in the
-VMware compiled code.
+The Unlocker enables certain flags and data tables that are required to see the macOS type when setting
+the guest OS type, and modify the implmentation of the virtual SMC controller device. These capabiltiites are normally 
+exposed in Fusion and ESXi when running on Apple hardware.
 
-What the Unlocker can do is enable certain flags and data tables that are required to see the macOS type when setting
-the guest OS type, and modify the implmentation of the virtual SMC controller device. The patch code carries out the 
-following modifications dependent on the product being patched:
+The patch code carries out the following modifications dependent on the product being patched:
 
 * Fix vmware-vmx and derivatives to allow macOS to boot
 * Fix vmwarebase.dll or libvmwarebase.so to allow Apple guests to be selected during VM creation
 * Provide a copy of the macOS VMware Tools for the guest
 
-In all cases make sure VMware is not running, and any background guests have been shutdown.
+It is important to understand that the Unlocker cannot add any new capabilities to VMware Workstation and Player
+but enables support for macOS that is disabled in the VMware products that do not run on Apple Hardware.
+
+The Unlocker cannot:
+
+* add support for new versions of macOS
+* add paravirtualized Apple GPU support 
+* add AMD CPU support
+
+or any other features that are not already in the VMware compiled code. 
+
+A patched macSO kernel must be used to run on AMD systems.
 
 ## 2. Prerequisites
 The code has no pre-requisites and should run directly from the download. The code is written in Go with some 
@@ -40,7 +47,8 @@ On Windows you will need to either run a Command or Powershell prompt as Adminis
 where the golocker has been unpacked and run:
 
 ```
-.\windows\unlocker.exe <install | uninstall>
+   cd .\windows
+   .\unlocker.exe <install | uninstall>
    install - install patches
    uninstall - uninstall patches
 ```
@@ -49,7 +57,8 @@ On Linux you will need to be either root or use sudo to run the scripts in the t
 where the golocker has been unpacked and run:
 
 ```
-./linux/unlocker <install | uninstall>
+   cd ./linux
+   ./unlocker <install | uninstall>
    install - install patches
    uninstall - uninstall patches
 ```
@@ -84,4 +93,4 @@ Thanks also to Sam B for finding the solution for ESXi 6 and helping me with
 debugging expertise. Sam also wrote the code for patching ESXi ELF files and
 modified the Unlocker code to run on Python 3 in the ESXi 6.5 environment.
 
-(c) 2011-2021 David Parsons
+(c) 2011-2022 David Parsons
