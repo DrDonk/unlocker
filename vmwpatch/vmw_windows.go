@@ -48,8 +48,8 @@ func VMWStart(v *VMwareInfo) {
 	fmt.Println()
 	fmt.Println("Starting VMware services and tasks...")
 	svcStart(v.AuthD)
-	svcStart(v.HostD)
 	svcStart(v.USBD)
+	svcStart(v.HostD)
 	err := manager.Disconnect()
 	if err != nil {
 		fmt.Println("Disconnect from SCM failed")
@@ -68,8 +68,8 @@ func VMWStop(v *VMwareInfo) {
 		panic("SCM connection failed")
 	}
 
-	svcStop(v.USBD)
 	svcStop(v.HostD)
+	svcStop(v.USBD)
 	svcStop(v.AuthD)
 	taskStop(v.ShellExt) // No Need to re-exec this, it's part of a registered shell extension
 	taskStop(v.Tray)
