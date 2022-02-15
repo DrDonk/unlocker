@@ -2,6 +2,11 @@
 
 All dates are UK format.
 
+## 15/02/22 4.1.2
+
+_drdonk:_
+* Fix stopping/starting services on Windows
+
 ## 26/01/22 4.1.1
 
 _drdonk:_
