@@ -68,9 +68,9 @@ func VMWStop(v *VMwareInfo) {
 		panic("SCM connection failed")
 	}
 
-	svcStop(v.AuthD)
-	svcStop(v.HostD)
 	svcStop(v.USBD)
+	svcStop(v.HostD)
+	svcStop(v.AuthD)
 	taskStop(v.ShellExt) // No Need to re-exec this, it's part of a registered shell extension
 	taskStop(v.Tray)
 }
