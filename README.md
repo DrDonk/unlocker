@@ -3,7 +3,7 @@
 ---
 **IMPORTANT**
 ---
-1. Use a release from the Releases section of this GitHub repository. https://github.com/DrDonk/golocker/releases
+1. Use a release from the Releases section of this GitHub repository. https://github.com/DrDonk/unlocker/releases
 2. Always uninstall the previous version of the Unlocker before using a new version or
    running an update on the VMware software. Failure to do this could render VMware unusable.
 3. You use this software at your own risk and there are no guarantees this will work
