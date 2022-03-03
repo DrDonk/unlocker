@@ -77,7 +77,7 @@ The Unlocker provides the VMware tools ISO images. There can be newer releases a
 from these URLs if the script has not yet been updated:
 
 * Mac OS X 10.5 - 10.10 https://customerconnect.vmware.com/en/downloads/details?downloadGroup=VMTOOLS10012&productId=491
-* macOS 10.11+ https://customerconnect.vmware.com/downloads/info/slug/datacenter_cloud_infrastructure/vmware_tools/11_x
+* macOS 10.11+ https://customerconnect.vmware.com/downloads/info/slug/datacenter_cloud_infrastructure/vmware_tools/12_x
 
 _These URLs require a VMware login to download._
 
