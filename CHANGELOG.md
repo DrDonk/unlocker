@@ -2,6 +2,10 @@
 
 All dates are UK format.
 
+## 03/03/22 4.1.3
+_drdonk:_
+* Update VMware Tools to version 12.0.0
+
 ## 15/02/22 4.1.2
 
 _drdonk:_
