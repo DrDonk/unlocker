@@ -1,5 +1,13 @@
+/.idea
 /backup/
 /build/
 /samples/
 /tests/
-/.idea
+
+/darwin/
+/linux/patchgos
+/linux/patchsmc
+/linux/patchvmkctl
+/windows/patchgos.exe
+/windows/patchsmc.exe
+/windows/patchvmkctl.exe
