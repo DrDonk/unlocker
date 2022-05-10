@@ -3,6 +3,15 @@
 ---
 **IMPORTANT**
 ---
+
+**False positive from anti-virus software**
+
+Some Windows AV programs mistakenly flag the unlocker as having a virus. This is a false positive and it is mainly seen with Windows Defender. The Go Langauge web site documents the problem.
+
+https://go.dev/doc/faq#virus
+
+Always download from the releases section here, and if you have any doubts you can compile the source code and will see the false positive from Defender.
+
 1. Use a release from the Releases section of this GitHub repository. https://github.com/DrDonk/unlocker/releases
 2. Always uninstall the previous version of the Unlocker before using a new version or
    running an update on the VMware software. Failure to do this could render VMware unusable.
