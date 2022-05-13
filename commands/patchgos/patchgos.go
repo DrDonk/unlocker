@@ -25,15 +25,15 @@ func main() {
 		filename = os.Args[1]
 	}
 
-	state, hash256 := vmwpatch.IsGOSPatched(filename)
+	patchFlag, _, hash256 := vmwpatch.IsGOSPatched(filename)
 
-	switch state {
+	switch patchFlag {
 	case 0:
 		unpatched, patched := vmwpatch.PatchGOS(filename)
 		fmt.Printf("\nSHA256\nunpatched: %s\npatched:   %s\n", unpatched, patched)
 	case 1:
 		fmt.Printf("File %s is already patched\n", filename)
-		fmt.Printf("Patch Status: %d\nSHA256: %s\n", state, hash256)
+		fmt.Printf("Patch Status: %d\nSHA256: %s\n", patchFlag, hash256)
 		return
 	case 2:
 		fmt.Printf("File %s is in an indeterminate state\n", filename)

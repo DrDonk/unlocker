@@ -7,7 +7,16 @@ import (
 	"crypto/sha256"
 	"fmt"
 	"os"
+	"path/filepath"
 )
+
+func getBaseDir() (basePath string) {
+	// Find executable base path
+	ex, _ := os.Executable()
+	exPath := filepath.Dir(ex)
+	basePath, _ = filepath.Split(exPath)
+	return
+}
 
 func loadFile(filename string) (contents []byte) {
 

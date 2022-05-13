@@ -1,0 +1,38 @@
+{
+  "RT_MANIFEST": {
+    "#1": {
+      "0409": {
+        "identity": {},
+        "description": "",
+        "minimum-os": "win7",
+        "execution-level": "administrator",
+        "ui-access": false,
+        "auto-elevate": false,
+        "dpi-awareness": "system",
+        "disable-theming": false,
+        "disable-window-filtering": false,
+        "high-resolution-scrolling-aware": false,
+        "ultra-high-resolution-scrolling-aware": false,
+        "long-path-aware": false,
+        "printer-driver-isolation": false,
+        "gdi-scaling": false,
+        "segment-heap": false,
+        "use-common-controls-v6": false
+      }
+    }
+  },
+  "RT_VERSION": {
+    "#1": {
+      "0409": {
+        "info": {
+          "0409": {
+            "FileDescription": "Relock macOS in VMware",
+            "LegalCopyright": "David Parsons 2011-2022",
+            "OriginalFilename": "relock.exe",
+            "ProductName": "macOS Unlocker for VMware"
+          }
+        }
+      }
+    }
+  }
+}
