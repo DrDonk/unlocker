@@ -8,6 +8,7 @@ package vmwpatch
 
 import (
 	"fmt"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
@@ -22,7 +23,7 @@ import (
 var manager *mgr.Mgr
 
 func IsAdmin() bool {
-	// Always return true as now has embedded manifest to soecify runas Administrator
+	// Always return true as now has embedded manifest to runas Administrator
 	return true
 }
 
@@ -37,7 +38,11 @@ func VMWStart(v *VMwareInfo) {
 		fmt.Println("Disconnect from SCM failed")
 		// Not stopping the process over this one
 	}
+
+	cwd, _ := os.Getwd()
+	os.Chdir("C:\\Windows\\SysWOW64\\")
 	taskStart(filepath.Join(v.InstallDir, v.Tray))
+	os.Chdir(cwd)
 }
 
 func VMWStop(v *VMwareInfo) {
@@ -99,6 +104,7 @@ func VMWInfo() *VMwareInfo {
 	}
 
 	// Construct needed filenames from reg settings
+	v.BasePath = getBaseDir()
 	v.InstallDir64 = filepath.Join(v.InstallDir, "x64")
 	v.Player = "vmplayer.exe"
 	v.Workstation = "vmware.exe"
@@ -114,14 +120,15 @@ func VMWInfo() *VMwareInfo {
 	v.PathVMXDebug = filepath.Join(v.InstallDir64, v.VMXDebug)
 	v.PathVMXStats = filepath.Join(v.InstallDir64, v.VMXStats)
 	v.PathVMwareBase = filepath.Join(v.InstallDir, v.VMwareBase)
-	currentFolder := GetBaseDir()
-	v.BackDir = filepath.Join(currentFolder, "backup", v.ProductVersion)
+	v.BackDir = filepath.Join(v.BasePath, "backup", v.ProductVersion)
 	v.BackVMXDefault = filepath.Join(v.BackDir, v.VMXDefault)
 	v.BackVMXDebug = filepath.Join(v.BackDir, v.VMXDebug)
 	v.BackVMXStats = filepath.Join(v.BackDir, v.VMXStats)
 	v.BackVMwareBase = filepath.Join(v.BackDir, v.VMwareBase)
-	v.PathISOMacOSX = filepath.Join(v.InstallDir, "darwinPre15.iso")
-	v.PathISOmacOS = filepath.Join(v.InstallDir, "darwin.iso")
+	v.SrcISOMacOSX = filepath.Join(v.BasePath, "iso", "darwinPre15.iso")
+	v.SrcISOmacOS = filepath.Join(v.BasePath, "iso", "darwin.iso")
+	v.DstISOMacOSX = filepath.Join(v.InstallDir, "darwinPre15.iso")
+	v.DstISOmacOS = filepath.Join(v.InstallDir, "darwin.iso")
 	return v
 }
 

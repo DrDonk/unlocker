@@ -72,10 +72,10 @@ func main() {
 	// Removing ISOs
 	fmt.Println()
 	fmt.Println("Removing VMware Tools...")
-	fmt.Printf(v.PathISOMacOSX)
-	_ = os.Remove(v.PathISOMacOSX)
-	fmt.Println(v.PathISOmacOS)
-	_ = os.Remove(v.PathISOmacOS)
+	fmt.Printf(v.DstISOMacOSX)
+	_ = os.Remove(v.DstISOMacOSX)
+	fmt.Println(v.DstISOmacOS)
+	_ = os.Remove(v.DstISOmacOS)
 
 	// Start all VMW services and tasks on Windows
 	vmwpatch.VMWStart(v)

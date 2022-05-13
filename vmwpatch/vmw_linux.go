@@ -67,6 +67,9 @@ func VMWInfo() *VMwareInfo {
 		}
 	}
 
+	// Root of unlocker
+	v.BasePath = getBaseDir()
+
 	// Basic product settings
 	v.ProductVersion = config["product.version"]
 	v.BuildNumber = fmt.Sprintf("%s.%s", v.ProductVersion, config["product.buildNumber"])
@@ -89,14 +92,15 @@ func VMWInfo() *VMwareInfo {
 	v.PathVMXDebug = filepath.Join(v.InstallDir, "bin", v.VMXDebug)
 	v.PathVMXStats = filepath.Join(v.InstallDir, "bin", v.VMXStats)
 	v.PathVMwareBase = filepath.Join(v.InstallDir, "lib", v.VMwareBase, v.VMwareBase)
-	currentFolder := GetBaseDir()
-	v.BackDir = filepath.Join(currentFolder, "backup", v.ProductVersion)
+	v.BackDir = filepath.Join(v.BasePath, "backup", v.ProductVersion)
 	v.BackVMXDefault = filepath.Join(v.BackDir, v.VMXDefault)
 	v.BackVMXDebug = filepath.Join(v.BackDir, v.VMXDebug)
 	v.BackVMXStats = filepath.Join(v.BackDir, v.VMXStats)
 	v.BackVMwareBase = filepath.Join(v.BackDir, v.VMwareBase)
-	v.PathISOMacOSX = filepath.Join(v.InstallDir, "isoimages", "darwinPre15.iso")
-	v.PathISOmacOS = filepath.Join(v.InstallDir, "isoimages", "darwin.iso")
+	v.SrcISOMacOSX = filepath.Join(v.BasePath, "iso", "darwinPre15.iso")
+	v.SrcISOmacOS = filepath.Join(v.BasePath, "iso", "darwin.iso")
+	v.DstISOMacOSX = filepath.Join(v.InstallDir, "isoimages", "darwinPre15.iso")
+	v.DstISOmacOS = filepath.Join(v.InstallDir, "isoimages", "darwin.iso")
 	return v
 }
 

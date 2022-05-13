@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 )
 
-func GetBaseDir() (basePath string) {
+func getBaseDir() (basePath string) {
 	// Find executable base path
 	ex, _ := os.Executable()
 	exPath := filepath.Dir(ex)

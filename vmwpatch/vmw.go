@@ -12,6 +12,7 @@ import (
 )
 
 type VMwareInfo struct {
+	BasePath       string
 	BuildNumber    string
 	ProductVersion string
 	InstallDir     string
@@ -33,8 +34,10 @@ type VMwareInfo struct {
 	PathVMXDebug   string
 	PathVMXStats   string
 	PathVMwareBase string
-	PathISOmacOS   string
-	PathISOMacOSX  string
+	SrcISOmacOS    string
+	SrcISOMacOSX   string
+	DstISOmacOS    string
+	DstISOMacOSX   string
 	BackDir        string
 	BackVMXDefault string
 	BackVMXDebug   string
