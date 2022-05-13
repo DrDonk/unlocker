@@ -74,4 +74,3 @@ popd
 cp -v LICENSE ./dist
 cp -v *.md ./dist
 cp -vr ./iso ./dist
-cp -vr ./tools ./dist
