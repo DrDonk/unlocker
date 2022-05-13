@@ -4,13 +4,14 @@
 **IMPORTANT**
 ---
 
-**False positive from anti-virus software**
+**False positive from antivirus software**
 
-Some Windows AV programs mistakenly flag the unlocker as having a virus. This is a false positive and it is mainly seen with Windows Defender. The Go Langauge web site documents the problem.
+Some Windows antivirus programs mistakenly flag the unlocker as having a virus. This is a false positive 
+and it is mainly seen with Windows Defender. The Go Langauge website documents the problem.
 
 https://go.dev/doc/faq#virus
 
-Always download from the releases section here, and if you have any doubts you can compile the source code and will see the false positive from Defender.
+If you have any doubts you can compile the source code yourself. 
 
 1. Use a release from the Releases section of this GitHub repository. https://github.com/DrDonk/unlocker/releases
 2. Always uninstall the previous version of the Unlocker before using a new version or
@@ -48,29 +49,24 @@ or any other features that are not already in the VMware compiled code.
 A patched macSO kernel must be used to run on AMD systems.
 
 ## 2. Prerequisites
-The code has no pre-requisites and should run directly from the download. The code is written in Go with some 
-utility Bash and Powershell files.
+The code is written in Go and has no pre-requisites and should run directly from the download.
 
 ## 3. Windows
-On Windows you will need to either run a Command or Powershell prompt as Administrator and navigate to the folder
-where the golocker has been unpacked and run:
+On Windows you can double-click the executables to launch them from the "windows" folder. You may be prompted to run 
+with Administrator rights which are required to patch VMware.
 
-```
-   cd .\windows
-   .\unlocker.exe <install | uninstall>
-   install - install patches
-   uninstall - uninstall patches
-```
+* unlock.exe - apply patches to VMware
+* relock.exe - remove patches from VMware
+* check.exe  - check the patch status of VMware 
+
 ## 4. Linux
-On Linux you will need to be either root or use sudo to run the scripts in the terminal and navigate to the folder
-where the golocker has been unpacked and run:
+On Linux you will need to be either root or use sudo to run the scripts in the terminal.
 
-```
-   cd ./linux
-   ./unlocker <install | uninstall>
-   install - install patches
-   uninstall - uninstall patches
-```
+Navigate to the folder where the unlocker has been unpacked, and run the required command from the "linux" folder.
+
+* unlock - apply patches to VMware
+* relock - remove patches from VMware
+* check  - check the patch status of your VMware installation
 
 ## 5. VMware Downloads
 These URLs will link to the latest versions of VMware's hosted products:
