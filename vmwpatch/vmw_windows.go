@@ -75,24 +75,28 @@ func VMWInfo() *VMwareInfo {
 	regKey, err := registry.OpenKey(registry.LOCAL_MACHINE,
 		`SOFTWARE\VMware, Inc.\VMware Player`, access)
 	if err != nil {
-		panic("Failed to open registry")
+		fmt.Println("Failed to open VMware registry key")
+		return v
 	}
 	//goland:noinspection GoUnhandledErrorResult
 	defer regKey.Close()
 
 	v.ProductVersion, _, err = regKey.GetStringValue("ProductVersion")
 	if err != nil {
-		panic("Failed to locate registry key ProductVersion")
+		fmt.Println("Failed to locate registry key ProductVersion")
+		return v
 	}
 
 	v.BuildNumber, _, err = regKey.GetStringValue("BuildNumber")
 	if err != nil {
-		panic("Failed to locate registry key BuildNumber")
+		fmt.Println("Failed to locate registry key BuildNumber")
+		return v
 	}
 
 	v.InstallDir, _, err = regKey.GetStringValue("InstallPath")
 	if err != nil {
-		panic("Failed to locate registry key InstallPath")
+		fmt.Println("Failed to locate registry key InstallPath")
+		return v
 	}
 
 	// Construct needed filenames from reg settings
@@ -123,8 +127,8 @@ func VMWInfo() *VMwareInfo {
 }
 
 func setCTime(path string, ctime time.Time) error {
-	//setCTime will set the create time on a file. On Windows, this requires
-	//calling SetFileTime and explicitly including the create time.
+	//setCTime will set the creation time on a file. On Windows, this requires
+	//calling SetFileTime and explicitly including the creation time.
 	ctimespec := windows.NsecToTimespec(ctime.UnixNano())
 	pathp, e := windows.UTF16PtrFromString(path)
 	if e != nil {

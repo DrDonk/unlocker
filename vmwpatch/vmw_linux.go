@@ -46,7 +46,8 @@ func VMWInfo() *VMwareInfo {
 	// Access /etc/vmware/config for version, build and installation path
 	file, err := os.Open("/etc/vmware/config")
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
+		return v
 	}
 	//goland:noinspection GoUnhandledErrorResult
 	defer file.Close()
