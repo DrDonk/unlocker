@@ -1,24 +1,58 @@
-#!/usr/bin/env bash
+#!/usr/bin/env zsh
+set -x
+
 echo Building debug executables
+mkdir -p ./dist/macos
 
-echo Building Windows executables...
-env GOOS=windows GOARCH=amd64 go build -o ./windows/dumpsmc.exe ./tools/dumpsmc.go
-env GOOS=windows GOARCH=amd64 go build -o ./windows/patchsmc.exe ./tools/patchsmc.go
-env GOOS=windows GOARCH=amd64 go build -o ./windows/patchgos.exe ./tools/patchgos.go
-env GOOS=windows GOARCH=amd64 go build -o ./windows/patchvmkctl.exe ./tools/patchvmkctl.go
-env GOOS=windows GOARCH=amd64 go build -o ./windows/unlocker.exe ./command/unlocker.go
+pushd ./commands/dumpsmc
+go-winres make --arch amd64 --product-version 9.9.9 --file-version 9.9.9
+env GOOS=windows GOARCH=amd64 go build -o ../../dist/windows
+env GOOS=linux GOARCH=amd64 go build -o ../../dist/linux
+env GOOS=darwin GOARCH=amd64 go build -o ../../dist/macos
+rm -v rsrc_windows_amd64.syso
+popd
 
-echo Building Linux executables...
-env GOOS=linux GOARCH=amd64 go build -o ./linux/dumpsmc ./tools/dumpsmc.go
-env GOOS=linux GOARCH=amd64 go build -o ./linux/patchsmc ./tools/patchsmc.go
-env GOOS=linux GOARCH=amd64 go build -o ./linux/patchgos ./tools/patchgos.go
-env GOOS=linux GOARCH=amd64 go build -o ./linux/patchvmkctl ./tools/patchvmkctl.go
-env GOOS=linux GOARCH=amd64 go build -o ./linux/unlocker ./command/unlocker.go
+pushd ./commands/relock
+go-winres make --arch amd64 --product-version 9.9.9 --file-version 9.9.9
+env GOOS=windows GOARCH=amd64 go build -o ../../dist/windows
+env GOOS=linux GOARCH=amd64 go build -o ../../dist/linux
+env GOOS=darwin GOARCH=amd64 go build -o ../../dist/macos
+rm -v rsrc_windows_amd64.syso
+popd
 
-echo Building macOS executables...
-env GOOS=darwin GOARCH=amd64 go build -o ./darwin/dumpsmc ./tools/dumpsmc.go
-env GOOS=darwin GOARCH=amd64 go build -o ./darwin/patchsmc ./tools/patchsmc.go
-env GOOS=darwin GOARCH=amd64 go build -o ./darwin/patchgos ./tools/patchgos.go
-env GOOS=darwin GOARCH=amd64 go build -o ./darwin/patchvmkctl ./tools/patchvmkctl.go
-env GOOS=darwin GOARCH=amd64 go build -o ./darwin/unlocker ./command/unlocker.go
+pushd ./commands/unlock
+go-winres make --arch amd64 --product-version 9.9.9 --file-version 9.9.9
+env GOOS=windows GOARCH=amd64 go build -o ../../dist/windows
+env GOOS=linux GOARCH=amd64 go build -o ../../dist/linux
+env GOOS=darwin GOARCH=amd64 go build -o ../../dist/macos
+rm -v rsrc_windows_amd64.syso
+popd
 
+pushd ./commands/patchgos
+go-winres make --arch amd64 --product-version 9.9.9 --file-version 9.9.9
+env GOOS=windows GOARCH=amd64 go build -o ../../dist/windows
+env GOOS=linux GOARCH=amd64 go build -o ../../dist/linux
+env GOOS=darwin GOARCH=amd64 go build -o ../../dist/macos
+rm -v rsrc_windows_amd64.syso
+popd
+
+pushd ./commands/patchsmc
+go-winres make --arch amd64 --product-version 9.9.9 --file-version 9.9.9
+env GOOS=windows GOARCH=amd64 go build -o ../../dist/windows
+env GOOS=linux GOARCH=amd64 go build -o ../../dist/linux
+env GOOS=darwin GOARCH=amd64 go build -o ../../dist/macos
+rm -v rsrc_windows_amd64.syso
+popd
+
+pushd ./commands/patchvmkctl
+go-winres make --arch amd64 --product-version 9.9.9 --file-version 9.9.9
+env GOOS=windows GOARCH=amd64 go build -o ../../dist/windows
+env GOOS=linux GOARCH=amd64 go build -o ../../dist/linux
+env GOOS=darwin GOARCH=amd64 go build -o ../../dist/macos
+rm -v rsrc_windows_amd64.syso
+popd
+
+cp -v LICENSE ./dist
+cp -v *.md ./dist
+cp -vr ./iso ./dist
+cp -vr ./tools ./dist
