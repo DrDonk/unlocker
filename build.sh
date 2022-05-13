@@ -34,4 +34,5 @@ popd
 
 cp -v LICENSE ./dist
 cp -v *.md ./dist
+cp -v *.pdf ./dist
 cp -vr ./iso ./dist
