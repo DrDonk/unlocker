@@ -91,7 +91,7 @@ func PatchGOS(filename string) (string, string) {
 
 }
 
-func IsGOSPatched(filename string) (int, string) {
+func IsGOSPatched(filename string) (int, string, string) {
 
 	// MMap the file
 	contents := loadFile(filename)
@@ -126,17 +126,22 @@ func IsGOSPatched(filename string) (int, string) {
 		}
 	}
 
+	patchFlag := 0
+	patchStatus := ""
+
 	// Check patched byte count
 	switch patched {
 	case 0:
-		patched = 0
+		patchFlag = 0
+		patchStatus = "Unpatched"
 	case count:
-		patched = 1
+		patchFlag = 1
+		patchStatus = "Patched"
 	default:
-		patched = 2
+		patchFlag = 2
+		patchStatus = "Unknown"
 	}
 
 	hash256 := sha256File(contents)
-	saveFile(filename, contents)
-	return patched, hash256
+	return patchFlag, patchStatus, hash256
 }

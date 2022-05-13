@@ -78,7 +78,7 @@ func main() {
 					fmt.Println(smc.FileToPatch, "already patched, skipping")
 				}
 			case gos := <-patchGos:
-				p, _ := vmwpatch.IsGOSPatched(gos.FileToPatch)
+				p, _, _ := vmwpatch.IsGOSPatched(gos.FileToPatch)
 				if p == 0 {
 					fmt.Println("Patching", gos.FileToPatch)
 					backupSuccessful := gos.Backup()
