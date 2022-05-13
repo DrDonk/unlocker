@@ -5,9 +5,9 @@
 /tests/
 
 /darwin/
-/linux/patchgos
-/linux/patchsmc
-/linux/patchvmkctl
-/windows/patchgos.exe
-/windows/patchsmc.exe
-/windows/patchvmkctl.exe
+/dist/linux/patchgos
+/dist/linux/patchsmc
+/dist/linux/patchvmkctl
+/dist/windows/patchgos.exe
+/dist/windows/patchsmc.exe
+/dist/windows/patchvmkctl.exe

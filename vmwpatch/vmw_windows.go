@@ -12,8 +12,6 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
-	"strings"
-	"syscall"
 	"time"
 
 	"golang.org/x/sys/windows"
@@ -25,22 +23,7 @@ import (
 var manager *mgr.Mgr
 
 func IsAdmin() bool {
-	_, err := os.Open("\\\\.\\PHYSICALDRIVE0")
-	if err != nil {
-		exe, _ := os.Executable()
-		cwd, _ := os.Getwd()
-
-		verbPtr, _ := syscall.UTF16PtrFromString("runas")
-		exePtr, _ := syscall.UTF16PtrFromString(exe)
-		cwdPtr, _ := syscall.UTF16PtrFromString(cwd)
-		argPtr, _ := syscall.UTF16PtrFromString(strings.Join(os.Args[1:], " "))
-
-		err := windows.ShellExecute(0, verbPtr, exePtr, argPtr, cwdPtr, 1)
-		if err != nil {
-			fmt.Println(err)
-		}
-		os.Exit(1)
-	}
+	// Always return true as now has embedded manifest to soecify runas Administrator
 	return true
 }
 
