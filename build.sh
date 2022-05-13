@@ -1,27 +1,34 @@
 #!/usr/bin/env zsh
-set -x
+#set -x
 
 echo Building release executables
+if ! [ $# -eq 1 ] ; then
+  echo "Product version not found" >&2
+  exit 1
+fi
 
 pushd ./commands/dumpsmc
-go-winres make --arch amd64 --product-version 9.9.9 --file-version 9.9.9
+echo "Building dumpsmc"
+go-winres make --arch amd64 --product-version $1 --file-version $1
 env GOOS=windows GOARCH=amd64 go build -o ../../dist/windows
 env GOOS=linux GOARCH=amd64 go build -o ../../dist/linux
-rm -v rsrc_windows_amd64.syso
+rm rsrc_windows_amd64.syso
 popd
 
 pushd ./commands/relock
-go-winres make --arch amd64 --product-version 9.9.9 --file-version 9.9.9
+echo "Building relock"
+go-winres make --arch amd64 --product-version $1 --file-version $1
 env GOOS=windows GOARCH=amd64 go build -o ../../dist/windows
 env GOOS=linux GOARCH=amd64 go build -o ../../dist/linux
-rm -v rsrc_windows_amd64.syso
+rm rsrc_windows_amd64.syso
 popd
 
 pushd ./commands/unlock
-go-winres make --arch amd64 --product-version 9.9.9 --file-version 9.9.9
+echo "Building unlock"
+go-winres make --arch amd64 --product-version $1 --file-version $1
 env GOOS=windows GOARCH=amd64 go build -o ../../dist/windows
 env GOOS=linux GOARCH=amd64 go build -o ../../dist/linux
-rm -v rsrc_windows_amd64.syso
+rm rsrc_windows_amd64.syso
 popd
 
 
