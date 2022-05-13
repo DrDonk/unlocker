@@ -89,7 +89,7 @@ func VMWInfo() *VMwareInfo {
 	v.PathVMXDebug = filepath.Join(v.InstallDir, "bin", v.VMXDebug)
 	v.PathVMXStats = filepath.Join(v.InstallDir, "bin", v.VMXStats)
 	v.PathVMwareBase = filepath.Join(v.InstallDir, "lib", v.VMwareBase, v.VMwareBase)
-	currentFolder, _ := os.Getwd()
+	currentFolder := GetBaseDir()
 	v.BackDir = filepath.Join(currentFolder, "backup", v.ProductVersion)
 	v.BackVMXDefault = filepath.Join(v.BackDir, v.VMXDefault)
 	v.BackVMXDebug = filepath.Join(v.BackDir, v.VMXDebug)

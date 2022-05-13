@@ -8,7 +8,6 @@ package vmwpatch
 
 import (
 	"fmt"
-	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
@@ -115,7 +114,7 @@ func VMWInfo() *VMwareInfo {
 	v.PathVMXDebug = filepath.Join(v.InstallDir64, v.VMXDebug)
 	v.PathVMXStats = filepath.Join(v.InstallDir64, v.VMXStats)
 	v.PathVMwareBase = filepath.Join(v.InstallDir, v.VMwareBase)
-	currentFolder, _ := os.Getwd()
+	currentFolder := GetBaseDir()
 	v.BackDir = filepath.Join(currentFolder, "backup", v.ProductVersion)
 	v.BackVMXDefault = filepath.Join(v.BackDir, v.VMXDefault)
 	v.BackVMXDebug = filepath.Join(v.BackDir, v.VMXDebug)

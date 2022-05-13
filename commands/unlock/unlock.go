@@ -6,6 +6,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/drdonk/golocker/vmwpatch"
 )
@@ -104,13 +105,16 @@ func main() {
 	v.PatchFiles(patchGos, patchSmc, done)
 
 	// Copy ISOs
+	basePath := vmwpatch.GetBaseDir()
+	isoPath := filepath.Join(basePath, "iso")
+
 	fmt.Println()
 	fmt.Println("Copying VMware Tools...")
-	_, err := vmwpatch.CopyFile("../iso/darwinPre15.iso", v.PathISOMacOSX)
+	_, err := vmwpatch.CopyFile(filepath.Join(isoPath, "darwinPre15.iso"), v.PathISOMacOSX)
 	if err != nil {
 		fmt.Println("Error copying darwinPre15.iso")
 	}
-	_, err = vmwpatch.CopyFile("../iso/darwin.iso", v.PathISOmacOS)
+	_, err = vmwpatch.CopyFile(filepath.Join(isoPath, "darwin.iso"), v.PathISOmacOS)
 	if err != nil {
 		fmt.Println("Error copying darwin.iso")
 	}
