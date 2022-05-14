@@ -2,6 +2,10 @@
 
 All dates are UK format.
 
+## xx/05/22 4.2.1
+_drdonk_:
+* Missing message when removing ISOs in relock
+
 ## 13/05/22 4.2.0
 _drdonk:_
 * Split unlocker.exe into 2 new files unlock.exe and relock.exe so can be directly executed on Windows without 
