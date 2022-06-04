@@ -72,7 +72,7 @@ func main() {
 	// Removing ISOs
 	fmt.Println()
 	fmt.Println("Removing VMware Tools...")
-	fmt.Printf(v.DstISOMacOSX)
+	fmt.Println(v.DstISOMacOSX)
 	_ = os.Remove(v.DstISOMacOSX)
 	fmt.Println(v.DstISOmacOS)
 	_ = os.Remove(v.DstISOmacOS)

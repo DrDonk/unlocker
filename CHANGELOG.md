@@ -2,6 +2,11 @@
 
 All dates are UK format.
 
+## 03/06/22 4.2.1
+_drdonk_:
+* Missing message when removing ISOs in relock
+* Updated darwin.iso to version 12.0.5
+
 ## 13/05/22 4.2.0
 _drdonk:_
 * Split unlocker.exe into 2 new files unlock.exe and relock.exe so can be directly executed on Windows without 
