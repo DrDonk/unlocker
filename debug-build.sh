@@ -14,6 +14,7 @@ echo "Building check"
 go-winres make --arch amd64 --product-version $1 --file-version $1
 env GOOS=windows GOARCH=amd64 go build -o ../../dist/windows/check.exe
 env GOOS=linux GOARCH=amd64 go build -o ../../dist/linux/check
+env GOOS=darwin GOARCH=amd64 go build -o ../../dist/macos/check
 rm rsrc_windows_amd64.syso
 popd
 
