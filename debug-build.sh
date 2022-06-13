@@ -48,9 +48,9 @@ popd
 pushd ./commands/patchgos
 echo "Building patchgos"
 go-winres make --arch amd64 --product-version $1 --file-version $1
-env GOOS=windows GOARCH=amd64 go build -o ../../dist/windows
-env GOOS=linux GOARCH=amd64 go build -o ../../dist/linux
-env GOOS=darwin GOARCH=amd64 go build -o ../../dist/macos
+env GOOS=windows GOARCH=amd64 go build -o ../../dist/windows/patchgos.exe
+env GOOS=linux GOARCH=amd64 go build -o ../../dist/linux/patchgos
+env GOOS=darwin GOARCH=amd64 go build -o ../../dist/macos/patchgos
 rm rsrc_windows_amd64.syso
 popd
 
