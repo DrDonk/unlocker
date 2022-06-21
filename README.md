@@ -49,7 +49,7 @@ or any other features that are not already in the VMware compiled code.
 A patched macSO kernel must be used to run on AMD systems.
 
 ## 2. Prerequisites
-The code is written in Go and has no pre-requisites and should run directly from the download.
+The code is written in Go and has no pre-requisites and should run directly from the release zip download.
 
 ## 3. Windows
 On Windows you can double-click the executables to launch them from the "windows" folder. You may be prompted to run 
@@ -58,6 +58,9 @@ with Administrator rights which are required to patch VMware.
 * unlock.exe - apply patches to VMware
 * relock.exe - remove patches from VMware
 * check.exe  - check the patch status of VMware 
+
+### Building on Windows
+Currently, you will need to use WSL to build on Windows and follow the Linux build instructions.
 
 ## 4. Linux
 On Linux you will need to be either root or use sudo to run the scripts in the terminal.
@@ -69,17 +72,22 @@ Navigate to the folder where the unlocker has been unpacked, and run the require
 * check  - check the patch status of your VMware installation
 
 ### Building on Linux
+The Go language allows cross-compilation for multiple platforms and architectures. It is possible to
+compile the unlocker on Windows, Linux and macOS for VMware Workstation on Linux and Windows.
+
 To build from source, do the following:
 1. Install go from your distro's repos
 2. `go install github.com/tc-hib/go-winres@latest`
 3. `export PATH="$PATH:$HOME/go/bin"`
 4. `git clone https://github.com/DrDonk/unlocker.git`
 5. `cd unlocker`
-6. `sh build.sh`
+6. `sh build.sh x.y.z` where x.y.z is a version number; e.g. 4.2.1.
 7. `cd dist/linux`
 8. Run the binaries as needed. 
 
-NOTE: If you want to build from the source of the latest release and not of the latest commit, change the add `--branch <tag_name>` to the `git clone` command. For example, if you want to clone from the v4.2.1 tag, type in `git clone --branch v4.2.1 https://github.com/DrDonk/unlocker.git`.
+NOTE: If you want to build from the source of the latest release and not of the latest commit, change the 
+add `--branch <tag_name>` to the `git clone` command. For example, if you want to clone from the v4.2.1 tag, 
+type in `git clone --branch v4.2.1 https://github.com/DrDonk/unlocker.git`.
 
 ## 5. VMware Downloads
 These URLs will link to the latest versions of VMware's hosted products:
