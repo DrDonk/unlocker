@@ -1,4 +1,4 @@
-#!/usr/bin/env zsh
+#!/bin/sh
 #set -x
 echo Clean distribution
 rm -vfr ./dist
