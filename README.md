@@ -60,7 +60,22 @@ with Administrator rights which are required to patch VMware.
 * check.exe  - check the patch status of VMware 
 
 ### Building on Windows
-Currently, you will need to use WSL to build on Windows and follow the Linux build instructions.
+The Go language allows cross-compilation for multiple platforms and architectures. It is possible to
+compile the unlocker on Windows, Linux and macOS for VMware Workstation on Linux and Windows.
+
+To build from source, do the following:
+1. Install go and git using either [scoop](https://scoop.sh) or [chocolatey](https://chocolatey.org)
+2. Open a Windows command prompt
+3. `go install github.com/tc-hib/go-winres@latest`
+4. `git clone https://github.com/DrDonk/unlocker.git`
+5. `cd unlocker`
+6. `build.cmd x.y.z` where x.y.z is a version number; e.g. 4.2.1.
+7. `cd dist/windows`
+8. Run the binaries as needed.
+
+NOTE: If you want to build from the source of the latest release and not of the latest commit, change the
+add `--branch <tag_name>` to the `git clone` command. For example, if you want to clone from the v4.2.1 tag,
+type in `git clone --branch v4.2.1 https://github.com/DrDonk/unlocker.git`.
 
 ## 4. Linux
 On Linux you will need to be either root or use sudo to run the scripts in the terminal.
