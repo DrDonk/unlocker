@@ -68,6 +68,19 @@ Navigate to the folder where the unlocker has been unpacked, and run the require
 * relock - remove patches from VMware
 * check  - check the patch status of your VMware installation
 
+### Building on Linux
+To build from source, do the following:
+1. Install go from your distro's repos
+2. `go install github.com/tc-hib/go-winres@latest`
+3. `export PATH="$PATH:$HOME/go/bin"`
+4. `git clone https://github.com/DrDonk/unlocker.git`
+5. `cd unlocker`
+6. `sh build.sh`
+7. `cd dist/linux`
+8. Run the binaries as needed. 
+
+NOTE: If you want to build from the source of the latest release and not of the latest commit, change the add `--branch <tag_name>` to the `git clone` command. For example, if you want to clone from the v4.2.1 tag, type in `git clone --branch v4.2.1 https://github.com/DrDonk/unlocker.git`.
+
 ## 5. VMware Downloads
 These URLs will link to the latest versions of VMware's hosted products:
 
