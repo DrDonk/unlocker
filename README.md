@@ -73,9 +73,7 @@ To build from source, do the following:
 7. `cd dist/windows`
 8. Run the binaries as needed.
 
-NOTE: If you want to build from the source of the latest release and not of the latest commit, change the
-add `--branch <tag_name>` to the `git clone` command. For example, if you want to clone from the v4.2.1 tag,
-type in `git clone --branch v4.2.1 https://github.com/DrDonk/unlocker.git`.
+NOTE: If you want to build from the source of the latest release and not of the latest commit, add `--branch <tag_name>` to the `git clone` command. For example, if you want to clone from the v4.2.1 tag, type in `git clone --branch v4.2.1 https://github.com/DrDonk/unlocker.git`.
 
 ## 4. Linux
 On Linux you will need to be either root or use sudo to run the scripts in the terminal.
@@ -100,9 +98,7 @@ To build from source, do the following:
 7. `cd dist/linux`
 8. Run the binaries as needed. 
 
-NOTE: If you want to build from the source of the latest release and not of the latest commit, change the 
-add `--branch <tag_name>` to the `git clone` command. For example, if you want to clone from the v4.2.1 tag, 
-type in `git clone --branch v4.2.1 https://github.com/DrDonk/unlocker.git`.
+NOTE: If you want to build from the source of the latest release and not of the latest commit, add `--branch <tag_name>` to the `git clone` command. For example, if you want to clone from the v4.2.1 tag, type in `git clone --branch v4.2.1 https://github.com/DrDonk/unlocker.git`.
 
 ## 5. VMware Downloads
 These URLs will link to the latest versions of VMware's hosted products:
