@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 #set -x
 
 echo Building release executables
@@ -6,6 +6,10 @@ if ! [ $# -eq 1 ] ; then
   echo "Product version not found" >&2
   exit 1
 fi
+
+mkdir -p ./dist/iso
+mkdir -p ./dist/linux
+mkdir -p ./dist/windows
 
 pushd ./commands/check
 echo "Building check"

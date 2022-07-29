@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 #set -x
 
 echo Building debug executables
@@ -7,7 +7,10 @@ if ! [ $# -eq 1 ] ; then
   exit 1
 fi
 
+mkdir -p ./dist/iso
+mkdir -p ./dist/linux
 mkdir -p ./dist/macos
+mkdir -p ./dist/windows
 
 pushd ./commands/check
 echo "Building check"
