@@ -102,7 +102,7 @@ https://go.dev/doc/faq#virus
 
 If you have any doubts you can compile the source code yourself.
 
-### 5.2 AMD CPUS
+### 5.2 AMD CPUs
 A patched macOS AMD kernel must be used to run on older AMD systems, but there is a workaround if you have a modern
 AMD Ryzen CPU. The unlocker cannot patch this but we can recommend settings for the VMX file that allows macOS to
 run on recent AMD CPUs. The tests are being recorded in this issue, and it would be useful if more can report
