@@ -25,6 +25,7 @@ type VMwareInfo struct {
 	AuthD          string
 	HostD          string
 	USBD           string
+	StartD         string
 	ShellExt       string
 	VMXDefault     string
 	VMXDebug       string

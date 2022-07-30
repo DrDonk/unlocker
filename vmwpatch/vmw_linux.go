@@ -42,6 +42,7 @@ func VMWInfo() *VMwareInfo {
 	v.AuthD = ""
 	v.HostD = ""
 	v.USBD = ""
+	v.StartD = ""
 
 	// Access /etc/vmware/config for version, build and installation path
 	file, err := os.Open("/etc/vmware/config")

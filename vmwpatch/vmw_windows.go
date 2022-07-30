@@ -33,6 +33,7 @@ func VMWStart(v *VMwareInfo) {
 	svcStart(v.AuthD)
 	svcStart(v.USBD)
 	svcStart(v.HostD)
+	svcStart(v.StartD)
 	err := manager.Disconnect()
 	if err != nil {
 		fmt.Println("Disconnect from SCM failed")
@@ -58,6 +59,8 @@ func VMWStop(v *VMwareInfo) {
 	svcStop(v.HostD)
 	svcStop(v.USBD)
 	svcStop(v.AuthD)
+	svcStop(v.StartD)
+
 	taskStop(v.ShellExt) // No Need to re-exec this, it's part of a registered shell extension
 	taskStop(v.Tray)
 }
@@ -69,6 +72,7 @@ func VMWInfo() *VMwareInfo {
 	v.AuthD = "VMAuthdService"
 	v.HostD = "VMwareHostd"
 	v.USBD = "VMUSBArbService"
+	v.StartD = "VmwareAutostartService"
 
 	// Access registry for version, build and installation path
 	var access uint32
