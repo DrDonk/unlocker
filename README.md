@@ -121,8 +121,8 @@ cpuid.1.eax = "0000:0000:0000:0001:0000:0110:0111:0001"
 cpuid.1.ebx = "0000:0010:0000:0001:0000:1000:0000:0000"
 cpuid.1.ecx = "1000:0010:1001:1000:0010:0010:0000:0011"
 cpuid.1.edx = "0000:0111:1000:1011:1111:1011:1111:1111"
-vhv.enable = "TRUE"
-vpmc.enable = "TRUE"
+vhv.enable = "FALSE"
+vpmc.enable = "FALSE"
 ```
 3. Make sure there are no duplicate lines in the VMX file or the guest will not start and a dictionary error will
    be displayed by VMware.
