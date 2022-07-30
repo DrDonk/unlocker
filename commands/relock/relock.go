@@ -60,6 +60,8 @@ func main() {
 	// Check backup status
 	if !v.BackupExists() {
 		fmt.Println("Aborting uninstall as backup folder does not exist!")
+		// Ensure Services restart even with failed relock
+		vmwpatch.VMWStart(v)
 		waitExit()
 		return
 	}
