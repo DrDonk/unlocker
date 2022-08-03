@@ -1,5 +1,14 @@
 # macOS Unlocker V4 for VMware Workstation
 
+---
+**False positive from antivirus software**
+
+Some Windows antivirus programs mistakenly flag the unlocker as having a virus. 
+https://go.dev/doc/faq#virus
+
+Please do not log an issue about this!
+---
+
 ## 1. Introduction
 Unlocker 4 is designed for VMware Workstation and Player 16 and has been tested against:
 
@@ -94,7 +103,7 @@ the v4.2.1 tag, type in:
 and then build the code on your platform.
 
 ## 5. FAQS
-### 5.1 False positive from antivirus software**
+### 5.1 False positive from antivirus software
 Some Windows antivirus programs mistakenly flag the unlocker as having a virus. This is a false positive
 and it is mainly seen with Windows Defender. The Go Langauge website documents the problem.
 
