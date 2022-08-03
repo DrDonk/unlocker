@@ -157,6 +157,10 @@ vpmc.enable = "FALSE"
    be displayed by VMware.
 4. You can now install and run macOS as a guest.
 
+### 5.3 macOS Ventura
+
+It looks like Ventura will only work with the Apple Paravirtualized GPU and so will not work inside Workstation or Player. There is no workaround to this issue, unless VMware and/or Apple allow Ventura to run without the AppleGPU settings.
+
 ## 6. VMware Downloads
 These URLs will link to the latest versions of VMware's hosted products:
 
