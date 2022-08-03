@@ -3,10 +3,15 @@
 ---
 **False positive from antivirus software**
 
-Some Windows antivirus programs mistakenly flag the unlocker as having a virus. 
-https://go.dev/doc/faq#virus
+Some Windows antivirus programs mistakenly flag the unlocker as having a virus. The code is compiled on macOS and 
+which is checked for viruses. These are false positives and if you want to check you can compile the code.
 
-Please do not log an issue about this!
+**Please do not log an issue about this!**
+
+
+There is a known problem with Windows executables written in the Go languauge which is documented at the Go website.
+[https://go.dev/doc/faq#virus]()
+
 ---
 
 ## 1. Introduction
