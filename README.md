@@ -3,7 +3,7 @@
 ---
 **False positive from antivirus software**
 
-Some Windows antivirus programs mistakenly flag the unlocker as having a virus. The code is compiled on macOS and 
+Some Windows antivirus programs mistakenly flag the unlocker as having a virus. The code is compiled on macOS  
 which is checked for viruses. These are false positives and if you want to check you can compile the code.
 
 **Please do not log an issue about this!**
