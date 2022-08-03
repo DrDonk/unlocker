@@ -17,7 +17,7 @@ The patch code carries out the following modifications dependent on the product 
 * Provide a copy of the macOS VMware Tools for the guest
 
 It is important to understand that the Unlocker cannot add any new capabilities to VMware Workstation and Player
-but enables support for macOS that is disabled in the VMware products that do not run on Apple Hardware.
+but enables support for macOS that is disabled in the VMware products that do not run on Apple hardware.
 
 The Unlocker cannot:
 
