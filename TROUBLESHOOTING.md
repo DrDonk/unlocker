@@ -43,6 +43,3 @@ vpmc.enable = "FALSE"
 3. Make sure there are no duplicate lines in the VMX file or the guest will not start and a dictionary error will
    be displayed by VMware.
 4. You can now install and run macOS as a guest.
-
-### macOS Ventura
-It looks like Ventura will only work with the Apple Paravirtualized GPU and so will not work inside Workstation or Player. There is no workaround to this issue, unless VMware and/or Apple allow Ventura to run without the AppleGPU settings.
