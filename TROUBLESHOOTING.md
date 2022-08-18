@@ -26,6 +26,11 @@ success or failures in that issue.
 
 https://github.com/DrDonk/unlocker/issues/33
 
+You must have Hyper-V disabled on Windows or VMware falls back to a mode called ULM. CPUID masking is not available in ULM mode as it is pushed to Windows for the low level VMX/SVM operations. Here is a link to a Microsoft artcile on disabling Hyper-V.
+
+https://docs.microsoft.com/en-us/troubleshoot/windows-client/application-management/virtualization-apps-not-work-with-hyper-v
+
+
 1. Read this KB article to learn how to edit a guest's VMX file safely https://kb.vmware.com/s/article/2057902
 2. Add the following lines were to the VMX file:
 ```
