@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<Foundry>
+<VM>
+<VMId type="string">52 78 24 cc a7 b9 2e af-e1 ff c1 6c 70 13 87 a8</VMId>
+<ClientMetaData>
+<clientMetaDataAttributes/>
+<HistoryEventList/></ClientMetaData>
+<vmxPathName type="string">macos.vmx</vmxPathName></VM></Foundry>
