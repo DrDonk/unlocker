@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 //go:build linux
-// +build linux
 
 package vmwpatch
 
