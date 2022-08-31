@@ -1,30 +1,18 @@
 # macOS Unlocker V4 for VMware Workstation
 
 ---
-**False positive from antivirus software**
+## Important News
 
-Some Windows antivirus programs mistakenly flag the unlocker as having a virus. The code is compiled on macOS  
-which is checked for viruses. These are false positives and if you want to check you can compile the code.
+VMware will stop supporting new macOS versions as guests starting with Fusion 13 and the next version of ESXi.
 
-**Please do not log an issue about this!**
+This is documented at the VMware KB for Fusion:
+https://kb.vmware.com/s/article/88697
 
+And for ESXi:
+https://kb.vmware.com/s/article/88698
 
-There is a known problem with Windows executables written in the Go languauge which is documented at the Go website.
-[https://go.dev/doc/faq#virus]()
-
-From the Go web site:
-
->Why does my virus-scanning software think my Go distribution or compiled binary is infected?
->
->This is a common occurrence, especially on Windows machines, and is almost always a false positive. 
->Commercial virus scanning programs are often confused by the structure of Go binaries, which they don't see as 
->often as those compiled from other languages.
->
->If you've just installed the Go distribution and the system reports it is infected, that's certainly a mistake. 
->To be really thorough, you can verify the download by comparing the checksum with those on the downloads page.
->
->In any case, if you believe the report is in error, please report a bug to the supplier of your virus scanner. 
->Maybe in time virus scanners can learn to understand Go programs.
+This will likely impact Workstation Pro/Player as well. Currently the exact details fo what make change are not clear, but
+it is safe to say we should look for alternnative approaches to the unlocker.
 
 ---
 
@@ -124,12 +112,28 @@ and then build the code on your platform.
 
 ## 5. FAQS
 ### 5.1 False positive from antivirus software
-Some Windows antivirus programs mistakenly flag the unlocker as having a virus. This is a false positive
-and it is mainly seen with Windows Defender. The Go Langauge website documents the problem.
+Some Windows antivirus programs mistakenly flag the unlocker as having a virus. The code is compiled on macOS  
+which is checked for viruses. These are false positives and if you want to check you can compile the code youself using
+instruction in the readme file.
 
-https://go.dev/doc/faq#virus
+**Please do not log an issue about this!**
 
-If you have any doubts you can compile the source code yourself.
+This is a known problem with Windows executables written in the Go languauge which is documented at the Go website.
+[https://go.dev/doc/faq#virus]()
+
+From the Go web site:
+
+>Why does my virus-scanning software think my Go distribution or compiled binary is infected?
+>
+>This is a common occurrence, especially on Windows machines, and is almost always a false positive. 
+>Commercial virus scanning programs are often confused by the structure of Go binaries, which they don't see as 
+>often as those compiled from other languages.
+>
+>If you've just installed the Go distribution and the system reports it is infected, that's certainly a mistake. 
+>To be really thorough, you can verify the download by comparing the checksum with those on the downloads page.
+>
+>In any case, if you believe the report is in error, please report a bug to the supplier of your virus scanner. 
+>Maybe in time virus scanners can learn to understand Go programs.
 
 ### 5.2 AMD CPUs
 A patched macOS AMD kernel must be used to run on older AMD systems, but there is a workaround if you have a modern
