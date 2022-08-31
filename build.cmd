@@ -45,3 +45,4 @@ popd
 xcopy /R /Y LICENSE dist\
 xcopy /R /Y *.md dist\
 xcopy /E /F /I /R /Y ISO dist\ISO
+xcopy /E /F /I /R /Y ISO dist\templates

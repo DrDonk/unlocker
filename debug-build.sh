@@ -11,6 +11,7 @@ mkdir -p ./dist/iso
 mkdir -p ./dist/linux
 mkdir -p ./dist/macos
 mkdir -p ./dist/windows
+mkdir -p ./dist/templates
 
 pushd ./commands/check
 echo "Building check"
@@ -78,3 +79,4 @@ popd
 cp -v LICENSE ./dist
 cp -v *.md ./dist
 cp -vr ./iso ./dist
+cp -vr ./templates ./dist
