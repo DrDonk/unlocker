@@ -11,7 +11,7 @@ https://kb.vmware.com/s/article/88697
 And for ESXi:
 https://kb.vmware.com/s/article/88698
 
-This will likely impact Workstation Pro/Player as well. Currently the exact details of what make change are not clear, but
+This will likely impact Workstation Pro/Player as well. Currently the exact details of what may change are not clear, but
 it is safe to say we should look for alternative approaches to the unlocker.
 
 ---
