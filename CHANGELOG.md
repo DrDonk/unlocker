@@ -1,12 +1,18 @@
 # Changes
 
 All dates are UK format.
+
+## 21/09/22 4.2.3
+_drdonk_
+* VMware Tools 12.1.0 - last VMware tools for macOS to be released
+* Template VMs for Intel and AMD CPUs with sensible defaults and preformatted HFS+J virtual disk
+
 ## 30/07/22 4.2.2
 _drdonk_
 * Re-worked README.md file
 * Updated darwin.iso to version 12.0.6
 * relock restarts Windows services unpatching fails
-* Initial changes for 22H2 tech previews. New Windows service for auto-starting VMs needs to be stopped and started.
+* Initial changes for 22H2 tech previews. New Windows service for auto-starting VMs needs to be stopped and started
 * Ensure using bash and fix dist folder creation in the source code build scripts fro Linux/macOS
 
 ## 03/06/22 4.2.1
