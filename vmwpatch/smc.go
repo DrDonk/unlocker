@@ -35,6 +35,7 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"fmt"
+	"os"
 	"unsafe"
 
 	binarypack "github.com/canhlinh/go-binary-pack"
@@ -359,6 +360,24 @@ func PatchSMC(filename string) (string, string) {
 	// Read the file
 	contents := loadFile(filename)
 	unpatched256 := sha256File(contents)
+
+	// Internal patch checker
+	patchFlag, _ := checkPatch(contents)
+
+	// Guard checks
+	if patchFlag == 1 {
+		fmt.Printf("File %s is already patched\n", filename)
+		fmt.Printf("Patch Status: %d\nSHA256: %s\n", patchFlag, unpatched256)
+		os.Exit(1)
+	}
+	if patchFlag == 2 {
+		fmt.Printf("File %s is in an indeterminate state\n", filename)
+		os.Exit(2)
+	}
+	if patchFlag > 2 {
+		fmt.Printf("Unknown issue with filename %s\n", filename)
+		os.Exit(3)
+	}
 
 	// Find the vSMC headers
 	smcHeaderV0Offset, smcHeaderV1Offset := findHdrs(contents)
