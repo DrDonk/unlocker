@@ -68,6 +68,9 @@ On Linux navigate to the folder where the unlocker has been unpacked, and run th
 * relock - remove patches from VMware
 * check  - check the patch status of your VMware installation
 
+### 2.3.1 Arch Linux and its derivatives
+If you are using Arch Linux or a derivative of Arch, you can install and use this like any normal package [from the AUR](https://aur.archlinux.org/packages/vmware-unlocker-bin). Precompiled binaries and PKGBUILDs to build from the [source of the latest release](https://aur.archlinux.org/packages/vmware-unlocker) as well as [from the main branch](https://aur.archlinux.org/packages/vmware-unlocker-git) are provided. Included in all of the packages are some Pacman hooks to help unlock and relock VMware whenever there is an update to Unlocker, VMware Worksation Pro/Player, or any of VMware Workstation Pro/Player's components. The binary files are installed to the `/usr/bin` directory so they are already added to your `$PATH`.
+
 ## 3. Upgrading VMware
 If a new VMware version is installed the patches will be lost as the update will overwrite the patched files.
 You will need to re-run the unlock program to patch the newly installed VMware files.
