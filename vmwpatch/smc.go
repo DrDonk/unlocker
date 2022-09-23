@@ -369,7 +369,7 @@ func PatchSMC(filename string) (string, string) {
 	// Patch vSMC0 tables and keys
 	vmxhdr0 := getHdr(contents, smcHeaderV0Offset)
 	printHdr("0", smcHeaderV0Offset, vmxhdr0)
-	patchKeys(contents, smcKey0, int(vmxhdr0.cntPrivate))
+	_, _ = patchKeys(contents, smcKey0, int(vmxhdr0.cntPrivate))
 
 	fmt.Println()
 
