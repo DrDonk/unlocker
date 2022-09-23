@@ -21,7 +21,7 @@ func getBaseDir() (basePath string) {
 func loadFile(filename string) (contents []byte) {
 
 	// Print filename
-	fmt.Printf("File: %s\n", filename)
+	fmt.Printf("File: %s\n\n", filename)
 
 	// Open the file
 	contents, err := os.ReadFile(filename)
