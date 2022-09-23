@@ -85,7 +85,7 @@ func stringToFourCC(s string) (result string) {
 		if v != 32 {
 			result = string(v) + result
 		} else {
-			result = "\x00" + result
+			result = " " + result
 		}
 	}
 	return
