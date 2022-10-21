@@ -35,6 +35,7 @@ func main() {
 		return
 	} else {
 		filename = os.Args[1]
+		fmt.Printf("Filename: %s\n\n", filename)
 	}
 
 	vmwpatch.DumpSMC(filename)
