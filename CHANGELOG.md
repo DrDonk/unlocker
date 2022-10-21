@@ -1,6 +1,11 @@
 # Changes
 
 All dates are UK format.
+## 21/10/22 4.2.4
+_drdonk_
+* Changes to templates to disable webcam in VM
+* Removed files from templates that are generated when VM is first opened to ensure uniqueness of VMs.
+* Remove some duplicate messages in executables
 
 ## 21/09/22 4.2.3
 _drdonk_
