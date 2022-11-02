@@ -1,6 +1,15 @@
 # macOS Unlocker V4 for VMware Workstation
 
 ---
+## macOS Ventura Guests
+There is a known issue that Ventura guests boot loop in VMware Workstation. Currently there is no workaround but investigations are still underway to see
+how it may be fixed.
+
+Please do not upograde to Ventura at this time.
+
+---
+
+---
 ## Important News
 
 VMware will stop supporting new macOS versions as guests starting with Fusion 13 and the next version of ESXi.
