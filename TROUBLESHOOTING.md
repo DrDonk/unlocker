@@ -1,5 +1,11 @@
 # Troubleshooting Notes
 
+## macOS Ventura Guests
+There is a known issue that Ventura guests boot loop in VMware Workstation. Currently there is no workaround but investigations are still underway to see
+how it may be fixed.
+
+Please do not upograde to Ventura at this time.
+
 ## False positive from anti-virus software
 
 Some Windows AV programs mistakenly flag the unlocker as having a virus. This is a false positive and it mainly is seen with Windows Defender. The Go Langauge web site documents the problem. 
