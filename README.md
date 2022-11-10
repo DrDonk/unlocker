@@ -5,6 +5,8 @@
 There is a known issue that Ventura guests boot loop in VMware Workstation. Currently there is no workaround but investigations are still underway to see
 how it may be fixed.
 
+https://github.com/DrDonk/unlocker/issues/47
+
 Please do not upgrade to Ventura at this time.
 
 ---
