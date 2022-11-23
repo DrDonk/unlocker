@@ -30,8 +30,8 @@ it is safe to say we should look for alternative approaches to the unlocker.
 ## 1. Introduction
 Unlocker 4 is designed for VMware Workstation and Player 16 and has been tested against:
 
-* Workstation Pro 16 on Windows and Linux
-* Workstation Player 16 on Windows and Linux
+* Workstation Pro 16/17 on Windows and Linux
+* Workstation Player 16/17 on Windows and Linux
 
 The Unlocker enables certain flags and data tables that are required to see the macOS type when setting
 the guest OS type, and modify the implmentation of the virtual SMC controller device. These capabiltiites are normally 
