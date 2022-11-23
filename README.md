@@ -84,7 +84,7 @@ If you are using Arch Linux or a derivative of Arch, you can install and use thi
 
 ## 3. Upgrading VMware
 If a new VMware version is installed the patches will be lost as the update will overwrite the patched files.
-You will need to re-run the unlock program to patch the newly installed VMware files.
+You will need to re-run the unlock program to patch the newly installed VMware files. This does not apply to the Arch Linux AUR packages due to the provided ALPM hooks.
 
 ## 4. Compiling from source code
 The release ZIP file contains pre-compiled executables but if you want to compile the code please follow 
