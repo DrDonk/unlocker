@@ -1,6 +1,17 @@
 # macOS Unlocker V4 for VMware Workstation
 
 ---
+## macOS Ventura Guests
+There is a known issue that Ventura guests boot loop in VMware Workstation. Currently there is no workaround but investigations are still underway to see
+how it may be fixed.
+
+https://github.com/DrDonk/unlocker/issues/47
+
+Please do not upgrade to Ventura at this time.
+
+---
+
+---
 ## Important News
 
 VMware will stop supporting new macOS versions as guests starting with Fusion 13 and the next version of ESXi.
@@ -19,8 +30,8 @@ it is safe to say we should look for alternative approaches to the unlocker.
 ## 1. Introduction
 Unlocker 4 is designed for VMware Workstation and Player 16 and has been tested against:
 
-* Workstation Pro 16 on Windows and Linux
-* Workstation Player 16 on Windows and Linux
+* Workstation Pro 16/17 on Windows and Linux
+* Workstation Player 16/17 on Windows and Linux
 
 The Unlocker enables certain flags and data tables that are required to see the macOS type when setting
 the guest OS type, and modify the implmentation of the virtual SMC controller device. These capabiltiites are normally 
@@ -73,7 +84,7 @@ If you are using Arch Linux or a derivative of Arch, you can install and use thi
 
 ## 3. Upgrading VMware
 If a new VMware version is installed the patches will be lost as the update will overwrite the patched files.
-You will need to re-run the unlock program to patch the newly installed VMware files.
+You will need to re-run the unlock program to patch the newly installed VMware files. This does not apply to the Arch Linux AUR packages due to the provided ALPM hooks.
 
 ## 4. Compiling from source code
 The release ZIP file contains pre-compiled executables but if you want to compile the code please follow 
