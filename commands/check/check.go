@@ -50,8 +50,11 @@ func main() {
 	patchFlag, patchStatus, hash256 = vmwpatch.IsSMCPatched(v.PathVMXDebug)
 	fmt.Printf("Patch Status: %s (%d)\nSHA256: %s\n", patchStatus, patchFlag, hash256)
 
-	patchFlag, patchStatus, hash256 = vmwpatch.IsSMCPatched(v.PathVMXStats)
-	fmt.Printf("Patch Status: %s (%d)\nSHA256: %s\n", patchStatus, patchFlag, hash256)
+	_, err := os.Stat(v.PathVMXStats)
+	if err == nil {
+		patchFlag, patchStatus, hash256 = vmwpatch.IsSMCPatched(v.PathVMXStats)
+		fmt.Printf("Patch Status: %s (%d)\nSHA256: %s\n", patchStatus, patchFlag, hash256)
+	}
 
 	patchFlag, patchStatus, hash256 = vmwpatch.IsGOSPatched(v.PathVMwareBase)
 	fmt.Printf("Patch Status: %s (%d)\nSHA256: %s\n", patchStatus, patchFlag, hash256)
