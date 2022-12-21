@@ -46,9 +46,6 @@ const keyLength = 24
 const dataLength = 48
 const rowLength = keyLength + dataLength
 
-//goland:noinspection GoUnusedConst
-const kppwData = "\x53\x70\x65\x63\x69\x61\x6c\x69\x73\x52\x65\x76\x65\x6c\x69\x6f\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
-const kpstData = "\x01"
 const osk0Data = "\x6f\x75\x72\x68\x61\x72\x64\x77\x6f\x72\x6b\x62\x79\x74\x68\x65\x73\x65\x77\x6f\x72\x64\x73\x67\x75\x61\x72\x64\x65\x64\x70\x6c"
 const osk1Data = "\x65\x61\x73\x65\x64\x6f\x6e\x74\x73\x74\x65\x61\x6c\x28\x63\x29\x41\x70\x70\x6c\x65\x43\x6f\x6d\x70\x75\x74\x65\x72\x49\x6e\x63"
 
@@ -172,14 +169,13 @@ func checkPatch(contents []byte) (int, string) {
 	// Check if the file is already patched
 	osk0 := bytes.Index(contents, []byte(osk0Data))
 	osk1 := bytes.Index(contents, []byte(osk1Data))
-	kppw := bytes.Index(contents, []byte(kppwData))
 
 	patchFlag := 0
 	patchStatus := ""
-	if osk0 == -1 && osk1 == -1 && kppw == -1 {
+	if osk0 == -1 && osk1 == -1 {
 		patchFlag = 0
 		patchStatus = "Unpatched"
-	} else if osk0 != -1 && osk1 != -1 && kppw != -1 {
+	} else if osk0 != -1 && osk1 != -1 {
 		patchFlag = 1
 		patchStatus = "Patched"
 	} else {
@@ -293,20 +289,6 @@ func patchKeys(contents []byte, offset int, count int) (uintptr, uintptr) {
 			fmt.Printf("Getting +LKS:\n")
 			printKey(ptrCurrent, vmxKey)
 			AppleSMCHandleDefault = vmxKey.ptrFunc
-		case "KPPW":
-			fmt.Printf("Patching KPPW:\n")
-			printKey(ptrCurrent, vmxKey)
-			vmxKey.data = kppwData
-			putKey(contents, ptrCurrent, vmxKey)
-			vmxKey = getKey(contents, ptrCurrent)
-			printKey(ptrCurrent, vmxKey)
-		case "KPST":
-			fmt.Printf("Patching KPST:\n")
-			printKey(ptrCurrent, vmxKey)
-			vmxKey.data = kpstData
-			putKey(contents, ptrCurrent, vmxKey)
-			vmxKey = getKey(contents, ptrCurrent)
-			printKey(ptrCurrent, vmxKey)
 		case "OSK0":
 			fmt.Printf("Patching OSK0:\n")
 			printKey(ptrCurrent, vmxKey)
