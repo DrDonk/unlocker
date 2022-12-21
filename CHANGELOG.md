@@ -1,11 +1,20 @@
 # Changes
 
 All dates are UK format.
-## 21/10/22 4.2.4
+## 21/12/22 4.2.4
 _drdonk_
 * Changes to templates to disable webcam in VM
 * Removed files from templates that are generated when VM is first opened to ensure uniqueness of VMs.
+* New templates with good defaults for different versions of VMware and macOS guests
 * Remove some duplicate messages in executables
+* Removed a marker in patches as never used (KPPW/KPST)
+* Wiki now source of more dynamic informtion such as Ventura supoort
+
+_samhocevar_
+* Check for vmware-vmx-stats file exists before trying to patch
+
+_SimPilotAdamT_
+* Clarification on using AUR with Unlocker
 
 ## 21/09/22 4.2.3
 _drdonk_
