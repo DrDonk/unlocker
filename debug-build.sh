@@ -87,5 +87,6 @@ popd
 
 cp -v LICENSE ./dist
 cp -v *.md ./dist
+cp -vr ./cpuid/* ./dist
 cp -vr ./iso ./dist
 cp -vr ./templates ./dist
