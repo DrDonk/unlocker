@@ -22,6 +22,7 @@ VMware is changing it's policy on which host and guest macOS versions they suppo
 KB articles for latest informtion
 
 VMware Fusion: https://kb.vmware.com/s/article/88697
+
 VMware ESXi: https://kb.vmware.com/s/article/88698
 
 This will likely impact Workstation Pro/Player as well. 
@@ -215,5 +216,7 @@ Thanks to Zenith432 for originally building the C++ Unlocker and Mac Son of Knif
 Thanks also to Sam B for finding the solution for ESXi 6 and helping me with
 debugging expertise. Sam also wrote the code for patching ESXi ELF files and
 modified the Unlocker code to run on Python 3 in the ESXi 6.5 environment.
+
+There have also been many new testers via GitHub, some who want to remain anoymous, but a big thanks to them.
 
 (c) 2011-2022 David Parsons
