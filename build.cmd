@@ -30,15 +30,16 @@ go build -o ..\..\dist\linux\relock
 del /q rsrc_windows_amd64.syso
 popd
 
-pushd .\commands\unlock
-echo Building unlock
+
+pushd .\commands\hostcaps
+echo Building hostcaps
 go-winres make --arch amd64 --product-version %1 --file-version %1
 set GOOS=windows
 set GOARCH=amd64
-go build -o ..\..\dist\windows\unlock.exe
+go build -o ..\..\dist\windows\hostcaps.exe
 set GOOS=linux
 set GOARCH=amd64
-go build -o ..\..\dist\linux\unlock
+go build -o ..\..\dist\linux\hostcaps
 del /q rsrc_windows_amd64.syso
 popd
 

@@ -76,6 +76,15 @@ env GOOS=darwin GOARCH=amd64 go build -o ../../dist/macos/patchvmkctl
 rm rsrc_windows_amd64.syso
 popd
 
+pushd ./commands/hostcaps
+echo "Building hostcaps"
+go-winres make --arch amd64 --product-version $1 --file-version $1
+env GOOS=windows GOARCH=amd64 go build -o ../../dist/windows/hostcaps.exe
+env GOOS=linux GOARCH=amd64 go build -o ../../dist/linux/hostcaps
+env GOOS=darwin GOARCH=amd64 go build -o ../../dist/macos/hostcaps
+rm rsrc_windows_amd64.syso
+popd
+
 cp -v LICENSE ./dist
 cp -v *.md ./dist
 cp -vr ./iso ./dist
