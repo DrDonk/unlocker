@@ -46,6 +46,7 @@ popd
 
 cp -v LICENSE ./dist
 cp -v *.md ./dist
-cp -vr ./cpuid/* ./dist
+cp -v ./cpuid/linux/cpuid ./distlinux/cpuid
+cp -v ./cpuid/windows/cpuid.exe ./dist/windows/cpuid.exe
 cp -vr ./iso ./dist
 cp -vr ./templates ./dist

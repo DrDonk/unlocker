@@ -45,5 +45,7 @@ popd
 
 xcopy /R /Y LICENSE dist\
 xcopy /R /Y *.md dist\
+xcopy /R /Y cpuid\linux\cpuid .\dist\linux\cpuid
+xcopy /R /Y cpuid\windows\cpuid.exe dist\windows\cpuid.exe
 xcopy /E /F /I /R /Y ISO dist\ISO
 xcopy /E /F /I /R /Y ISO dist\templates
