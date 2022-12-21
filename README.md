@@ -5,7 +5,7 @@
 There are a known issues that Ventura guests boot loop in VMware Workstation. The situation after extensive testing is:
 
 1. Intel pre-Haswell CPUs dropped by Apple in Ventura - no way to patch need to look at OCLP
-2. AMD CPUs n o longer work in Ventura possibly due to how CPUID leaf 4 is read - no way to patch need to look at OpenCore and other solutions
+2. AMD CPUs no longer work in Ventura possibly due to how CPUID leaf 4 is read - no way to patch need to look at OpenCore and other solutions
 3. Intel Haswell+ CPUS, which are supported, make sure you set 
 
 `ethernet0.virtualDev = "e1000e`
@@ -18,16 +18,13 @@ https://github.com/DrDonk/unlocker/issues/47
 
 Please do not upgrade to Ventura at this time if you have AMD or Intel pre-Haswell CPUs.
 
-VMware will stop supporting new macOS versions as guests starting with Fusion 13 and the next version of ESXi.
+VMware is changing it's policy on which host and guest macOS versions they support. You should check these VMware 
+KB articles for latest informtion
 
-This is documented at the VMware KB for Fusion:
-https://kb.vmware.com/s/article/88697
+VMware Fusion: https://kb.vmware.com/s/article/88697
+VMware ESXi: https://kb.vmware.com/s/article/88698
 
-And for ESXi:
-https://kb.vmware.com/s/article/88698
-
-This will likely impact Workstation Pro/Player as well. Currently the exact details of what may change are not clear, but
-it is safe to say we should look for alternative approaches to the unlocker.
+This will likely impact Workstation Pro/Player as well. 
 
 ---
 
@@ -201,14 +198,13 @@ These URLs will link to the latest versions of VMware's hosted products:
 
 ## 7. VMware Tools
 The Unlocker provides the VMware tools ISO images. There can be newer releases available which can be downloaded
-from these URLs if the script has not yet been updated:
+from this URL:
 
-* Mac OS X 10.5 - 10.10 https://customerconnect.vmware.com/en/downloads/details?downloadGroup=VMTOOLS10012&productId=491
-* macOS 10.11+ https://customerconnect.vmware.com/downloads/info/slug/datacenter_cloud_infrastructure/vmware_tools/12_x
+https://vmware.com/go/tools
 
-_These URLs require a VMware login to download._
+_These URLs require a VMware login to download the macOS guest tools._
 
-Version 16 of Workstation Pro recognises the darwin.iso files and the tools can be installed in the usual way by
+Version 16/17 of Workstation Pro recognises the darwin.iso files and the tools can be installed in the usual way by
 using the "Install VMware Tools" menu item. The Player version does not automatically pick up the ISO images and so
 the ISO must be maually attached to the VM via the guest's settings.
 
