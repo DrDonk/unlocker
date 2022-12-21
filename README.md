@@ -1,7 +1,7 @@
 # macOS Unlocker V4 for VMware Workstation
 ***
 
-Please checkout the wiki. https://github.com/DrDonk/unlocker/wiki/Unlocker-Wiki
+Please checkout the wiki. https://github.com/DrDonk/unlocker/wiki
 ***
  
 ## 1. Introduction
