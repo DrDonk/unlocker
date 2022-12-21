@@ -1,18 +1,5 @@
 # macOS Unlocker V4 for VMware Workstation
 
----
-
-VMware is changing it's policy on which host and guest macOS versions they support. You should check these VMware 
-KB articles for latest informtion
-
-VMware Fusion: https://kb.vmware.com/s/article/88697
-
-VMware ESXi: https://kb.vmware.com/s/article/88698
-
-This will likely impact Workstation Pro/Player as well. 
-
----
-
 ## 1. Introduction
 Unlocker 4 is designed for VMware Workstation and Player 16 and has been tested against:
 
@@ -71,106 +58,6 @@ If you are using Arch Linux or a derivative of Arch, you can install and use thi
 ## 3. Upgrading VMware
 If a new VMware version is installed the patches will be lost as the update will overwrite the patched files.
 You will need to re-run the unlock program to patch the newly installed VMware files. This does not apply to the Arch Linux AUR packages due to the provided ALPM hooks.
-
-## 4. Compiling from source code
-The release ZIP file contains pre-compiled executables but if you want to compile the code please follow 
-these instructions.
-
-The Go language allows cross-compilation for multiple platforms and architectures. It is possible to
-compile the unlocker on Windows, Linux and macOS for VMware Workstation on Linux and Windows.
-
-### 4.1 Building on Windows
-To build from source, do the following:
-1. Install go and git using either [scoop](https://scoop.sh) or [chocolatey](https://chocolatey.org)
-2. Open a Windows command prompt
-3. `go install github.com/tc-hib/go-winres@latest`
-4. `git clone https://github.com/DrDonk/unlocker.git`
-5. `cd unlocker`
-6. `build.cmd x.y.z` where x.y.z is the desiered Unlocker version number; e.g. 4.2.1.
-7. `cd dist/windows`
-8. Run the binaries as needed.
-
-### 4.2 Building on Linux
-To build from source, do the following:
-1. Install go from your distro's repos
-2. `go install github.com/tc-hib/go-winres@latest`
-3. `export PATH="$PATH:$HOME/go/bin"`
-4. `git clone https://github.com/DrDonk/unlocker.git`
-5. `cd unlocker`
-6. `sh build.sh x.y.z` where x.y.z is the desired Unlocker version number; e.g. 4.2.1.
-7. `cd dist/linux`
-8. Run the binaries as needed. 
-
-### 4.3 Build a specific release
-If you want to build from the source of a specific release and not of the latest commit, 
-add `--branch <tag_name>` to the `git clone` command. For example, if you want to build from
-the v4.2.1 tag, type in:
-
-`git clone --branch v4.2.1 https://github.com/DrDonk/unlocker.git`.
-
-and then build the code on your platform.
-
-## 5. FAQS
-### 5.1 False positive from antivirus software
-Some Windows antivirus programs mistakenly flag the unlocker as having a virus. The code is compiled on macOS  
-which is checked for viruses. These are false positives and if you want to check you can compile the code youself using
-instruction in the readme file.
-
-**Please do not log an issue about this!**
-
-This is a known problem with Windows executables written in the Go languauge which is documented at the Go website.
-[https://go.dev/doc/faq#virus]()
-
-From the Go web site:
-
->Why does my virus-scanning software think my Go distribution or compiled binary is infected?
->
->This is a common occurrence, especially on Windows machines, and is almost always a false positive. 
->Commercial virus scanning programs are often confused by the structure of Go binaries, which they don't see as 
->often as those compiled from other languages.
->
->If you've just installed the Go distribution and the system reports it is infected, that's certainly a mistake. 
->To be really thorough, you can verify the download by comparing the checksum with those on the downloads page.
->
->In any case, if you believe the report is in error, please report a bug to the supplier of your virus scanner. 
->Maybe in time virus scanners can learn to understand Go programs.
-
-### 5.2 AMD CPUs
-A patched macOS AMD kernel must be used to run on older AMD systems, but there is a workaround if you have a modern
-AMD Ryzen CPU. The unlocker cannot patch this but we can recommend settings for the VMX file that allows macOS to
-run on recent AMD CPUs. The tests are being recorded in this issue, and it would be useful if more can report
-success or failures in that issue.
-
-https://github.com/DrDonk/unlocker/issues/33
-
-You must have Hyper-V disabled on Windows or VMware falls back to a mode called ULM. CPUID masking is not available in ULM mode as it is pushed to Windows for the low level VMX/SVM operations. You can see if VMware is in ULM mode on Hyper_V by searching the guest's vmware.log file for these 2 lines:
-
-`vmx IOPL_Init: Hyper-V detected by CPUID`
-
-`Monitor Mode: ULM`
-
-Here is a link to a Microsoft artcile on disabling Hyper-V.
-
-https://docs.microsoft.com/en-us/troubleshoot/windows-client/application-management/virtualization-apps-not-work-with-hyper-v
-
-_Editing the VMX file_
-1. Read this KB article to learn how to edit a guest's VMX file safely https://kb.vmware.com/s/article/2057902
-2. Add the following lines to the VMX file:
-```
-cpuid.0.eax = "0000:0000:0000:0000:0000:0000:0000:1011"
-cpuid.0.ebx = "0111:0101:0110:1110:0110:0101:0100:0111"
-cpuid.0.ecx = "0110:1100:0110:0101:0111:0100:0110:1110"
-cpuid.0.edx = "0100:1001:0110:0101:0110:1110:0110:1001"
-cpuid.1.eax = "0000:0000:0000:0001:0000:0110:0111:0001"
-cpuid.1.ebx = "0000:0010:0000:0001:0000:1000:0000:0000"
-cpuid.1.ecx = "1000:0010:1001:1000:0010:0010:0000:0011"
-cpuid.1.edx = "0000:0111:1000:1011:1111:1011:1111:1111"
-vhv.enable = "FALSE"
-vpmc.enable = "FALSE"
-```
-3. Make sure there are no duplicate lines in the VMX file or the guest will not start and a dictionary error will
-   be displayed by VMware.
-4. You can now install and run macOS as a gu
 
 ## 6. VMware Downloads
 These URLs will link to the latest versions of VMware's hosted products:
