@@ -1,22 +1,6 @@
 # macOS Unlocker V4 for VMware Workstation
 
 ---
-## macOS Ventura Guests
-There are a known issues that Ventura guests boot loop in VMware Workstation. The situation after extensive testing is:
-
-1. Intel pre-Haswell CPUs dropped by Apple in Ventura - no way to patch need to look at OCLP
-2. AMD CPUs no longer work in Ventura possibly due to how CPUID leaf 4 is read - no way to patch need to look at OpenCore and other solutions
-3. Intel Haswell+ CPUS, which are supported, make sure you set 
-
-`ethernet0.virtualDev = "e1000e`
-
-to
-
-`ethernet0.virtualDev = "vmxnet3"`
-
-https://github.com/DrDonk/unlocker/issues/47
-
-Please do not upgrade to Ventura at this time if you have AMD or Intel pre-Haswell CPUs.
 
 VMware is changing it's policy on which host and guest macOS versions they support. You should check these VMware 
 KB articles for latest informtion
