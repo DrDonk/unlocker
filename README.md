@@ -57,14 +57,20 @@ On Linux navigate to the folder where the unlocker has been unpacked, and run th
 * check  - check the patch status of your VMware installation
 
 ### 2.3.1 Arch Linux and its derivatives
-If you are using Arch Linux or a derivative of Arch, you can install and use this like any normal package [from the AUR](https://aur.archlinux.org/packages/vmware-unlocker-bin). Precompiled binaries and PKGBUILDs to build from the [source of the latest release](https://aur.archlinux.org/packages/vmware-unlocker) as well as [from the main branch](https://aur.archlinux.org/packages/vmware-unlocker-git) are provided. Included in all of the packages are some Pacman hooks to help unlock and relock VMware whenever there is an update to Unlocker, VMware Worksation Pro/Player, or any of VMware Workstation Pro/Player's components. The binary files are installed to the `/usr/bin` directory so they are already added to your `$PATH`.
+If you are using Arch Linux or a derivative of Arch, you can install and use this like any normal package
+[from the AUR](https://aur.archlinux.org/packages/vmware-unlocker-bin). Precompiled binaries and PKGBUILDs to build
+from the [source of the latest release](https://aur.archlinux.org/packages/vmware-unlocker) as well 
+as [from the main branch](https://aur.archlinux.org/packages/vmware-unlocker-git) are provided. 
+Included in all of the packages are some Pacman hooks to help unlock and relock VMware whenever there is an update 
+to Unlocker, VMware Worksation Pro/Player, or any of VMware Workstation Pro/Player's components. The binary files 
+are installed to the `/usr/bin` directory so they are already added to your `$PATH`.
 
 ## 2.4 Upgrading VMware
 If a new VMware version is installed the patches will be lost as the update will overwrite the patched files.
 You will need to re-run the unlock program to patch the newly installed VMware files. This does not apply to the Arch Linux AUR packages due to the provided ALPM hooks.
 
 ## 2.5 VMware Tools
-The Unlocker provides the VMware tools ISO images.Version 16/17 of Workstation Pro recognises the darwin.iso files and the tools can be installed in the usual way by using the "Install VMware Tools" menu item. The Player version does not automatically pick up the ISO images and so
+The Unlocker provides the VMware tools ISO images. Version 16/17 of Workstation Pro recognises the darwin.iso files and the tools can be installed in the usual way by using the "Install VMware Tools" menu item. The Player version does not automatically pick up the ISO images and so
 the ISO must be maually attached to the VM via the guest's settings.
 
 ## 3. VMware Downloads
