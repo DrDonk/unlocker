@@ -126,8 +126,8 @@ func printHdr(version string, offset int, vmxHdr smcHdr) {
 	fmt.Printf("appleSMCTableV%s (smc.version = '%s')\n", version, version)
 	fmt.Printf("File Offset  : 0x%08x\n", offset)
 	fmt.Printf("Keys Address : 0x%08x\n", vmxHdr.address)
-	fmt.Printf("Private Key #: 0x%04x/%04d\n", vmxHdr.cntPublic, vmxHdr.cntPublic)
-	fmt.Printf("Public Key  #: 0x%04x/%04d\n", vmxHdr.cntPrivate, vmxHdr.cntPrivate)
+	fmt.Printf("Public Keys  : 0x%04x/%04d\n", vmxHdr.cntPublic, vmxHdr.cntPublic)
+	fmt.Printf("Private Keys : 0x%04x/%04d\n", vmxHdr.cntPrivate, vmxHdr.cntPrivate)
 	fmt.Printf("\n")
 }
 

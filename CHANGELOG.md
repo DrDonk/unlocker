@@ -6,6 +6,7 @@ _drdonk_
 * Updated copyright to 2023
 * Added example version numbers to build scripts
 * Build script ship dumpsmc as useful for diagnostic info
+* SMC text labels for private and public key count incorrectly swapped
 
 ## 21/12/22 4.2.4
 _drdonk_
