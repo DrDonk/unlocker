@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: © 2014-2022 David Parsons
+// SPDX-FileCopyrightText: © 2014-2023 David Parsons
 // SPDX-License-Identifier: MIT
 
 //go:build darwin

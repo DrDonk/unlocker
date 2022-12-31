@@ -27,7 +27,7 @@
         "info": {
           "0409": {
             "FileDescription": "Patch vitual SMC in VMware",
-            "LegalCopyright": "David Parsons 2011-2022",
+            "LegalCopyright": "David Parsons 2011-2023",
             "OriginalFilename": "patchsmc.exe",
             "ProductName": "macOS Unlocker for VMware"
           }

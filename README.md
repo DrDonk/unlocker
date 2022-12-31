@@ -87,4 +87,4 @@ modified the Unlocker code to run on Python 3 in the ESXi 6.5 environment.
 
 There have also been many new testers via GitHub, some who want to remain anoymous, but a big thanks to them.
 
-(c) 2011-2022 David Parsons
+(c) 2011-2023 David Parsons

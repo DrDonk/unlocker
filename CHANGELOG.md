@@ -1,6 +1,10 @@
 # Changes
 
 All dates are UK format.
+## dd/mm/23 4.2.5
+_drdonk_
+* Updated copyright to 2023
+
 ## 21/12/22 4.2.4
 _drdonk_
 * Changes to templates to disable webcam in VM
