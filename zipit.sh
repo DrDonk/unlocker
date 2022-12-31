@@ -2,7 +2,7 @@
 #set -x
 echo Zip distribution
 if ! [ $# -eq 1 ] ; then
-  echo "Product version not found" >&2
+  echo "Product version not found: xyz (e.g. 123)" >&2
   exit 1
 fi
 

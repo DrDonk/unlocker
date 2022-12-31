@@ -2,7 +2,7 @@
 
 echo Building release executables
 if [%1]==[] (
-  echo Product version not found
+  echo Product version not found: x.y.z (e.g. 1.2.3)
   exit /b 1
 )
 
