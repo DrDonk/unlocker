@@ -5,6 +5,7 @@ All dates are UK format.
 _drdonk_
 * Updated copyright to 2023
 * Added example version numbers to build scripts
+* Build script ship dumpsmc as useful for diagnostic info
 
 ## 21/12/22 4.2.4
 _drdonk_
