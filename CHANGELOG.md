@@ -1,6 +1,6 @@
 # Changes
 
-All dates are UK format.
+All dates are UK DD/MM/YY format.
 ## dd/mm/23 4.2.5
 _drdonk_
 * Updated copyright to 2023
