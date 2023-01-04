@@ -7,7 +7,18 @@ import (
 	"fmt"
 	"github.com/drdonk/cpuid-go"
 	"github.com/drdonk/golocker/vmwpatch"
+	"os"
 )
+
+func waitExit() {
+	quiet := os.Getenv("UNLOCK_QUIET")
+	if quiet != "1" {
+		fmt.Println()
+		fmt.Println("\nPress Enter key to continue...")
+
+		_, _ = fmt.Scanln()
+	}
+}
 
 func main() {
 	fmt.Println("macOS Unlocker Host Capabilities")
@@ -34,4 +45,6 @@ func main() {
 	if cpuid.CPU.Has(cpuid.HYPERVISOR) {
 		fmt.Println("\tHypervisor found so CPUID masking may not work correctly.")
 	}
+	waitExit()
+	return
 }
