@@ -42,8 +42,10 @@ func main() {
 		fmt.Println("\tHypervisor ID:", cpuid.CPU.HypervisorID)
 	}
 
-	if cpuid.CPU.Has(cpuid.HYPERVISOR) {
-		fmt.Println("\tHypervisor found so CPUID masking may not work correctly.")
+	if cpuid.CPU.HypervisorString != "VMwareVMware" {
+		fmt.Println("\tHypervisor found:")
+		fmt.Println("\t\t- CPUID masking may not work correctly")
+		fmt.Println("\t\t- Graphics speed may be affected")
 	}
 	waitExit()
 	return
