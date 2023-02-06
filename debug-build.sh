@@ -1,11 +1,9 @@
 #!/usr/bin/env bash
 #set -x
+# Read current version
+VERSION=$(<VERSION)
 
-echo Building debug executables
-if ! [ $# -eq 1 ] ; then
-  echo "Product version not found: x.y.z (e.g. 1.2.3)" >&2
-  exit 1
-fi
+echo Building debug executables - $VERSION
 
 mkdir -p ./build/iso
 mkdir -p ./build/linux
@@ -15,7 +13,7 @@ mkdir -p ./build/templates
 
 pushd ./commands/check
 echo "Building check"
-go-winres make --arch amd64 --product-version $1 --file-version $1
+go-winres make --arch amd64 --product-version $VERSION --file-version $VERSION
 env GOOS=windows GOARCH=amd64 go build -o ../../build/windows/check.exe
 env GOOS=linux GOARCH=amd64 go build -o ../../build/linux/check
 env GOOS=darwin GOARCH=amd64 go build -o ../../build/macos/check
@@ -24,7 +22,7 @@ popd
 
 pushd ./commands/relock
 echo "Building relock"
-go-winres make --arch amd64 --product-version $1 --file-version $1
+go-winres make --arch amd64 --product-version $VERSION --file-version $VERSION
 env GOOS=windows GOARCH=amd64 go build -o ../../build/windows/relock.exe
 env GOOS=linux GOARCH=amd64 go build -o ../../build/linux/relock
 env GOOS=darwin GOARCH=amd64 go build -o ../../build/macos/relock
@@ -33,7 +31,7 @@ popd
 
 pushd ./commands/unlock
 echo "Building unlock"
-go-winres make --arch amd64 --product-version $1 --file-version $1
+go-winres make --arch amd64 --product-version $VERSION --file-version $VERSION
 env GOOS=windows GOARCH=amd64 go build -o ../../build/windows/unlock.exe
 env GOOS=linux GOARCH=amd64 go build -o ../../build/linux/unlock
 env GOOS=darwin GOARCH=amd64 go build -o ../../build/macos/unlock
@@ -42,7 +40,7 @@ popd
 
 pushd ./commands/dumpsmc
 echo "Building dumpsmc"
-go-winres make --arch amd64 --product-version $1 --file-version $1
+go-winres make --arch amd64 --product-version $VERSION --file-version $VERSION
 env GOOS=windows GOARCH=amd64 go build -o ../../build/windows/dumpsmc.exe
 env GOOS=linux GOARCH=amd64 go build -o ../../build/linux/dumpsmc
 env GOOS=darwin GOARCH=amd64 go build -o ../../build/macos/dumpsmc
@@ -51,7 +49,7 @@ popd
 
 pushd ./commands/patchgos
 echo "Building patchgos"
-go-winres make --arch amd64 --product-version $1 --file-version $1
+go-winres make --arch amd64 --product-version $VERSION --file-version $VERSION
 env GOOS=windows GOARCH=amd64 go build -o ../../build/windows/patchgos.exe
 env GOOS=linux GOARCH=amd64 go build -o ../../build/linux/patchgos
 env GOOS=darwin GOARCH=amd64 go build -o ../../build/macos/patchgos
@@ -60,7 +58,7 @@ popd
 
 pushd ./commands/patchsmc
 echo "Building patchsmc"
-go-winres make --arch amd64 --product-version $1 --file-version $1
+go-winres make --arch amd64 --product-version $VERSION --file-version $VERSION
 env GOOS=windows GOARCH=amd64 go build -o ../../build/windows/patchsmc.exe
 env GOOS=linux GOARCH=amd64 go build -o ../../build/linux/patchsmc
 env GOOS=darwin GOARCH=amd64 go build -o ../../build/macos/patchsmc
@@ -69,7 +67,7 @@ popd
 
 pushd ./commands/patchvmkctl
 echo "Building patchvmkctl"
-go-winres make --arch amd64 --product-version $1 --file-version $1
+go-winres make --arch amd64 --product-version $VERSION --file-version $VERSION
 env GOOS=windows GOARCH=amd64 go build -o ../../build/windows/patchvmkctl.exe
 env GOOS=linux GOARCH=amd64 go build -o ../../build/linux/patchvmkctl
 env GOOS=darwin GOARCH=amd64 go build -o ../../build/macos/patchvmkctl
@@ -78,7 +76,7 @@ popd
 
 pushd ./commands/hostcaps
 echo "Building hostcaps"
-go-winres make --arch amd64 --product-version $1 --file-version $1
+go-winres make --arch amd64 --product-version $VERSION --file-version $VERSION
 env GOOS=windows GOARCH=amd64 go build -o ../../build/windows/hostcaps.exe
 env GOOS=linux GOARCH=amd64 go build -o ../../build/linux/hostcaps
 env GOOS=darwin GOARCH=amd64 go build -o ../../build/macos/hostcaps

@@ -1,12 +1,14 @@
 #!/bin/sh
 #set -x
-echo Zip distribution
-if ! [ $# -eq 1 ] ; then
-  echo "Product version not found: xyz (e.g. 123)" >&2
-  exit 1
-fi
 
-rm -vf ./dist/unlocker$1.zip
-rm -vrf ./dist/unlocker$1
-7z a ./dist/unlocker$1.zip ./build/*
-7z x -o./dist/unlocker$1 ./dist/unlocker$1.zip
+# Read current version
+VERSION=$(<VERSION)
+VERSION=${VERSION//.}
+
+echo Create distribution files - $VERSION
+
+rm -vf ./dist/unlocker$VERSION.zip
+rm -vrf ./dist/unlocker$VERSION
+7z a ./dist/unlocker$VERSION.zip ./build/*
+tar czvf ./dist/unlocker$VERSION.tgz ./build/*
+7z x -o./dist/unlocker$VERSION ./dist/unlocker$VERSION.zip
