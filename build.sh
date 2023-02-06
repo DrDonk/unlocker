@@ -55,7 +55,7 @@ popd
 
 cp -v LICENSE ./build
 cp -v *.md ./build
-cp -v ./cpuid/linux/cpuid ./buildlinux/cpuid
+cp -v ./cpuid/linux/cpuid ./build/linux/cpuid
 cp -v ./cpuid/windows/cpuid.exe ./build/windows/cpuid.exe
 cp -vr ./iso ./build
 cp -vr ./templates ./build
