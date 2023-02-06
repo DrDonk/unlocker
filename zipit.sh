@@ -6,7 +6,7 @@ if ! [ $# -eq 1 ] ; then
   exit 1
 fi
 
-rm -vf ./build/unlocker$1.zip
-rm -vrf ./build/unlocker$1
-7z a ./build/unlocker$1.zip ./dist/*
-7z x -o./build/unlocker$1 ./build/unlocker$1.zip
+rm -vf ./dist/unlocker$1.zip
+rm -vrf ./dist/unlocker$1
+7z a ./dist/unlocker$1.zip ./build/*
+7z x -o./dist/unlocker$1 ./dist/unlocker$1.zip

@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 #set -x
-echo Clean distribution
-rm -vfr ./dist
-mkdir -vp ./dist/iso
-mkdir -vp ./dist/linux
-mkdir -vp ./dist/windows
-mkdir -vp ./dist/templates
+echo Clean buildribution
+rm -vfr ./build
+mkdir -vp ./build/iso
+mkdir -vp ./build/linux
+mkdir -vp ./build/windows
+mkdir -vp ./build/templates
 
 rm -vfr ./commands/rsrc_windows_amd64.syso

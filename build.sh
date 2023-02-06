@@ -7,54 +7,54 @@ if ! [ $# -eq 1 ] ; then
   exit 1
 fi
 
-mkdir -p ./dist/iso
-mkdir -p ./dist/linux
-mkdir -p ./dist/windows
-mkdir -p ./dist/templates
+mkdir -p ./build/iso
+mkdir -p ./build/linux
+mkdir -p ./build/windows
+mkdir -p ./build/templates
 
 pushd ./commands/check
 echo "Building check"
 go-winres make --arch amd64 --product-version $1 --file-version $1
-env GOOS=windows GOARCH=amd64 go build -o ../../dist/windows/check.exe
-env GOOS=linux GOARCH=amd64 go build -o ../../dist/linux/check
+env GOOS=windows GOARCH=amd64 go build -o ../../build/windows/check.exe
+env GOOS=linux GOARCH=amd64 go build -o ../../build/linux/check
 rm rsrc_windows_amd64.syso
 popd
 
 pushd ./commands/relock
 echo "Building relock"
 go-winres make --arch amd64 --product-version $1 --file-version $1
-env GOOS=windows GOARCH=amd64 go build -o ../../dist/windows/relock.exe
-env GOOS=linux GOARCH=amd64 go build -o ../../dist/linux/relock
+env GOOS=windows GOARCH=amd64 go build -o ../../build/windows/relock.exe
+env GOOS=linux GOARCH=amd64 go build -o ../../build/linux/relock
 rm rsrc_windows_amd64.syso
 popd
 
 pushd ./commands/unlock
 echo "Building unlock"
 go-winres make --arch amd64 --product-version $1 --file-version $1
-env GOOS=windows GOARCH=amd64 go build -o ../../dist/windows/unlock.exe
-env GOOS=linux GOARCH=amd64 go build -o ../../dist/linux/unlock
+env GOOS=windows GOARCH=amd64 go build -o ../../build/windows/unlock.exe
+env GOOS=linux GOARCH=amd64 go build -o ../../build/linux/unlock
 rm rsrc_windows_amd64.syso
 popd
 
 pushd ./commands/dumpsmc
 echo "Building dumpsmc"
 go-winres make --arch amd64 --product-version $1 --file-version $1
-env GOOS=windows GOARCH=amd64 go build -o ../../dist/windows/dumpsmc.exe
-env GOOS=linux GOARCH=amd64 go build -o ../../dist/linux/dumpsmc
+env GOOS=windows GOARCH=amd64 go build -o ../../build/windows/dumpsmc.exe
+env GOOS=linux GOARCH=amd64 go build -o ../../build/linux/dumpsmc
 rm rsrc_windows_amd64.syso
 popd
 
 pushd ./commands/hostcaps
 echo "Building hostcaps"
 go-winres make --arch amd64 --product-version $1 --file-version $1
-env GOOS=windows GOARCH=amd64 go build -o ../../dist/windows/hostcaps.exe
-env GOOS=linux GOARCH=amd64 go build -o ../../dist/linux/hostcaps
+env GOOS=windows GOARCH=amd64 go build -o ../../build/windows/hostcaps.exe
+env GOOS=linux GOARCH=amd64 go build -o ../../build/linux/hostcaps
 rm rsrc_windows_amd64.syso
 popd
 
-cp -v LICENSE ./dist
-cp -v *.md ./dist
-cp -v ./cpuid/linux/cpuid ./distlinux/cpuid
-cp -v ./cpuid/windows/cpuid.exe ./dist/windows/cpuid.exe
-cp -vr ./iso ./dist
-cp -vr ./templates ./dist
+cp -v LICENSE ./build
+cp -v *.md ./build
+cp -v ./cpuid/linux/cpuid ./buildlinux/cpuid
+cp -v ./cpuid/windows/cpuid.exe ./build/windows/cpuid.exe
+cp -vr ./iso ./build
+cp -vr ./templates ./build
