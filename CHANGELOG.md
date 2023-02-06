@@ -8,6 +8,9 @@ _drdonk_
 * Build script ship dumpsmc as useful for diagnostic info
 * SMC text labels for private and public key count incorrectly swapped
 * Add wait for key press to hostcaps
+* Build process updated to use a VERSION file when building
+* Folder swap dist <-> build
+* Added TAR Gzipped distribution file for Linux 
 
 ## 21/12/22 4.2.4
 _drdonk_
