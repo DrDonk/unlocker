@@ -14,7 +14,6 @@ func main() {
 	// Print titles
 	fmt.Printf("PatchSMC %s\n", vmwpatch.VERSION)
 	fmt.Printf("===============\n")
-	fmt.Printf("%s \n\n", vmwpatch.COPYRIGHT)
 
 	// Get and check file passed as parameter
 	var filename string

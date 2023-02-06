@@ -24,7 +24,6 @@ func main() {
 	// Titles
 	fmt.Printf("Relocker %s for VMware Workstation/Player\n", vmwpatch.VERSION)
 	fmt.Println("============================================")
-	fmt.Println(vmwpatch.COPYRIGHT)
 	fmt.Println()
 
 	// Check admin rights

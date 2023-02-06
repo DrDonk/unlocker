@@ -6,7 +6,6 @@ package main
 import (
 	"fmt"
 	"github.com/drdonk/cpuid-go"
-	"github.com/drdonk/golocker/vmwpatch"
 	"os"
 )
 
@@ -23,7 +22,6 @@ func waitExit() {
 func main() {
 	fmt.Println("macOS Unlocker Host Capabilities")
 	fmt.Println("================================")
-	fmt.Printf("%s \n\n", vmwpatch.COPYRIGHT)
 	fmt.Println("")
 	fmt.Println("Host CPU")
 	fmt.Println("--------")

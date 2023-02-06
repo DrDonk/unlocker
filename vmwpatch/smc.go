@@ -1,4 +1,3 @@
-// SPDX-FileCopyrightText: © 2014-2023 David Parsons
 // SPDX-License-Identifier: MIT
 
 /*
