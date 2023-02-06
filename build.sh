@@ -3,6 +3,8 @@
 
 # Read current version
 VERSION=$(<VERSION)
+echo package vmwpatch > ./vmwpatch/version.go
+echo const VERSION = \"$VERSION\" >> ./vmwpatch/version.go
 
 echo Building release executables - $VERSION
 

@@ -4,6 +4,8 @@
 VERSION=$(<VERSION)
 
 echo Building debug executables - $VERSION
+echo package vmwpatch > ./vmwpatch/version.go
+echo const VERSION = \"$VERSION\" >> ./vmwpatch/version.go
 
 mkdir -p ./build/iso
 mkdir -p ./build/linux
