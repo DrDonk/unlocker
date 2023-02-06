@@ -1,15 +1,13 @@
 # Changes
 
 All dates are UK DD/MM/YY format.
-## dd/mm/23 4.2.5
+## 06/02/23 4.2.5
 _drdonk_
-* Updated copyright to 2023
-* Added example version numbers to build scripts
-* Build script ship dumpsmc as useful for diagnostic info
+* Added dumpsmc to release build as useful for diagnostic info
 * SMC text labels for private and public key count incorrectly swapped
 * Add wait for key press to hostcaps
-* Build process updated to use a VERSION file when building
-* Folder swap dist <-> build
+* Updated cpuid binaries from http://github.com/drdonk/cpuid
+* Build process updated to make it more automatedbuilding
 * Added TAR Gzipped distribution file for Linux 
 
 ## 21/12/22 4.2.4
