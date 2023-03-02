@@ -11,7 +11,6 @@ mkdir -p ./build/iso
 mkdir -p ./build/linux
 mkdir -p ./build/macos
 mkdir -p ./build/windows
-mkdir -p ./build/templates
 
 pushd ./commands/check
 echo "Building check"
@@ -89,4 +88,3 @@ cp -v LICENSE ./build
 cp -v *.md ./build
 cp -vr ./cpuid/* ./build
 cp -vr ./iso ./build
-cp -vr ./templates ./build

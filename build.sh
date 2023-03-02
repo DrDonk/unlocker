@@ -11,7 +11,6 @@ echo Building release executables - $VERSION
 mkdir -p ./build/iso
 mkdir -p ./build/linux
 mkdir -p ./build/windows
-mkdir -p ./build/templates
 
 pushd ./commands/check
 echo "Building check"
@@ -58,4 +57,3 @@ cp -v *.md ./build
 cp -v ./cpuid/linux/cpuid ./build/linux/cpuid
 cp -v ./cpuid/windows/cpuid.exe ./build/windows/cpuid.exe
 cp -vr ./iso ./build
-cp -vr ./templates ./build
