@@ -1,6 +1,16 @@
 # Changes
 
 All dates are UK DD/MM/YY format.
+
+
+## 03/03/23 4.2.6
+### This is the last release of Unlocker.
+
+_drdonk:_
+* Tidy up of code
+* Removed template VMs
+* Added macOS recovery VMDK utility
+
 ## 06/02/23 4.2.5
 _drdonk_
 * Added dumpsmc to release build as useful for diagnostic info

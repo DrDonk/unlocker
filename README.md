@@ -1,4 +1,8 @@
 # macOS Unlocker V4 for VMware Workstation
+
+## Unlocker 2007-2023
+## This project is now archived as I no longer use VMware and not in a position to provide future development and support.
+
 ***
 
 Please checkout the wiki. https://github.com/DrDonk/unlocker/wiki
