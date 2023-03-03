@@ -1,5 +1,5 @@
 #!/bin/sh
-set -x
+#set -x
 
 # Read current version
 VERSION=$(<VERSION)
