@@ -1,7 +1,14 @@
 # macOS Unlocker V4 for VMware Workstation
 
 ## Unlocker 2007-2023
-## This project is now archived as I no longer use VMware and not in a position to provide future development and support.
+This project is now archived.
+
+The unlocker should continue to run as there have been few changes to the VMware code in many years.
+I have stopped developemnt as I no longer use VMware but would be happy to refer to a fork if someone 
+sends me an email with the relevant details.
+
+There is also [Auto Unlocker](https://github.com/paolo-projects/auto-unlocker) which is still active.
+
 
 ***
 
