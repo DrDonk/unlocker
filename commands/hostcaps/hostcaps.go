@@ -20,8 +20,8 @@ func waitExit() {
 }
 
 func main() {
-	fmt.Println("macOS Unlocker Host Capabilities")
-	fmt.Println("================================")
+	fmt.Println("VMware macOS Host Capabilities")
+	fmt.Println("==============================")
 	fmt.Println("")
 	fmt.Println("Host CPU")
 	fmt.Println("--------")
@@ -38,13 +38,11 @@ func main() {
 	if cpuid.CPU.Has(cpuid.HYPERVISOR) {
 		fmt.Println("\tHypervisor String:", cpuid.CPU.HypervisorString)
 		fmt.Println("\tHypervisor ID:", cpuid.CPU.HypervisorID)
+		if cpuid.CPU.HypervisorString != "VMwareVMware" {
+			fmt.Println("\tHypervisor found:")
+			fmt.Println("\t\t- CPUID masking may not work correctly")
+			fmt.Println("\t\t- Graphics speed may be affected")
+		}
 	}
-
-	if cpuid.CPU.HypervisorString != "VMwareVMware" {
-		fmt.Println("\tHypervisor found:")
-		fmt.Println("\t\t- CPUID masking may not work correctly")
-		fmt.Println("\t\t- Graphics speed may be affected")
-	}
-	waitExit()
 	return
 }
