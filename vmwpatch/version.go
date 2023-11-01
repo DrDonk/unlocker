@@ -1,3 +1,3 @@
 package vmwpatch
 
-const VERSION = "4.2.6"
+const VERSION = "4.2.7"
