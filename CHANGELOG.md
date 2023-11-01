@@ -2,9 +2,17 @@
 
 All dates are UK DD/MM/YY format.
 
+## 01/11/24 4.2.7
+## IMPORTANT: Security Update
+Please redownload the unlocker as VMware have
+[announced](https://www.vmware.com/security/advisories/VMSA-2023-0024.html) and fixed a vulnerability in
+VMware Tools across macOS, Linux and Windows guests. The unlocker has been updated with the latest ISOs which fix the
+issue. Alternatively download the tools directly from VMware https://vmware.com/go/tools.
+
+_drdonk_
+* Update VMware tools as CVE vuklnerability in earlier versions
 
 ## 03/03/23 4.2.6
-### This is the last release of Unlocker.
 
 _drdonk:_
 * Tidy up of code
