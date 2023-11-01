@@ -2,7 +2,7 @@
 
 All dates are UK DD/MM/YY format.
 
-## 01/11/24 4.2.7
+## 01/11/23 4.2.7
 ## IMPORTANT: Security Update
 Please redownload the unlocker as VMware have
 [announced](https://www.vmware.com/security/advisories/VMSA-2023-0024.html) and fixed a vulnerability in
