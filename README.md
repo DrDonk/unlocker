@@ -41,9 +41,9 @@ but enables support for macOS that is disabled in the VMware products that do no
 
 The Unlocker cannot:
 
+* add AMD CPU support
 * add support for new versions of macOS
 * add paravirtualized Apple GPU support 
-* add older (non-Ryzen) AMD CPU support
 
 or any other features that are not already in the VMware compiled code. 
 
