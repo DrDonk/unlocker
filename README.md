@@ -1,5 +1,8 @@
 # macOS Unlocker V4 for VMware Workstation
 
+> [!NOTE]  
+> Doing some tidy up of the repo to make it more relevant in 2026.
+
 ## IMPORTANT: Security Update
 Please redownload the unlocker as VMware have 
 [announced](https://www.vmware.com/security/advisories/VMSA-2023-0024.html) and fixed a vulnerability in 
