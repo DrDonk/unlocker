@@ -1,5 +1,5 @@
 //
-// SPDX-FileCopyrightText: © 2014-2023 David Parsons
+// SPDX-FileCopyrightText: © 2014-2026 David Parsons
 // SPDX-License-Identifier: MIT
 
 package main
